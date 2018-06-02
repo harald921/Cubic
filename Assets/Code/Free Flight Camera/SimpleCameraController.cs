@@ -70,7 +70,7 @@ namespace UnityTemplateProjects
         [Tooltip("Whether or not to invert our Y axis for mouse input to rotation.")]
         public bool invertY = false;
 
-		bool freaze;
+		bool freaze; public bool Freaze { set { freaze = value; } }
 
         void OnEnable()
         {

@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Code\Free Flight Camera\SimpleCameraController.cs" />
+    <Compile Include="Assets\Code\TileEditor\TileEditor.cs" />
     <Compile Include="Assets\Third Party Plugins\More Efficient Coroutines\Timing.cs" />
     <Compile Include="Assets\Third Party Plugins\Photon Unity Networking\Plugins\PhotonNetwork\CustomTypes.cs" />
     <Compile Include="Assets\Third Party Plugins\Photon Unity Networking\Plugins\PhotonNetwork\Enums.cs" />
@@ -120,6 +121,11 @@
     <Compile Include="Assets\Third Party Plugins\Photon Unity Networking\UtilityScripts\UI\ButtonInsideScrollList.cs" />
     <Compile Include="Assets\Third Party Plugins\Photon Unity Networking\UtilityScripts\UI\TextButtonTransition.cs" />
     <Compile Include="Assets\Third Party Plugins\Photon Unity Networking\UtilityScripts\UI\TextToggleIsOnTransition.cs" />
+    <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Wireframe Functions.cginc" />
+    <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Wireframe.shader" />
+    <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Cutout Wireframe.shader" />
+    <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Double-Sided Wireframe.shader" />
+    <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Double-Sided Cutout Wireframe.shader" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>C:/Users/nilss/Desktop/Cubic/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
