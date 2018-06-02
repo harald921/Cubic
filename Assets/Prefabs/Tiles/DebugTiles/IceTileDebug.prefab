@@ -21,7 +21,8 @@ GameObject:
   - component: {fileID: 4350390310149258}
   - component: {fileID: 33857231718879394}
   - component: {fileID: 23116932146830550}
-  m_Layer: 0
+  - component: {fileID: 65635376526874384}
+  m_Layer: 9
   m_Name: IceTileDebug
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57,7 +58,6 @@ MeshRenderer:
   m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: c368a969efa74954bab8828d601aeade, type: 2}
-  - {fileID: 2100000, guid: c368a969efa74954bab8828d601aeade, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -84,3 +84,15 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1157504412975688}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &65635376526874384
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1157504412975688}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}

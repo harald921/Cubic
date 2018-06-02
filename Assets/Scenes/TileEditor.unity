@@ -205,6 +205,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05ad1319cdacc5949b96b4c39e47e77f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _tileModels:
+  - {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a, type: 2}
+  - {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21, type: 2}
+  - {fileID: 1525346839178874, guid: 6d55443ee8b1aaa418855beb30589917, type: 2}
   _gridmaterial: {fileID: 2100000, guid: dff2bb3d8c3b61748bbd6a26ee85fa5c, type: 2}
 --- !u!4 &1087316337
 Transform:

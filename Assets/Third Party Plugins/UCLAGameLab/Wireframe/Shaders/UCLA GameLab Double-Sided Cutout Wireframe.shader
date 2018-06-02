@@ -4,7 +4,7 @@ Shader "UCLA Game Lab/Wireframe/Double-Sided Cutout"
 	{
 		_Color ("Line Color", Color) = (1,1,1,1)
 		_MainTex ("Main Texture", 2D) = "white" {}
-		_Thickness ("Thickness", Float) = 1
+		_Thickness ("Thickness", Float) = 3
 	}
 
 	SubShader 
