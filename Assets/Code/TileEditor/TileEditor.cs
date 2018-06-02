@@ -1,33 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
-
-public enum TILE_TYPE
-{
-	TYPE_LAVA,
-	TYPE_ICE,
-	TYPE_DEATH,
-	TYPE_UNDIFINED
-}
 
 public class TileInfo
 {
-	public TILE_TYPE type = TILE_TYPE.TYPE_UNDIFINED;
+	public Vector2DInt position;
+	public string name = "";
+
+	public TileInfo(Vector2DInt pos, string n)
+	{
+		position = pos;
+		name = n;
+	}
 }
 
 public class TileEditor : MonoBehaviour
 {
-	[Header("TileModels")]
-	[SerializeField] GameObject[] _tileModels;
-
+	string levelName = "EditorTest";
 	Camera _camera;
 
 	// grid
 	[Header("Grid")]
 	[SerializeField] Material _gridmaterial;
-	Vector2 _gridDefaultSize = new Vector2(10, 10);
-	Vector2 _gridSize;
+	Vector2DInt _gridDefaultSize = new Vector2DInt(10, 10);
+	Vector2DInt _gridSize;
 	GameObject _grid;
 
 	// tileinfo
@@ -35,44 +33,49 @@ public class TileEditor : MonoBehaviour
 
 	// current
 	GameObject _selectedTile;
-	TILE_TYPE _selectedTileType;
+	string _selectedTileType;
+
+	TileDatabase TB;
 
 	void Start()
 	{
+		TB = TileDatabase.instance;
 		_camera = Camera.main;
 		_camera.GetComponent<UnityTemplateProjects.SimpleCameraController>().frozen = true;
-		GenerateGrid((int)_gridDefaultSize.x, (int)_gridDefaultSize.y);
+		GenerateGrid(_gridDefaultSize.x, _gridDefaultSize.y);
 
-		_selectedTile = Instantiate(_tileModels[0]);
-		_selectedTileType = TILE_TYPE.TYPE_LAVA;
+		_selectedTile = Instantiate(TB.GetTile(0).view.MainGo);
+		_selectedTileType = TB.GetTile(0).typeName;
 	}
 
 	void Update()
 	{
+		if (Input.GetKeyDown(KeyCode.S)) // temp way of saving
+			BinarySave();
 
 		if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
 		{
-			int currentType = (int)_selectedTileType;
-			if (currentType < (int)TILE_TYPE.TYPE_UNDIFINED - 1)
+			int currentType = TB.GetIndexFromName(_selectedTileType);
+			if (currentType != -1 && currentType < TB.GetNumTiles -1)
 			{
-				_selectedTileType = (TILE_TYPE)(currentType + 1);
+				_selectedTileType = TB.GetTile(currentType +1).typeName;
 				if (_selectedTile)
 					Destroy(_selectedTile);
 
-				_selectedTile = Instantiate(_tileModels[(int)_selectedTileType]);
+				_selectedTile = Instantiate(TB.GetTile(currentType +1).view.MainGo);
 			}
 		}
 
 		if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
 		{
-			int currentType = (int)_selectedTileType;
+			int currentType = TB.GetIndexFromName(_selectedTileType);
 			if (currentType > 0)
 			{
-				_selectedTileType = (TILE_TYPE)(currentType - 1);
+				_selectedTileType = TB.GetTile(currentType -1).typeName;
 				if (_selectedTile)
 					Destroy(_selectedTile);
 
-				_selectedTile = Instantiate(_tileModels[(int)_selectedTileType]);
+				_selectedTile = Instantiate(TB.GetTile(currentType - 1).view.MainGo);
 			}
 		}
 
@@ -86,7 +89,7 @@ public class TileEditor : MonoBehaviour
 			}
 			else
 			{
-				_selectedTile = Instantiate(_tileModels[(int)_selectedTileType]);
+				_selectedTile = Instantiate(TB.GetTileFromName(_selectedTileType).view.MainGo);
 			}
 		}
 
@@ -103,7 +106,7 @@ public class TileEditor : MonoBehaviour
 
 			if(CoordX >= 0 && CoordX < _gridSize.x && CoordY >= 0 && CoordY < _gridSize.y)
 			{
-				bool occupied = _tileProperties[CoordY, CoordX].type != TILE_TYPE.TYPE_UNDIFINED;
+				bool occupied = _tileProperties[CoordY, CoordX].name != "Death";
 				float yPos = 0.0f;
 				if (occupied)
 					yPos = 1.0f;
@@ -113,7 +116,9 @@ public class TileEditor : MonoBehaviour
 				if (Input.GetMouseButtonDown(0) && !occupied)
 				{
 					_selectedTile = null;
-					_tileProperties[CoordY, CoordX].type = _selectedTileType;
+					_tileProperties[CoordY, CoordX].name = _selectedTileType;
+					_tileProperties[CoordY, CoordX].position = new Vector2DInt(CoordX, CoordY);
+
 				}
 			}
 		}
@@ -126,8 +131,8 @@ public class TileEditor : MonoBehaviour
 				if(Physics.Raycast(ray, out hit))
 					if(hit.collider.gameObject.layer == 9)
 					{
-						_selectedTileType = _tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].type;
-						_tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].type = TILE_TYPE.TYPE_UNDIFINED;
+						_selectedTileType = _tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].name;
+						_tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].name = "Death";
 						_selectedTile = hit.collider.gameObject;
 					}
 			}
@@ -183,7 +188,7 @@ public class TileEditor : MonoBehaviour
 		mesh.vertices = vertices;
 		mesh.triangles = indices;
 
-		_gridSize = new Vector2(sizeX, sizeY);
+		_gridSize = new Vector2DInt(sizeX, sizeY);
 
 		GenerateTileData(sizeX, sizeY);
 	}
@@ -193,7 +198,42 @@ public class TileEditor : MonoBehaviour
 		_tileProperties = new TileInfo[sizeY,sizeX];
 		for (int y = 0; y < sizeY; y++)
 			for (int x = 0; x < sizeX; x++)
-				_tileProperties[y, x] = new TileInfo();
+				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x,y),"Death");
 	}
 
+
+	public void BinarySave()
+	{
+		Directory.CreateDirectory(Constants.TILEMAP_SAVE_FOLDER);
+
+		using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, levelName), FileMode.OpenOrCreate, FileAccess.Write))
+		using (BinaryWriter writer = new BinaryWriter(stream))
+		{
+			writer.Write(_gridSize.x * _gridSize.y);
+			for (int y = 0; y < _gridSize.y; y++)
+				for (int x = 0; x < _gridSize.x; x++)
+				{
+					_tileProperties[y, x].position.BinarySave(writer);
+					writer.Write(_tileProperties[y, x].name);
+				}
+		}
+	}
+
+	public void BinaryLoad()
+	{
+		//using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.Open, FileAccess.Read))
+		//using (BinaryReader reader = new BinaryReader(stream))
+		//{
+		//	int tileCount = reader.ReadInt32();        // Read: Num tiles
+		//	for (int i = 0; i < tileCount; i++)
+		//	{
+		//		Vector2DInt tilePosition = Vector2DInt.Zero;
+		//		tilePosition.BinaryLoad(reader);       // Read: Position
+
+		//		string typeName = reader.ReadString(); // Read: Tile type name  
+
+		//		tiles.Add(tilePosition, new Tile(tilePosition, typeName)); // TODO: Add serialization / Deserialization for tiles
+		//	}
+		//}
+	}
 }

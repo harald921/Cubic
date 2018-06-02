@@ -12,6 +12,6 @@ public class Level : MonoBehaviour
     {
         instance = this;
 
-        tileMap = new TileMap("debug");
+        tileMap = new TileMap("EditorTest");
     }
 }

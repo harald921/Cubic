@@ -25,6 +25,7 @@ public class Tile
     {
         public Player player { get; private set; }
 
+<<<<<<< HEAD
         [SerializeField] TileSettings _tileSettings;
         public TileSettings tileSettings => _tileSettings;
 
@@ -33,17 +34,37 @@ public class Tile
             
         }
     }
+=======
+        [SerializeField] TileSettings _tileSettings; public TileSettings tileSettings { get { return _tileSettings; } }
+        
 
+        public Data(string inTileName)
+        {
+			Tile tileData = TileDatabase.instance.GetTileFromName(inTileName);
+>>>>>>> 37f28b50d48add1e4412983f19526b4832a43911
 
-    // Holds all the gameobjects a tile will have. Its own class in case a tile will have several gameobject, eg. separate particle emitters and such
-    [System.Serializable]
-    public class View
-    {
-        [SerializeField] private GameObject mainGO;
+			_tileSettings.walkable         = tileData.data.tileSettings.walkable;
+			_tileSettings.walksBeforeBreak = tileData.data.tileSettings.walksBeforeBreak;
+			_tileSettings.deadly           = tileData.data.tileSettings.deadly;
+		}
+    }
+
+	// Holds all the gameobjects a tile will have. Its own class in case a tile will have several gameobject, eg. separate particle emitters and such
+	[System.Serializable]
+	public class View
+	{
+		[SerializeField] private GameObject mainGO; public GameObject MainGo { get { return mainGO; } }
 
         public View(Vector2DInt inPosition, string inTileName)
         {
-            // Load tile view from file... (E.g, "lava" loads the "lava" prefab from resources)
+			if(inTileName == "Death")
+			{
+				mainGO = null;
+				return;
+			}
+
+			mainGO = GameObject.Instantiate(TileDatabase.instance.GetTileFromName(inTileName).view.MainGo);
+			mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
 
         public View(Vector2DInt inPosition)

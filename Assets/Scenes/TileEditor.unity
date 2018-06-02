@@ -205,10 +205,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05ad1319cdacc5949b96b4c39e47e77f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tileModels:
-  - {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a, type: 2}
-  - {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21, type: 2}
-  - {fileID: 1525346839178874, guid: 6d55443ee8b1aaa418855beb30589917, type: 2}
   _gridmaterial: {fileID: 2100000, guid: dff2bb3d8c3b61748bbd6a26ee85fa5c, type: 2}
 --- !u!4 &1087316337
 Transform:
@@ -344,3 +340,45 @@ MonoBehaviour:
     m_RotationOrder: 4
   rotationLerpTime: 0.01
   invertY: 0
+--- !u!1001 &1984725165
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 5.55719
+      objectReference: {fileID: 0}
+    - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: -6.3899126
+      objectReference: {fileID: 0}
+    - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 9.859732
+      objectReference: {fileID: 0}
+    - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
+  m_IsPrefabParent: 0
