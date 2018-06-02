@@ -39,7 +39,8 @@ public class TileEditor : MonoBehaviour
 
 	void Start()
 	{
-		Camera.main.GetComponent<UnityTemplateProjects.SimpleCameraController>().frozen = true;
+		_camera = Camera.main;
+		_camera.GetComponent<UnityTemplateProjects.SimpleCameraController>().frozen = true;
 		GenerateGrid((int)_gridDefaultSize.x, (int)_gridDefaultSize.y);
 
 		_selectedTile = Instantiate(_tileModels[0]);
