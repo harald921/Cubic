@@ -5,7 +5,7 @@ using System.IO;
 
 public class TileMap
 {
-    readonly string name = "debug";
+    readonly string name = "EditorTest";
     Dictionary<Vector2DInt, Tile> tiles = new Dictionary<Vector2DInt, Tile>();
 
     public Tile GetTile(Vector2DInt inPosition) => tiles[inPosition];
