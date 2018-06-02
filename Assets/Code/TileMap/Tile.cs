@@ -26,11 +26,11 @@ public class Tile
         public Player player { get; private set; }
 
         [SerializeField] TileSettings _tileSettings;
-        
+        public TileSettings tileSettings => _tileSettings;
 
         public Data(string inTileName)
         {
-            // Load tile data from file...
+            
         }
     }
 
@@ -65,7 +65,7 @@ public class Tile
 [System.Serializable]
 public struct TileSettings
 {
-    bool walkable;
-    int  walksBeforeBreak;
-    bool deadly;
+    public bool walkable;
+    public int  walksBeforeBreak;
+    public bool deadly;
 }
