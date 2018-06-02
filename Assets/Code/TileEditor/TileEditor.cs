@@ -39,11 +39,7 @@ public class TileEditor : MonoBehaviour
 
 	void Start()
 	{
-		// start camera frozen
-		_camera = Camera.main;
-		_camera.GetComponent<UnityTemplateProjects.SimpleCameraController>().Freaze = true;
-
-		// generate standard 10x10 gridsize, can be changed from UI
+		Camera.main.GetComponent<UnityTemplateProjects.SimpleCameraController>().frozen = true;
 		GenerateGrid((int)_gridDefaultSize.x, (int)_gridDefaultSize.y);
 
 		_selectedTile = Instantiate(_tileModels[0]);
@@ -148,7 +144,7 @@ public class TileEditor : MonoBehaviour
 
 		float half = 0.5f;
 
-		_grid.AddComponent<MeshFilter>().mesh = mesh;		
+		_grid.AddComponent<MeshFilter>().mesh = mesh;
 		_grid.AddComponent<MeshRenderer>().material = _gridmaterial;
 
 		Vector3[] vertices = new Vector3[(sizeX * sizeY) * 4];
