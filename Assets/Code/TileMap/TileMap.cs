@@ -28,7 +28,7 @@ public class TileMap
             for (int x = 0; x < inSize; x++)
             {
                 Vector2DInt tilePosition = new Vector2DInt(x, y);
-                tiles.Add(tilePosition, new Tile(tilePosition));
+                tiles.Add(tilePosition, new Tile(tilePosition, "debug"));
             }
 
         BinarySave();
@@ -42,11 +42,11 @@ public class TileMap
         using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.OpenOrCreate, FileAccess.Write))
         using (BinaryWriter writer = new BinaryWriter(stream))
         {
-            writer.Write(tiles.Count);             // Write: Num tiles
+            writer.Write(tiles.Count);              // Write: Num tiles
             foreach (KeyValuePair<Vector2DInt, Tile> item in tiles)
             {
-                item.Key.BinarySave(writer);       // Write: Position
-                writer.Write(item.Value.typeName); // Write: Tile type name
+                item.Key.BinarySave(writer);        // Write: Position
+                writer.Write(item.Value.typeName);  // Write: Tile type name
             }
         }
     }
@@ -64,7 +64,7 @@ public class TileMap
 
                 string typeName = reader.ReadString(); // Read: Tile type name  
 
-                tiles.Add(tilePosition, new Tile(tilePosition/*, typeName*/)); // TODO: Add serialization / Deserialization for tiles
+                tiles.Add(tilePosition, new Tile(tilePosition, typeName)); // TODO: Add serialization / Deserialization for tiles
             }
         }
     }

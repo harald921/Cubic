@@ -2,60 +2,44 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Tile
 {
-    public readonly string typeName = "debug";
+    [SerializeField] string _typeName = "debug";
+    public string typeName => _typeName;
 
-    public readonly Data data;
-    public readonly View view;
+    public Data data;
+    public View view;
 
 
     public Tile(Vector2DInt inPosition, string inTypeName)
     {
-        typeName = inTypeName;
+        _typeName = inTypeName;
 
         data = new Data(inTypeName);
         view = new View(inPosition, inTypeName);
     }
 
-    public Tile(Vector2DInt inPosition)
-    {
-        // DEBUG
-        if (inPosition.x == 0 || inPosition.x == 11 ||
-            inPosition.y == 0 || inPosition.x == 11)
-            data = new Data(true, true);
-
-        else
-            data = new Data(true, false);
-
-        view = new View(inPosition);
-    }
-
-
+    [System.Serializable]
     public class Data
     {
         public Player player { get; private set; }
 
-        public readonly bool walkable;
-        public readonly bool deadly;
-
+        [SerializeField] TileSettings _tileSettings;
+        
 
         public Data(string inTileName)
         {
             // Load tile data from file...
         }
-
-        public Data(bool inWalkable, bool inDeadly)
-        {
-            walkable = inWalkable;
-            deadly = inDeadly;
-        }
     }
 
+
     // Holds all the gameobjects a tile will have. Its own class in case a tile will have several gameobject, eg. separate particle emitters and such
+    [System.Serializable]
     public class View
     {
-        public readonly GameObject mainGO;
+        [SerializeField] private GameObject mainGO;
 
         public View(Vector2DInt inPosition, string inTileName)
         {
@@ -76,4 +60,12 @@ public class Tile
             mainGO.transform.SetParent(Level.instance.transform);
         }
     }
+}
+
+[System.Serializable]
+public struct TileSettings
+{
+    bool walkable;
+    int  walksBeforeBreak;
+    bool deadly;
 }
