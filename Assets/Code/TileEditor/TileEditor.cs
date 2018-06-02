@@ -10,7 +10,7 @@ public class TileEditor : MonoBehaviour
 
 	void Start()
 	{
-		Camera.main.GetComponent<UnityTemplateProjects.SimpleCameraController>().Freaze = true;
+		Camera.main.GetComponent<UnityTemplateProjects.SimpleCameraController>().frozen = true;
 		GenerateGrid((int)_gridDefaultSize.x, (int)_gridDefaultSize.y);
 	}
 
