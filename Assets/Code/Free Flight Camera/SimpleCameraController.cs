@@ -70,6 +70,8 @@ namespace UnityTemplateProjects
         [Tooltip("Whether or not to invert our Y axis for mouse input to rotation.")]
         public bool invertY = false;
 
+		bool freaze;
+
         void OnEnable()
         {
             m_TargetCameraState.SetFromTransform(transform);
@@ -108,30 +110,20 @@ namespace UnityTemplateProjects
         
         void Update()
         {
-            // Hide and lock cursor when right mouse button pressed
-            if (Input.GetMouseButtonDown(1))
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-            }
 
-            // Unlock and show cursor when right mouse button released
-            if (Input.GetMouseButtonUp(1))
-            {
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
-            }
+			if (Input.GetKeyDown(KeyCode.F))
+				freaze = !freaze;
 
-            // Rotation
-            if (Input.GetMouseButton(1))
-            {
-                var mouseMovement = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y") * (invertY ? 1 : -1));
-                
-                var mouseSensitivityFactor = mouseSensitivityCurve.Evaluate(mouseMovement.magnitude);
-
-                m_TargetCameraState.yaw += mouseMovement.x * mouseSensitivityFactor;
-                m_TargetCameraState.pitch += mouseMovement.y * mouseSensitivityFactor;
-            }
+			if (freaze)
+				return;
+           
+            var mouseMovement = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y") * (invertY ? 1 : -1));
             
+            var mouseSensitivityFactor = mouseSensitivityCurve.Evaluate(mouseMovement.magnitude);
+
+            m_TargetCameraState.yaw += mouseMovement.x * mouseSensitivityFactor;
+            m_TargetCameraState.pitch += mouseMovement.y * mouseSensitivityFactor;
+                       
             // Translation
             var translation = GetInputTranslationDirection() * Time.deltaTime;
 
