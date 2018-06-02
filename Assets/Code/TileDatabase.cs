@@ -33,7 +33,18 @@ public class TileDatabase : MonoBehaviour
     public Tile GetTile(int inID) =>
         tiles[tileTypes[inID]];
 
+	public string GetTileType(int id) =>
+		tileTypes[id];
 
+	public int GetTileTypeIndex(string name)
+	{
+		for (int i = 0; i < tileTypes.Count; i++)
+			if (name == tileTypes[i])
+				return i;
+
+		Debug.LogErrorFormat("could not find tile {0} in tiletypes", name);
+		return -1;
+	}
 
     [System.Serializable]
     public struct NameTileKVP

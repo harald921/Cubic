@@ -45,7 +45,7 @@ public class TileEditor : MonoBehaviour
 		GenerateGrid(_gridDefaultSize.x, _gridDefaultSize.y);
 
 		_selectedTile = Instantiate(TB.GetTile(0).view.MainGo);
-		_selectedTileType = TB.GetTile(0).typeName;
+		_selectedTileType = TB.GetTileType(0);
 	}
 
 	void Update()
@@ -55,10 +55,10 @@ public class TileEditor : MonoBehaviour
 
 		if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
 		{
-			int currentType = TB.GetIndexFromName(_selectedTileType);
+			int currentType = TB.GetTileTypeIndex(_selectedTileType);
 			if (currentType != -1 && currentType < TB.GetTileCount -1)
 			{
-				_selectedTileType = TB.GetTile(currentType +1).typeName;
+				_selectedTileType = TB.GetTileType(currentType +1);
 				if (_selectedTile)
 					Destroy(_selectedTile);
 
@@ -68,10 +68,10 @@ public class TileEditor : MonoBehaviour
 
 		if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
 		{
-			int currentType = TB.GetIndexFromName(_selectedTileType);
+			int currentType = TB.GetTileTypeIndex(_selectedTileType);
 			if (currentType > 0)
 			{
-				_selectedTileType = TB.GetTile(currentType -1).typeName;
+				_selectedTileType = TB.GetTileType(currentType -1);
 				if (_selectedTile)
 					Destroy(_selectedTile);
 

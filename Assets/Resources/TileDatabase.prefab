@@ -51,28 +51,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e98be8faa9ec4f04fa20ef9d1e8d85cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tiles:
-  - _typeName: Lava
-    data:
-      _tileSettings:
-        walkable: 1
-        walksBeforeBreak: 3
-        deadly: 0
-    view:
-      mainGO: {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a, type: 2}
-  - _typeName: Ice
-    data:
-      _tileSettings:
-        walkable: 1
-        walksBeforeBreak: 3
-        deadly: 0
-    view:
-      mainGO: {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21, type: 2}
-  - _typeName: Death
-    data:
-      _tileSettings:
-        walkable: 0
-        walksBeforeBreak: 0
-        deadly: 1
-    view:
-      mainGO: {fileID: 1525346839178874, guid: 6d55443ee8b1aaa418855beb30589917, type: 2}
+  _tilesToSerialize:
+  - tileName: Lava
+    tile:
+      data:
+        _tileSettings:
+          walkable: 0
+          walksBeforeBreak: 0
+          deadly: 0
+      view:
+        mainGO: {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a,
+          type: 2}
+  - tileName: Ice
+    tile:
+      data:
+        _tileSettings:
+          walkable: 0
+          walksBeforeBreak: 0
+          deadly: 0
+      view:
+        mainGO: {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21,
+          type: 2}
+  - tileName: Death
+    tile:
+      data:
+        _tileSettings:
+          walkable: 0
+          walksBeforeBreak: 0
+          deadly: 0
+      view:
+        mainGO: {fileID: 1525346839178874, guid: 6d55443ee8b1aaa418855beb30589917,
+          type: 2}
