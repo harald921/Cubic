@@ -25,23 +25,12 @@ public class Tile
     {
         public Player player { get; private set; }
 
-<<<<<<< HEAD
         [SerializeField] TileSettings _tileSettings;
         public TileSettings tileSettings => _tileSettings;
-
-        public Data(string inTileName)
-        {
-            
-        }
-    }
-=======
-        [SerializeField] TileSettings _tileSettings; public TileSettings tileSettings { get { return _tileSettings; } }
-        
-
+                
         public Data(string inTileName)
         {
 			Tile tileData = TileDatabase.instance.GetTileFromName(inTileName);
->>>>>>> 37f28b50d48add1e4412983f19526b4832a43911
 
 			_tileSettings.walkable         = tileData.data.tileSettings.walkable;
 			_tileSettings.walksBeforeBreak = tileData.data.tileSettings.walksBeforeBreak;
