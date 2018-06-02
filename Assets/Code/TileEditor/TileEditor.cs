@@ -56,7 +56,7 @@ public class TileEditor : MonoBehaviour
 		if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
 		{
 			int currentType = TB.GetIndexFromName(_selectedTileType);
-			if (currentType != -1 && currentType < TB.GetNumTiles -1)
+			if (currentType != -1 && currentType < TB.GetTileCount -1)
 			{
 				_selectedTileType = TB.GetTile(currentType +1).typeName;
 				if (_selectedTile)
@@ -89,7 +89,7 @@ public class TileEditor : MonoBehaviour
 			}
 			else
 			{
-				_selectedTile = Instantiate(TB.GetTileFromName(_selectedTileType).view.MainGo);
+				_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo);
 			}
 		}
 

@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class Tile
 {
-    [SerializeField] string _typeName = "debug";
+    string _typeName = "debug";
     public string typeName => _typeName;
 
     public Data data;
@@ -30,7 +30,7 @@ public class Tile
                 
         public Data(string inTileName)
         {
-			Tile tileData = TileDatabase.instance.GetTileFromName(inTileName);
+			Tile tileData = TileDatabase.instance.GetTile(inTileName);
 
 			_tileSettings.walkable         = tileData.data.tileSettings.walkable;
 			_tileSettings.walksBeforeBreak = tileData.data.tileSettings.walksBeforeBreak;
@@ -52,7 +52,7 @@ public class Tile
 				return;
 			}
 
-			mainGO = GameObject.Instantiate(TileDatabase.instance.GetTileFromName(inTileName).view.MainGo);
+			mainGO = GameObject.Instantiate(TileDatabase.instance.GetTile(inTileName).view.MainGo);
 			mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
 

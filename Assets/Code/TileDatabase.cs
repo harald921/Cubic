@@ -6,36 +6,39 @@ public class TileDatabase : MonoBehaviour
 {
     public static TileDatabase instance { get; private set; }
 
-    [SerializeField] List<Tile> tiles = new List<Tile>();
-    public Tile GetTile(int inID) => tiles[inID];
-	public int GetNumTiles => tiles.Count;
+    public List<NameTileKVP> _tilesToSerialize = new List<NameTileKVP>();
 
-	public int GetIndexFromName(string name)
-	{
-		for (int i = 0; i < tiles.Count; i++)
-		{
-			if (tiles[i].typeName == name)
-				return i;
-		}
-
-		return -1; // magic number for not found
-	}
-
-	public Tile GetTileFromName(string name)
-	{
-		for (int i = 0; i < tiles.Count; i++)
-		{
-			if (tiles[i].typeName == name)
-				return tiles[i];
-		}
-
-		return null; 
-	}
+    Dictionary<string, Tile> tiles = new Dictionary<string, Tile>();
+    List<string> tileTypes = new List<string>();
 
 
     public void Awake()
     {
         instance = this;
 
+        foreach (var kvp in _tilesToSerialize)
+        {
+            tileTypes.Add(kvp.tileName);
+            tiles.Add(kvp.tileName, kvp.tile);
+        }
+    }
+
+
+    public int GetTileCount => 
+        tiles.Count;
+
+    public Tile GetTile(string inTileName) =>
+        tiles[inTileName];
+
+    public Tile GetTile(int inID) =>
+        tiles[tileTypes[inID]];
+
+
+
+    [System.Serializable]
+    public struct NameTileKVP
+    {
+        public string tileName;
+        public Tile tile;
     }
 }
