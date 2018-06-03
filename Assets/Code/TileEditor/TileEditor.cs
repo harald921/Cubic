@@ -112,16 +112,21 @@ public class TileEditor : MonoBehaviour
 		// in placetile mode
 		if (_selectedTile)
 		{
+			// create plane at zero to raycast at from camera
 			Plane targetPlane = new Plane(Vector3.up, Vector3.zero);
 			Ray hitRay = _camera.ScreenPointToRay(Input.mousePosition);
 			float dst = 0;
 			targetPlane.Raycast(hitRay, out dst);
+
+			// get hitpoint from ray and convert to 2d coordinates
 			Vector3 hitPoint = hitRay.GetPoint(dst);
 			int CoordY = Mathf.CeilToInt(hitPoint.z);
 			int CoordX = Mathf.CeilToInt(hitPoint.x);
 
+			// check so coordinates is inside grid
 			if(CoordX >= 0 && CoordX < _gridSize.x && CoordY >= 0 && CoordY < _gridSize.y)
 			{
+				// check if tile is already placed on coords (all tiles is set to "Death" by defualt meaning they are empty)
 				bool occupied = _tileProperties[CoordY, CoordX].name != "Death";
 				float yPos = 0.0f;
 				if (occupied)
@@ -129,6 +134,7 @@ public class TileEditor : MonoBehaviour
 
 				_selectedTile.transform.position = new Vector3(Mathf.CeilToInt(hitPoint.x), yPos, Mathf.CeilToInt(hitPoint.z));
 
+				// set the tiletype and position of this coord in the grid
 				if (Input.GetMouseButtonDown(0) && !occupied)
 				{
 					_selectedTile = null;
@@ -142,6 +148,7 @@ public class TileEditor : MonoBehaviour
 		{
 			if (Input.GetMouseButtonDown(0))
 			{
+				// raycast and se if we hit a already placed tile and then we can move it
 				Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
 				RaycastHit hit;
 				if(Physics.Raycast(ray, out hit))
@@ -167,14 +174,17 @@ public class TileEditor : MonoBehaviour
 		if (_grid)
 			Destroy(_grid);
 
+		// create gameobject and mesh
 		_grid = new GameObject("grid");
 		Mesh mesh = new Mesh();
 
 		float half = 0.5f;
 
+		// add mesh filter and meshrenderer and assign them
 		_grid.AddComponent<MeshFilter>().mesh = mesh;
 		_grid.AddComponent<MeshRenderer>().material = _gridmaterial;
 
+		// create vertex and index array
 		Vector3[] vertices = new Vector3[(sizeX * sizeY) * 4];
 		int[] indices = new int[(sizeX * sizeY) * 6];
 
@@ -183,6 +193,7 @@ public class TileEditor : MonoBehaviour
 		int indexVertex = 0;
 		int indexIndice = 0;
 
+		// loop over and set all vertices and indices
 		for(int i =0; i < sizeY * sizeX; i++)
 		{
 			vertices[indexVertex + 0] = new Vector3(tileCount - half, -half, column + half); // top left
@@ -207,6 +218,7 @@ public class TileEditor : MonoBehaviour
 			}
 		}
 
+		// assign vertices and indices
 		mesh.vertices = vertices;
 		mesh.triangles = indices;
 
@@ -220,7 +232,7 @@ public class TileEditor : MonoBehaviour
 		_tileProperties = new TileInfo[sizeY,sizeX];
 		for (int y = 0; y < sizeY; y++)
 			for (int x = 0; x < sizeX; x++)
-				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x,y),"Death");
+				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x,y),"Death"); // set all tiles to start as deathtiles and set position according to coords
 	}
 
 
@@ -231,7 +243,10 @@ public class TileEditor : MonoBehaviour
 		using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, levelName), FileMode.OpenOrCreate, FileAccess.Write))
 		using (BinaryWriter writer = new BinaryWriter(stream))
 		{
+			// write gridsize
 			writer.Write(_gridSize.x * _gridSize.y);
+
+			// loop over and write down the properties of each tile in grid
 			for (int y = 0; y < _gridSize.y; y++)
 				for (int x = 0; x < _gridSize.x; x++)
 				{
