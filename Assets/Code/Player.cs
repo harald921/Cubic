@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    Tile currentTile;
+    TileModel currentTile;
 
-    public event Action<Tile> OnTileExit;
-    public event Action<Tile> OnTileEnter;
+    public event Action<TileModel> OnTileExit;
+    public event Action<TileModel> OnTileEnter;
 
     void Move(Vector2DInt inDirection)
     {

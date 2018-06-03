@@ -74,12 +74,12 @@ public class TileEditor : MonoBehaviour
 
 		// add all existing tiletypes to dropdown menu
 		_dropDownTiles.options.Clear();
-		for(int i =0; i < TB.GetTileCount; i++)		
-			_dropDownTiles.options.Add(new Dropdown.OptionData(TB.GetTileType(i)));
+		for(int i =0; i < TB.tileCount; i++)		
+			_dropDownTiles.options.Add(new Dropdown.OptionData(TB.GetTile(i).typeName));
 		
 		// create tile of first type in typearray
-		_selectedTile = Instantiate(TB.GetTile(0).view.MainGo, _tileFolder);
-		_selectedTileType = TB.GetTileType(0);
+		_selectedTile = Instantiate(TB.GetTile(0).view.mainGO, _tileFolder);
+		_selectedTileType = TB.GetTile(0).typeName;
 		_currentEditMode = EDIT_MODE.PLACE_SINGLE;
 
 		// add collider and set layer of tile (need this to be able to select alredy placed tiles)
@@ -95,7 +95,7 @@ public class TileEditor : MonoBehaviour
 			int currentType = TB.GetTileTypeIndex(_selectedTileType); // get index of current tiletyp
 
 			// check if there is a tile available at previous or next index of current tile 
-			if (scrollDelta > 0 && currentType != -1 && currentType < TB.GetTileCount - 1) // scroll up
+			if (scrollDelta > 0 && currentType != -1 && currentType < TB.tileCount - 1) // scroll up
 				currentType++;
 			else if (scrollDelta < 0 && currentType > 0) // scroll down
 				currentType--;
@@ -126,7 +126,7 @@ public class TileEditor : MonoBehaviour
 			{
 				if (!_selectedTile)
 				{
-					_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo, _tileFolder);
+					_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
 					AddcolliderToSelectedTile();
 				}				
 			}
@@ -198,7 +198,7 @@ public class TileEditor : MonoBehaviour
 		_tileProperties[y, x].position = new Vector2DInt(x, y);
 
 		// spawn new tile
-		_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo, _tileFolder);
+		_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
 		AddcolliderToSelectedTile();
 	}
 
@@ -209,12 +209,12 @@ public class TileEditor : MonoBehaviour
 			Destroy(_selectedTile);
 
 		// set current selected type to new type
-		_selectedTileType = TB.GetTileType(index);
+		_selectedTileType = TB.GetTile(index).typeName;
 
 		// instantiate tile and add collider
 		if(_currentEditMode != EDIT_MODE.DELETE)
 		{
-			_selectedTile = Instantiate(TB.GetTile(index).view.MainGo, _tileFolder);
+			_selectedTile = Instantiate(TB.GetTile(index).view.mainGO, _tileFolder);
 			AddcolliderToSelectedTile();
 		}
 
@@ -332,7 +332,7 @@ public class TileEditor : MonoBehaviour
 			for (int x = 0; x < _gridSize.x; x++)
 			{
 				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), _selectedTileType);
-				GameObject tile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo, new Vector3(x,0,y), Quaternion.identity, _tileFolder);
+				GameObject tile = Instantiate(TB.GetTile(_selectedTileType).view.mainGO, new Vector3(x,0,y), Quaternion.identity, _tileFolder);
 				tile.AddComponent<BoxCollider>();
 				tile.layer = 9;
 			}

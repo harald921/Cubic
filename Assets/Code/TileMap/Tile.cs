@@ -2,80 +2,85 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Holds the *model data* of a tile, which defines this type of tile 
 [System.Serializable]
-public class Tile
+public class TileModel
 {
-    string _typeName = "debug";
-    public string typeName => _typeName;
+    string _typeName; public string typeName => _typeName;
 
-    public Data data;
-    public View view;
+    [SerializeField] Data _data; public Data data => _data;
+    [SerializeField] View _view; public View view => _view;
 
 
-    public Tile(Vector2DInt inPosition, string inTypeName)
+    [System.Serializable]
+    public struct Data        // Hmpf, cannot be readonly due to Unity's serialization system...
     {
-        _typeName = inTypeName;
-
-        data = new Data(inTypeName);
-        view = new View(inPosition, inTypeName);
+        public bool walkable; // Can a player ever enter this tile?
+        public int  health;   // How many times can a player step on this tile?
+        public bool deadly;   // Will a player die if it steps on this tile?
     }
 
     [System.Serializable]
+    public class View
+    {
+        [SerializeField] GameObject _mainGO; public GameObject mainGO => _mainGO; // Main visual representation
+    }
+}
+
+
+// Holds the instance data of a Tile, which separates different instances of the same type of tile
+public class Tile
+{
+    public readonly TileModel tileModel;
+
+    readonly Data _data;
+    readonly View _view;
+
+
+    public Tile(Vector2DInt inPosition, string inTileName)
+    {
+        tileModel = TileDatabase.instance.GetTile(inTileName);
+
+        _data = new Data(tileModel.data, inPosition);
+        _view = new View(tileModel.view, inPosition);
+    }
+
+    public void Delete()
+    {
+        Object.Destroy(_view.mainGO);
+    }
+
+
     public class Data
     {
-        public Player player { get; private set; }
+        public readonly Vector2DInt position;
 
-        [SerializeField] TileSettings _tileSettings;
-        public TileSettings tileSettings => _tileSettings;
-                
-        public Data(string inTileName)
+        public Player _player { get; private set; }
+        int _currentHealth = 0;
+
+
+        public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
         {
-			Tile tileData = TileDatabase.instance.GetTile(inTileName);
+            position = inPosition;
 
-			_tileSettings.walkable         = tileData.data.tileSettings.walkable;
-			_tileSettings.walksBeforeBreak = tileData.data.tileSettings.walksBeforeBreak;
-			_tileSettings.deadly           = tileData.data.tileSettings.deadly;
-		}
+            _currentHealth = inDataModel.health;
+        }
     }
 
-	// Holds all the gameobjects a tile will have. Its own class in case a tile will have several gameobject, eg. separate particle emitters and such
-	[System.Serializable]
-	public class View
-	{
-		[SerializeField] private GameObject mainGO; public GameObject MainGo { get { return mainGO; } }
+    public class View
+    {
+        GameObject _mainGO;
+        public GameObject mainGO => _mainGO; 
 
-        public View(Vector2DInt inPosition, string inTileName)
+
+        public View(TileModel.View inViewModel, Vector2DInt inPosition)
         {
-			if(inTileName == "Death")
-			{
-				mainGO = null;
-				return;
-			}
+            if (inViewModel.mainGO)
+                _mainGO = Object.Instantiate(inViewModel.mainGO);
 
-			mainGO = GameObject.Instantiate(TileDatabase.instance.GetTile(inTileName).view.MainGo);
-			mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
-        }
-
-        public View(Vector2DInt inPosition)
-        {
-            // Debug way of creating a border around the map
-            if (inPosition.x == 0 || inPosition.x == 11 ||
-                inPosition.y == 0 || inPosition.x == 11)
-                return;
-
-            mainGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            mainGO.transform.localScale = Vector3.one * 0.95f;
-            mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y) + new Vector3(0.5f, -0.5f, 0.5f);
-
-            mainGO.transform.SetParent(Level.instance.transform);
+            _mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
     }
 }
 
-[System.Serializable]
-public struct TileSettings
-{
-    public bool walkable;
-    public int  walksBeforeBreak;
-    public bool deadly;
-}
+

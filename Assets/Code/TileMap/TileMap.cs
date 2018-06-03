@@ -11,7 +11,7 @@ public class TileMap
     public Tile GetTile(Vector2DInt inPosition) => tiles[inPosition];
     public void SetTile(Vector2DInt inPosition, Tile inTile)
     {
-        // tiles[inPosition].view.Destroy();
+        tiles[inPosition].Delete();
         tiles[inPosition] = inTile;
     } 
 
@@ -22,19 +22,8 @@ public class TileMap
         BinaryLoad();
     }
 
-    public TileMap(int inSize)
-    {
-        for (int y = 0; y < inSize; y++)
-            for (int x = 0; x < inSize; x++)
-            {
-                Vector2DInt tilePosition = new Vector2DInt(x, y);
-                tiles.Add(tilePosition, new Tile(tilePosition, "debug"));
-            }
 
-        BinarySave();
-    }
-
-
+    #region Serialization
     public void BinarySave()
     {
         Directory.CreateDirectory(Constants.TILEMAP_SAVE_FOLDER); 
@@ -42,11 +31,11 @@ public class TileMap
         using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.OpenOrCreate, FileAccess.Write))
         using (BinaryWriter writer = new BinaryWriter(stream))
         {
-            writer.Write(tiles.Count);              // Write: Num tiles
-            foreach (KeyValuePair<Vector2DInt, Tile> item in tiles)
+            writer.Write(tiles.Count);                       // Write: Num tiles
+            foreach (var kvp in tiles)
             {
-                item.Key.BinarySave(writer);        // Write: Position
-                writer.Write(item.Value.typeName);  // Write: Tile type name
+                kvp.Key.BinarySave(writer);                  // Write: Position
+                writer.Write(kvp.Value.tileModel.typeName);  // Write: Tile type name
             }
         }
     }
@@ -64,11 +53,14 @@ public class TileMap
 
                 string typeName = reader.ReadString(); // Read: Tile type name  
 
-                tiles.Add(tilePosition, new Tile(tilePosition, typeName)); // TODO: Add serialization / Deserialization for tiles
+                tiles.Add(tilePosition, new Tile(tilePosition, typeName));
             }
         }
     }
+    #endregion
 }
+
+
 
    
 

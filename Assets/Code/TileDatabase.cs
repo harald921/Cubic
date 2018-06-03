@@ -8,7 +8,7 @@ public class TileDatabase : MonoBehaviour
 
     public List<NameTileKVP> _tilesToSerialize = new List<NameTileKVP>();
 
-    Dictionary<string, Tile> tiles = new Dictionary<string, Tile>();
+    Dictionary<string, TileModel> tiles = new Dictionary<string, TileModel>();
     List<string> tileTypes = new List<string>();
 
 
@@ -24,32 +24,30 @@ public class TileDatabase : MonoBehaviour
     }
 
 
-    public int GetTileCount => 
+    public int tileCount => 
         tiles.Count;
 
-    public Tile GetTile(string inTileName) =>
+    public TileModel GetTile(string inTileName) =>
         tiles[inTileName];
 
-    public Tile GetTile(int inID) =>
+    public TileModel GetTile(int inID) =>
         tiles[tileTypes[inID]];
 
-	public string GetTileType(int id) =>
-		tileTypes[id];
 
-	public int GetTileTypeIndex(string name)
+	public int GetTileTypeIndex(string inName)
 	{
 		for (int i = 0; i < tileTypes.Count; i++)
-			if (name == tileTypes[i])
+			if (inName == tileTypes[i])
 				return i;
-
-		Debug.LogErrorFormat("could not find tile {0} in tiletypes", name);
-		return -1;
+        
+        throw new KeyNotFoundException("Tile type '" + inName + "' not found");
 	}
+
 
     [System.Serializable]
     public struct NameTileKVP
     {
         public string tileName;
-        public Tile tile;
+        public TileModel tile;
     }
 }
