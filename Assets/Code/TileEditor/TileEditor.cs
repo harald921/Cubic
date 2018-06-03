@@ -5,6 +5,7 @@ using System.IO;
 using UnityEngine.UI;
 
 
+
 public class TileInfo
 {
 	public Vector2DInt position;
@@ -19,6 +20,16 @@ public class TileInfo
 
 public class TileEditor : MonoBehaviour
 {	
+
+	enum EDIT_MODE
+	{
+		PLACE_SINGLE,
+		PAINT,
+		DELETE,
+		NUM_MODES
+	}
+
+	EDIT_MODE _currentEditMode;
 	Camera _camera;
 
 	// grid
@@ -46,6 +57,8 @@ public class TileEditor : MonoBehaviour
 	[SerializeField] Text		_gridSizeText;
 	[SerializeField] Slider		_sliderSizeX;
 	[SerializeField] Slider		_sliderSizeY;
+	[SerializeField] Text       _editModeText;
+	[SerializeField] MessagePromt _promt;
 
 	void Start()
 	{
@@ -67,6 +80,7 @@ public class TileEditor : MonoBehaviour
 		// create tile of first type in typearray
 		_selectedTile = Instantiate(TB.GetTile(0).view.MainGo, _tileFolder);
 		_selectedTileType = TB.GetTileType(0);
+		_currentEditMode = EDIT_MODE.PLACE_SINGLE;
 
 		// add collider and set layer of tile (need this to be able to select alredy placed tiles)
 		AddcolliderToSelectedTile();
@@ -89,23 +103,37 @@ public class TileEditor : MonoBehaviour
 			ChangeTile(currentType);
 		}
 		
+		// change editmode
 		if (Input.GetMouseButtonDown(1))
 		{
+			if ((int)_currentEditMode < (int)EDIT_MODE.NUM_MODES -1)
+				_currentEditMode++;
+			else
+				_currentEditMode = 0;
+
+			_editModeText.text = string.Format("EDIT MODE: {0}", _currentEditMode);
+
 			// if in place tile mode, delete tile to go into select mode
-			if (_selectedTile)
+			if (_currentEditMode == EDIT_MODE.DELETE)
 			{
-				Destroy(_selectedTile);
-				_selectedTile = null;
+				if (_selectedTile)
+				{
+					Destroy(_selectedTile);
+					_selectedTile = null;
+				}
 			}
 			else
 			{
-				_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo, _tileFolder);
-				AddcolliderToSelectedTile();
+				if (!_selectedTile)
+				{
+					_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo, _tileFolder);
+					AddcolliderToSelectedTile();
+				}				
 			}
 		}
 
 		// in placetile mode
-		if (_selectedTile)
+		if (_currentEditMode == EDIT_MODE.PLACE_SINGLE || _currentEditMode == EDIT_MODE.PAINT)
 		{
 			// create plane at zero to raycast at from camera
 			Plane targetPlane = new Plane(Vector3.up, Vector3.zero);
@@ -130,12 +158,15 @@ public class TileEditor : MonoBehaviour
 				_selectedTile.transform.position = new Vector3(Mathf.CeilToInt(hitPoint.x), yPos, Mathf.CeilToInt(hitPoint.z));
 
 				// set the tiletype and position of this coord in the grid
-				if (Input.GetMouseButtonDown(0) && !occupied)
+				if (!occupied)
 				{
-					_selectedTile = null;
-					_tileProperties[CoordY, CoordX].name = _selectedTileType;
-					_tileProperties[CoordY, CoordX].position = new Vector2DInt(CoordX, CoordY);
+					if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+						return;
 
+					if (_currentEditMode == EDIT_MODE.PLACE_SINGLE && Input.GetMouseButtonDown(0))
+						PlaceTile(CoordX, CoordY);
+					else if(_currentEditMode == EDIT_MODE.PAINT && Input.GetMouseButton(0))
+						PlaceTile(CoordX, CoordY);
 				}
 			}
 		}
@@ -143,21 +174,32 @@ public class TileEditor : MonoBehaviour
 		{
 			if (Input.GetMouseButtonDown(0))
 			{
+				if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+					return;
+
 				// raycast and se if we hit a already placed tile and then we can move it
 				Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
 				RaycastHit hit;
 				if(Physics.Raycast(ray, out hit))
 					if(hit.collider.gameObject.layer == 9)
-					{
-						_selectedTileType = _tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].name;
+					{						
 						_tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].name = "Death";
-						_selectedTile = hit.collider.gameObject;
-
-						_dropDownTiles.value = TB.GetTileTypeIndex(_selectedTileType);
+						Destroy(hit.collider.gameObject);						
 					}
 			}
 		}
 
+	}
+
+	void PlaceTile(int x, int y)
+	{
+		_selectedTile = null;
+		_tileProperties[y, x].name = _selectedTileType;
+		_tileProperties[y, x].position = new Vector2DInt(x, y);
+
+		// spawn new tile
+		_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo, _tileFolder);
+		AddcolliderToSelectedTile();
 	}
 
 	void ChangeTile(int index)
@@ -170,8 +212,11 @@ public class TileEditor : MonoBehaviour
 		_selectedTileType = TB.GetTileType(index);
 
 		// instantiate tile and add collider
-		_selectedTile = Instantiate(TB.GetTile(index).view.MainGo, _tileFolder);
-		AddcolliderToSelectedTile();
+		if(_currentEditMode != EDIT_MODE.DELETE)
+		{
+			_selectedTile = Instantiate(TB.GetTile(index).view.MainGo, _tileFolder);
+			AddcolliderToSelectedTile();
+		}
 
 		// change dropdownmenu if tile was changed from scrollwheel
 		_dropDownTiles.value = index;
@@ -263,14 +308,34 @@ public class TileEditor : MonoBehaviour
 
 	}
 
+	public void ClearAllTiles()
+	{
+		int numTiles = _tileFolder.childCount;
+		for (int i = 0; i < numTiles; i++)
+			if (_selectedTile && _tileFolder.GetChild(0).gameObject != _selectedTile || !_selectedTile)
+				DestroyImmediate(_tileFolder.GetChild(0).gameObject);
+	}
+
 	public void GridChanged()
 	{
 		_gridSizeText.text = string.Format("{0} X {1}", _sliderSizeY.value, _sliderSizeX.value);
 		GenerateGrid((int)_sliderSizeX.value, (int)_sliderSizeY.value);
 
-		int numTiles = _tileFolder.childCount;
-		for(int i =0; i < numTiles; i++)		
-			DestroyImmediate(_tileFolder.GetChild(0).gameObject);				
+		ClearAllTiles();		
+	}
+
+	public void FillGrid()
+	{
+		ClearAllTiles();
+
+		for (int y = 0; y < _gridSize.y; y++)
+			for (int x = 0; x < _gridSize.x; x++)
+			{
+				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), _selectedTileType);
+				GameObject tile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo, new Vector3(x,0,y), Quaternion.identity, _tileFolder);
+				tile.AddComponent<BoxCollider>();
+				tile.layer = 9;
+			}
 	}
 	
 	public void BinarySave(string levelName)
@@ -290,6 +355,8 @@ public class TileEditor : MonoBehaviour
 					_tileProperties[y, x].position.BinarySave(writer);
 					writer.Write(_tileProperties[y, x].name);
 				}
+
+			_promt.SetAndShow(string.Format("Level {0} Was successfully saved", levelName), () => print("Ok button pressed, seems to work"));
 		}
 	}
 
