@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using UnityEngine.UI;
 
 
 public class TileInfo
@@ -17,13 +18,13 @@ public class TileInfo
 }
 
 public class TileEditor : MonoBehaviour
-{
-	string levelName = "EditorTest";
+{	
 	Camera _camera;
 
 	// grid
 	[Header("Grid")]
 	[SerializeField] Material _gridmaterial;
+	[SerializeField] Transform _tileFolder;
 	Vector2DInt _gridDefaultSize = new Vector2DInt(10, 10);
 	Vector2DInt _gridSize;
 	GameObject _grid;
@@ -37,6 +38,15 @@ public class TileEditor : MonoBehaviour
 
 	TileDatabase TB;
 
+	//UI
+	[Header("UI")]
+	[SerializeField] InputField _inputLoad;
+	[SerializeField] InputField _inputSave;
+	[SerializeField] Dropdown   _dropDownTiles;
+	[SerializeField] Text		_gridSizeText;
+	[SerializeField] Slider		_sliderSizeX;
+	[SerializeField] Slider		_sliderSizeY;
+
 	void Start()
 	{
 		// get references
@@ -49,8 +59,13 @@ public class TileEditor : MonoBehaviour
 		// generate standard 10x10 grid
 		GenerateGrid(_gridDefaultSize.x, _gridDefaultSize.y);
 
+		// add all existing tiletypes to dropdown menu
+		_dropDownTiles.options.Clear();
+		for(int i =0; i < TB.GetTileCount; i++)		
+			_dropDownTiles.options.Add(new Dropdown.OptionData(TB.GetTileType(i)));
+		
 		// create tile of first type in typearray
-		_selectedTile = Instantiate(TB.GetTile(0).view.MainGo);
+		_selectedTile = Instantiate(TB.GetTile(0).view.MainGo, _tileFolder);
 		_selectedTileType = TB.GetTileType(0);
 
 		// add collider and set layer of tile (need this to be able to select alredy placed tiles)
@@ -59,41 +74,21 @@ public class TileEditor : MonoBehaviour
 
 	void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.S)) // temp way of saving
-			BinarySave();
-
-		// go to next tiletype in tiletype array
-		if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
+		// check if scrollwheel has moved
+		float scrollDelta = Input.GetAxisRaw("Mouse ScrollWheel");
+		if(scrollDelta != 0)
 		{
-			int currentType = TB.GetTileTypeIndex(_selectedTileType);
-			if (currentType != -1 && currentType < TB.GetTileCount -1)
-			{
-				_selectedTileType = TB.GetTileType(currentType +1);
+			int currentType = TB.GetTileTypeIndex(_selectedTileType); // get index of current tiletyp
 
-				// if a tile is already selected, delete it and create new
-				if (_selectedTile)
-					Destroy(_selectedTile);
+			// check if there is a tile available at previous or next index of current tile 
+			if (scrollDelta > 0 && currentType != -1 && currentType < TB.GetTileCount - 1) // scroll up
+				currentType++;
+			else if (scrollDelta < 0 && currentType > 0) // scroll down
+				currentType--;
 
-				_selectedTile = Instantiate(TB.GetTile(currentType +1).view.MainGo);
-				AddcolliderToSelectedTile();
-			}
+			ChangeTile(currentType);
 		}
-
-		// go to previous tiletype in tiletype array
-		if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
-		{
-			int currentType = TB.GetTileTypeIndex(_selectedTileType);
-			if (currentType > 0)
-			{
-				_selectedTileType = TB.GetTileType(currentType -1);
-				if (_selectedTile)
-					Destroy(_selectedTile);
-
-				_selectedTile = Instantiate(TB.GetTile(currentType - 1).view.MainGo);
-				AddcolliderToSelectedTile();
-			}
-		}
-
+		
 		if (Input.GetMouseButtonDown(1))
 		{
 			// if in place tile mode, delete tile to go into select mode
@@ -104,7 +99,7 @@ public class TileEditor : MonoBehaviour
 			}
 			else
 			{
-				_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo);
+				_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo, _tileFolder);
 				AddcolliderToSelectedTile();
 			}
 		}
@@ -157,10 +152,29 @@ public class TileEditor : MonoBehaviour
 						_selectedTileType = _tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].name;
 						_tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].name = "Death";
 						_selectedTile = hit.collider.gameObject;
+
+						_dropDownTiles.value = TB.GetTileTypeIndex(_selectedTileType);
 					}
 			}
 		}
 
+	}
+
+	void ChangeTile(int index)
+	{
+		// if a tile is already selected, delete it and create new
+		if (_selectedTile)
+			Destroy(_selectedTile);
+
+		// set current selected type to new type
+		_selectedTileType = TB.GetTileType(index);
+
+		// instantiate tile and add collider
+		_selectedTile = Instantiate(TB.GetTile(index).view.MainGo, _tileFolder);
+		AddcolliderToSelectedTile();
+
+		// change dropdownmenu if tile was changed from scrollwheel
+		_dropDownTiles.value = index;
 	}
 
 	void AddcolliderToSelectedTile()
@@ -194,7 +208,7 @@ public class TileEditor : MonoBehaviour
 		int indexIndice = 0;
 
 		// loop over and set all vertices and indices
-		for(int i =0; i < sizeY * sizeX; i++)
+		for (int i = 0; i < sizeY * sizeX; i++)
 		{
 			vertices[indexVertex + 0] = new Vector3(tileCount - half, -half, column + half); // top left
 			vertices[indexVertex + 1] = new Vector3(tileCount + half, -half, column + half); // top right
@@ -211,7 +225,7 @@ public class TileEditor : MonoBehaviour
 			tileCount++;
 			indexVertex += 4;
 			indexIndice += 6;
-			if(tileCount == sizeX)
+			if (tileCount == sizeX)
 			{
 				column++;
 				tileCount = 0;
@@ -229,14 +243,37 @@ public class TileEditor : MonoBehaviour
 
 	void GenerateTileData(int sizeX, int sizeY)
 	{
-		_tileProperties = new TileInfo[sizeY,sizeX];
+		_tileProperties = new TileInfo[sizeY, sizeX];
 		for (int y = 0; y < sizeY; y++)
 			for (int x = 0; x < sizeX; x++)
-				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x,y),"Death"); // set all tiles to start as deathtiles and set position according to coords
+				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), "Death"); // set all tiles to start as deathtiles and set position according to coords
 	}
 
+	public void OnTileChanged(int index)
+	{
+		ChangeTile(index);
+	}
 
-	public void BinarySave()
+	public void SaveLoadButtonPressed(bool save)
+	{
+		if (save)
+			BinarySave(_inputSave.text);
+		else
+			BinaryLoad(_inputLoad.text);
+
+	}
+
+	public void GridChanged()
+	{
+		_gridSizeText.text = string.Format("{0} X {1}", _sliderSizeY.value, _sliderSizeX.value);
+		GenerateGrid((int)_sliderSizeX.value, (int)_sliderSizeY.value);
+
+		int numTiles = _tileFolder.childCount;
+		for(int i =0; i < numTiles; i++)		
+			DestroyImmediate(_tileFolder.GetChild(0).gameObject);				
+	}
+	
+	public void BinarySave(string levelName)
 	{
 		Directory.CreateDirectory(Constants.TILEMAP_SAVE_FOLDER);
 
@@ -256,7 +293,7 @@ public class TileEditor : MonoBehaviour
 		}
 	}
 
-	public void BinaryLoad()
+	public void BinaryLoad( string levelname)
 	{
 		//using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.Open, FileAccess.Read))
 		//using (BinaryReader reader = new BinaryReader(stream))

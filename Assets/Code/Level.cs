@@ -12,6 +12,6 @@ public class Level : MonoBehaviour
     {
         instance = this;
 
-        tileMap = new TileMap("EditorTest");
+        tileMap = new TileMap("SavedFromInputField");
     }
 }
