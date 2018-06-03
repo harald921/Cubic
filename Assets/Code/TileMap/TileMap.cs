@@ -6,20 +6,22 @@ using System.IO;
 public class TileMap
 {
     readonly string name = "EditorTest";
-    Dictionary<Vector2DInt, Tile> tiles = new Dictionary<Vector2DInt, Tile>();
 
-    public Tile GetTile(Vector2DInt inPosition) => tiles[inPosition];
-    public void SetTile(Vector2DInt inPosition, Tile inTile)
-    {
-        tiles[inPosition].Delete();
-        tiles[inPosition] = inTile;
-    } 
+    Dictionary<Vector2DInt, Tile> _tiles = new Dictionary<Vector2DInt, Tile>();
 
 
     public TileMap(string inMapName)
     {
         name = inMapName;
         BinaryLoad();
+    }
+
+
+    public Tile GetTile(Vector2DInt inPosition) => _tiles[inPosition];
+    public void SetTile(Vector2DInt inPosition, Tile inTile)
+    {
+        _tiles[inPosition].Delete();
+        _tiles[inPosition] = inTile;
     }
 
 
@@ -31,11 +33,11 @@ public class TileMap
         using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.OpenOrCreate, FileAccess.Write))
         using (BinaryWriter writer = new BinaryWriter(stream))
         {
-            writer.Write(tiles.Count);                       // Write: Num tiles
-            foreach (var kvp in tiles)
+            writer.Write(_tiles.Count);                            // Write: Num tiles
+            foreach (var tilesKVP in _tiles)
             {
-                kvp.Key.BinarySave(writer);                  // Write: Position
-                writer.Write(kvp.Value.tileModel.typeName);  // Write: Tile type name
+                tilesKVP.Key.BinarySave(writer);                  // Write: Position
+                writer.Write(tilesKVP.Value.tileModel.typeName);  // Write: Tile type name
             }
         }
     }
@@ -53,7 +55,7 @@ public class TileMap
 
                 string typeName = reader.ReadString(); // Read: Tile type name  
 
-                tiles.Add(tilePosition, new Tile(tilePosition, typeName));
+                _tiles.Add(tilePosition, new Tile(tilePosition, typeName));
             }
         }
     }

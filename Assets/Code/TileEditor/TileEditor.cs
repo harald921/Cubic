@@ -11,21 +11,21 @@ public class TileInfo
 	public Vector2DInt position;
 	public string name = "";
 
-	public TileInfo(Vector2DInt pos, string n)
+	public TileInfo(Vector2DInt inPosition, string inName)
 	{
-		position = pos;
-		name = n;
+		position = inPosition;
+		name = inName;
 	}
 }
 
 public class TileEditor : MonoBehaviour
 {	
-
 	enum EDIT_MODE
 	{
 		PLACE_SINGLE,
 		PAINT,
 		DELETE,
+
 		NUM_MODES
 	}
 
@@ -47,7 +47,7 @@ public class TileEditor : MonoBehaviour
 	GameObject _selectedTile;
 	string _selectedTileType;
 
-	TileDatabase TB;
+	TileDatabase _tileDB;
 
 	//UI
 	[Header("UI")]
@@ -60,10 +60,10 @@ public class TileEditor : MonoBehaviour
 	[SerializeField] Text       _editModeText;
 	[SerializeField] MessagePromt _promt;
 
-	void Start()
+	void Awake()
 	{
 		// get references
-		TB = TileDatabase.instance;
+		_tileDB = TileDatabase.instance;
 		_camera = Camera.main;
 
 		// freeze camera
@@ -74,12 +74,12 @@ public class TileEditor : MonoBehaviour
 
 		// add all existing tiletypes to dropdown menu
 		_dropDownTiles.options.Clear();
-		for(int i =0; i < TB.tileCount; i++)		
-			_dropDownTiles.options.Add(new Dropdown.OptionData(TB.GetTile(i).typeName));
+		for(int i =0; i < _tileDB.tileCount; i++)		
+			_dropDownTiles.options.Add(new Dropdown.OptionData(_tileDB.GetTile(i).typeName));
 		
 		// create tile of first type in typearray
-		_selectedTile = Instantiate(TB.GetTile(0).view.mainGO, _tileFolder);
-		_selectedTileType = TB.GetTile(0).typeName;
+		_selectedTile = Instantiate(_tileDB.GetTile(0).view.mainGO, _tileFolder);
+		_selectedTileType = _tileDB.GetTile(0).typeName;
 		_currentEditMode = EDIT_MODE.PLACE_SINGLE;
 
 		// add collider and set layer of tile (need this to be able to select alredy placed tiles)
@@ -92,10 +92,10 @@ public class TileEditor : MonoBehaviour
 		float scrollDelta = Input.GetAxisRaw("Mouse ScrollWheel");
 		if(scrollDelta != 0)
 		{
-			int currentType = TB.GetTileTypeIndex(_selectedTileType); // get index of current tiletyp
+			int currentType = _tileDB.GetTileTypeIndex(_selectedTileType); // get index of current tiletyp
 
 			// check if there is a tile available at previous or next index of current tile 
-			if (scrollDelta > 0 && currentType != -1 && currentType < TB.tileCount - 1) // scroll up
+			if (scrollDelta > 0 && currentType != -1 && currentType < _tileDB.tileCount - 1) // scroll up
 				currentType++;
 			else if (scrollDelta < 0 && currentType > 0) // scroll down
 				currentType--;
@@ -126,7 +126,7 @@ public class TileEditor : MonoBehaviour
 			{
 				if (!_selectedTile)
 				{
-					_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
+					_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
 					AddcolliderToSelectedTile();
 				}				
 			}
@@ -198,7 +198,7 @@ public class TileEditor : MonoBehaviour
 		_tileProperties[y, x].position = new Vector2DInt(x, y);
 
 		// spawn new tile
-		_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
+		_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
 		AddcolliderToSelectedTile();
 	}
 
@@ -209,12 +209,12 @@ public class TileEditor : MonoBehaviour
 			Destroy(_selectedTile);
 
 		// set current selected type to new type
-		_selectedTileType = TB.GetTile(index).typeName;
+		_selectedTileType = _tileDB.GetTile(index).typeName;
 
 		// instantiate tile and add collider
 		if(_currentEditMode != EDIT_MODE.DELETE)
 		{
-			_selectedTile = Instantiate(TB.GetTile(index).view.mainGO, _tileFolder);
+			_selectedTile = Instantiate(_tileDB.GetTile(index).view.mainGO, _tileFolder);
 			AddcolliderToSelectedTile();
 		}
 
@@ -332,7 +332,7 @@ public class TileEditor : MonoBehaviour
 			for (int x = 0; x < _gridSize.x; x++)
 			{
 				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), _selectedTileType);
-				GameObject tile = Instantiate(TB.GetTile(_selectedTileType).view.mainGO, new Vector3(x,0,y), Quaternion.identity, _tileFolder);
+				GameObject tile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, new Vector3(x,0,y), Quaternion.identity, _tileFolder);
 				tile.AddComponent<BoxCollider>();
 				tile.layer = 9;
 			}
