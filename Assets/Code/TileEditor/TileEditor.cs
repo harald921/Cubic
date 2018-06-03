@@ -39,13 +39,22 @@ public class TileEditor : MonoBehaviour
 
 	void Start()
 	{
+		// get references
 		TB = TileDatabase.instance;
 		_camera = Camera.main;
+
+		// freeze camera
 		_camera.GetComponent<UnityTemplateProjects.SimpleCameraController>().frozen = true;
+
+		// generate standard 10x10 grid
 		GenerateGrid(_gridDefaultSize.x, _gridDefaultSize.y);
 
+		// create tile of first type in typearray
 		_selectedTile = Instantiate(TB.GetTile(0).view.MainGo);
 		_selectedTileType = TB.GetTileType(0);
+
+		// add collider and set layer of tile (need this to be able to select alredy placed tiles)
+		AddcolliderToSelectedTile();
 	}
 
 	void Update()
@@ -53,19 +62,24 @@ public class TileEditor : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.S)) // temp way of saving
 			BinarySave();
 
+		// go to next tiletype in tiletype array
 		if(Input.GetAxisRaw("Mouse ScrollWheel") > 0)
 		{
 			int currentType = TB.GetTileTypeIndex(_selectedTileType);
 			if (currentType != -1 && currentType < TB.GetTileCount -1)
 			{
 				_selectedTileType = TB.GetTileType(currentType +1);
+
+				// if a tile is already selected, delete it and create new
 				if (_selectedTile)
 					Destroy(_selectedTile);
 
 				_selectedTile = Instantiate(TB.GetTile(currentType +1).view.MainGo);
+				AddcolliderToSelectedTile();
 			}
 		}
 
+		// go to previous tiletype in tiletype array
 		if (Input.GetAxisRaw("Mouse ScrollWheel") < 0)
 		{
 			int currentType = TB.GetTileTypeIndex(_selectedTileType);
@@ -76,6 +90,7 @@ public class TileEditor : MonoBehaviour
 					Destroy(_selectedTile);
 
 				_selectedTile = Instantiate(TB.GetTile(currentType - 1).view.MainGo);
+				AddcolliderToSelectedTile();
 			}
 		}
 
@@ -90,6 +105,7 @@ public class TileEditor : MonoBehaviour
 			else
 			{
 				_selectedTile = Instantiate(TB.GetTile(_selectedTileType).view.MainGo);
+				AddcolliderToSelectedTile();
 			}
 		}
 
@@ -138,6 +154,12 @@ public class TileEditor : MonoBehaviour
 			}
 		}
 
+	}
+
+	void AddcolliderToSelectedTile()
+	{
+		_selectedTile.AddComponent<BoxCollider>();
+		_selectedTile.layer = 9;
 	}
 
 	public void GenerateGrid(int sizeX, int sizeY)
