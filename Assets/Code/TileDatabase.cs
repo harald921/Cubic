@@ -18,8 +18,8 @@ public class TileDatabase : MonoBehaviour
 
         foreach (TileModel tileModelToSerialize in tilesToSerialize)
         {
-            _tileTypes.Add(tileModelToSerialize.typeName);
-            _tiles.Add(tileModelToSerialize.typeName, tileModelToSerialize);
+            _tileTypes.Add(tileModelToSerialize.typeName.ToLower());
+            _tiles.Add(tileModelToSerialize.typeName.ToLower(), tileModelToSerialize);
         }
     }
 
@@ -28,7 +28,8 @@ public class TileDatabase : MonoBehaviour
         _tiles.Count;
 
     public TileModel GetTile(string inTileName) =>
-        _tiles[inTileName];
+        _tiles[inTileName.ToLower()];
+
 
     public TileModel GetTile(int inID) =>
         _tiles[_tileTypes[inID]];

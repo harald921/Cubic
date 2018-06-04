@@ -8,7 +8,7 @@ public class Level : MonoBehaviour
 
     public TileMap tileMap { get; private set; }
 
-    void Awake()
+    void Start()
     {
         instance = this;
 
