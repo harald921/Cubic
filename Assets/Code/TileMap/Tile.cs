@@ -36,13 +36,23 @@ public class Tile
     readonly Data _data;
     readonly View _view;
 
+    readonly TileMap _tileMap;
 
-    public Tile(Vector2DInt inPosition, string inTileName)
+    static TileDatabase _tileDB;
+
+    static Tile()
     {
-        tileModel = TileDatabase.instance.GetTile(inTileName);
+        _tileDB = TileDatabase.instance;
+    }
+
+    public Tile(Vector2DInt inPosition, string inTileName, TileMap inTileMap)
+    {
+        tileModel = _tileDB.GetTile(inTileName);
 
         _data = new Data(tileModel.data, inPosition);
         _view = new View(tileModel.view, inPosition);
+
+        _tileMap = inTileMap;
     }
 
     public void Delete()
@@ -50,6 +60,9 @@ public class Tile
         Object.Destroy(_view.mainGO);
     }
 
+    public Tile GetRelativeTile(Vector2DInt inOffset) =>
+        _tileMap.GetTile(_data.position + inOffset);
+        
 
     public class Data
     {
@@ -75,8 +88,7 @@ public class Tile
 
         public View(TileModel.View inViewModel, Vector2DInt inPosition)
         {
-            if (inViewModel.mainGO)
-                _mainGO = Object.Instantiate(inViewModel.mainGO);
+            _mainGO = Object.Instantiate(inViewModel.mainGO);
 
             _mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
