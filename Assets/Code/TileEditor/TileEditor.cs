@@ -58,8 +58,7 @@ public class TileEditor : MonoBehaviour
 	[SerializeField] Slider		_sliderSizeX;
 	[SerializeField] Slider		_sliderSizeY;
 	[SerializeField] Text       _editModeText;
-	[SerializeField] MessagePromt _promt;
-	[SerializeField] Sprite _emptySprite;
+	[SerializeField] MessagePromt _promt;	
 
 	void Start()
 	{
@@ -75,13 +74,9 @@ public class TileEditor : MonoBehaviour
 
 		// add all existing tiletypes to dropdown menu
 		_dropDownTiles.options.Clear();
-		for(int i =0; i < _tileDB.tileCount; i++)
-		{							
+		for(int i =0; i < _tileDB.tileCount; i++)									
 			_dropDownTiles.options.Add(new Dropdown.OptionData(_tileDB.GetTile(i).typeName));
-			if (_tileDB.GetTile(i).typeName == "empty")			
-				_dropDownTiles.options[i].image = _emptySprite;							
-		}		
-		
+														
 		// create tile of first type in typearray
 		_selectedTile = Instantiate(_tileDB.GetTile(0).view.mainGO, _tileFolder);
 		_selectedTileType = _tileDB.GetTile(0).typeName;
