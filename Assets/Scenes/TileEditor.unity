@@ -1026,7 +1026,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1036,7 +1036,7 @@ MonoBehaviour:
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 14
-    m_FontStyle: 0
+    m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
@@ -1977,6 +1977,7 @@ MonoBehaviour:
   _sliderSizeY: {fileID: 1351279695}
   _editModeText: {fileID: 600670749}
   _promt: {fileID: 1370652994}
+  _emptySprite: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!4 &1087316337
 Transform:
   m_ObjectHideFlags: 0
@@ -4254,11 +4255,6 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.size
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
       propertyPath: m_LocalPosition.x
       value: 5.55719
@@ -4291,64 +4287,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[0]._typeName
-      value: lava
-      objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[0]._data.walkable
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[0]._data.deadly
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[0]._view._mainGO
-      value: 
-      objectReference: {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a,
-        type: 2}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[1]._typeName
-      value: ice
-      objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[1]._data.walkable
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[1]._view._mainGO
-      value: 
-      objectReference: {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21,
-        type: 2}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[2]._typeName
-      value: death
-      objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[2]._data.walkable
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[2]._data.deadly
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[2]._view._mainGO
-      value: 
-      objectReference: {fileID: 1525346839178874, guid: 6d55443ee8b1aaa418855beb30589917,
-        type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
   m_IsPrefabParent: 0

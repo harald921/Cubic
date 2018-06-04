@@ -59,6 +59,7 @@ public class TileEditor : MonoBehaviour
 	[SerializeField] Slider		_sliderSizeY;
 	[SerializeField] Text       _editModeText;
 	[SerializeField] MessagePromt _promt;
+	[SerializeField] Sprite _emptySprite;
 
 	void Start()
 	{
@@ -74,8 +75,12 @@ public class TileEditor : MonoBehaviour
 
 		// add all existing tiletypes to dropdown menu
 		_dropDownTiles.options.Clear();
-		for(int i =0; i < _tileDB.tileCount; i++)		
+		for(int i =0; i < _tileDB.tileCount; i++)
+		{							
 			_dropDownTiles.options.Add(new Dropdown.OptionData(_tileDB.GetTile(i).typeName));
+			if (_tileDB.GetTile(i).typeName == "empty")			
+				_dropDownTiles.options[i].image = _emptySprite;							
+		}		
 		
 		// create tile of first type in typearray
 		_selectedTile = Instantiate(_tileDB.GetTile(0).view.mainGO, _tileFolder);
@@ -93,12 +98,28 @@ public class TileEditor : MonoBehaviour
 		if(scrollDelta != 0)
 		{
 			int currentType = _tileDB.GetTileTypeIndex(_selectedTileType); // get index of current tiletyp
-
+			
 			// check if there is a tile available at previous or next index of current tile 
-			if (scrollDelta > 0 && currentType != -1 && currentType < _tileDB.tileCount - 1) // scroll up
-				currentType++;
-			else if (scrollDelta < 0 && currentType > 0) // scroll down
-				currentType--;
+			if (scrollDelta > 0 && currentType < _tileDB.tileCount - 1) // scroll up
+			{
+				if (_tileDB.GetTile(currentType + 1).typeName == "empty") // if the next tile is the empty tile skip it and move to next
+				{
+					if (currentType + 1 < _tileDB.tileCount - 1) // check so a next tile exist
+						currentType += 2;
+				}
+				else
+					currentType += 1;
+			} 
+			else if (scrollDelta < 0 && currentType > 0)
+			{
+				if (_tileDB.GetTile(currentType - 1).typeName == "empty")
+				{
+					if (currentType - 2 >= 0)
+						currentType -= 2;
+				}
+				else
+					currentType -= 1;
+			}
 
 			ChangeTile(currentType);
 		}
@@ -296,6 +317,12 @@ public class TileEditor : MonoBehaviour
 
 	public void OnTileChanged(int index)
 	{
+		if (_tileDB.GetTile(index).typeName == "empty")
+		{
+			_dropDownTiles.value = _tileDB.GetTileTypeIndex(_selectedTileType);
+			return;
+		}
+
 		ChangeTile(index);
 	}
 
