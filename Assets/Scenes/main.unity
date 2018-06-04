@@ -250,9 +250,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d37446ea74c7dbc41889f6bc21fbc010, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boost: 3.5
-  positionLerpTime: 0.2
-  mouseSensitivityCurve:
+  _boost: 3.5
+  _positionLerpTime: 0.2
+  _mouseSensitivityCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -276,8 +276,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  rotationLerpTime: 0.01
-  invertY: 0
+  _rotationLerpTime: 0.01
 --- !u!81 &577599859
 AudioListener:
   m_ObjectHideFlags: 0
@@ -348,6 +347,11 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.size
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4096164641099304, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
       propertyPath: m_LocalPosition.x
       value: 6.6869974
@@ -380,6 +384,81 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: _tilesToSerialize.Array.data[0].tile._view._mainGO
+      value: 
+      objectReference: {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a,
+        type: 2}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: _tilesToSerialize.Array.data[1].tile._view._mainGO
+      value: 
+      objectReference: {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21,
+        type: 2}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[0]._typeName
+      value: lava
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[0]._data.walkable
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[0]._data.deadly
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[0]._view._mainGO
+      value: 
+      objectReference: {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a,
+        type: 2}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[1]._typeName
+      value: ice
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[1]._data.walkable
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[1]._data.deadly
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[1]._view._mainGO
+      value: 
+      objectReference: {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21,
+        type: 2}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[2]._typeName
+      value: death
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[2]._data.walkable
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[2]._data.deadly
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114760108042899710, guid: 48deae589a4b6aa4d8f708e7a57567a1,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[2]._view._mainGO
+      value: 
+      objectReference: {fileID: 1525346839178874, guid: 6d55443ee8b1aaa418855beb30589917,
+        type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 48deae589a4b6aa4d8f708e7a57567a1, type: 2}
   m_IsPrefabParent: 0

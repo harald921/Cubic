@@ -60,7 +60,7 @@ public class TileEditor : MonoBehaviour
 	[SerializeField] Text       _editModeText;
 	[SerializeField] MessagePromt _promt;
 
-	void Awake()
+	void Start()
 	{
 		// get references
 		_tileDB = TileDatabase.instance;
