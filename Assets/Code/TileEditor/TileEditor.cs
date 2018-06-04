@@ -171,7 +171,7 @@ public class TileEditor : MonoBehaviour
 			if(CoordX >= 0 && CoordX < _gridSize.x && CoordY >= 0 && CoordY < _gridSize.y)
 			{
 				// check if tile is already placed on coords (all tiles is set to "Death" by defualt meaning they are empty)
-				bool occupied = _tileProperties[CoordY, CoordX].name != "Death";
+				bool occupied = _tileProperties[CoordY, CoordX].name != "empty";
 				float yPos = 0.0f;
 				if (occupied)
 					yPos = 1.0f;
@@ -204,7 +204,7 @@ public class TileEditor : MonoBehaviour
 				if(Physics.Raycast(ray, out hit))
 					if(hit.collider.gameObject.layer == 9)
 					{						
-						_tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].name = "Death";
+						_tileProperties[(int)hit.transform.position.z, (int)hit.transform.position.x].name = "empty";
 						Destroy(hit.collider.gameObject);						
 					}
 			}
@@ -312,17 +312,11 @@ public class TileEditor : MonoBehaviour
 		_tileProperties = new TileInfo[sizeY, sizeX];
 		for (int y = 0; y < sizeY; y++)
 			for (int x = 0; x < sizeX; x++)
-				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), "Death"); // set all tiles to start as deathtiles and set position according to coords
+				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), "empty"); // set all tiles to start as deathtiles and set position according to coords
 	}
 
 	public void OnTileChanged(int index)
-	{
-		if (_tileDB.GetTile(index).typeName == "empty")
-		{
-			_dropDownTiles.value = _tileDB.GetTileTypeIndex(_selectedTileType);
-			return;
-		}
-
+	{		
 		ChangeTile(index);
 	}
 

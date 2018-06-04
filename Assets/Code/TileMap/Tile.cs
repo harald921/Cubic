@@ -18,6 +18,7 @@ public class TileModel
         public bool walkable; // Can a player ever enter this tile?
         public int  health;   // How many times can a player step on this tile?
         public bool deadly;   // Will a player die if it steps on this tile?
+		public bool unBreakable; // tile cant break 
     }
 
     [System.Serializable]
@@ -88,8 +89,10 @@ public class Tile
 
         public View(TileModel.View inViewModel, Vector2DInt inPosition)
         {
-            _mainGO = Object.Instantiate(inViewModel.mainGO);
+			if (inViewModel.mainGO == null)
+				return;
 
+            _mainGO = Object.Instantiate(inViewModel.mainGO);
             _mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
     }

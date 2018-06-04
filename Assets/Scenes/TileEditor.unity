@@ -1977,7 +1977,7 @@ MonoBehaviour:
   _sliderSizeY: {fileID: 1351279695}
   _editModeText: {fileID: 600670749}
   _promt: {fileID: 1370652994}
-  _emptySprite: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  _emptySprite: {fileID: 21300000, guid: 27f4866100584a540b2975af1ca1afb1, type: 3}
 --- !u!4 &1087316337
 Transform:
   m_ObjectHideFlags: 0
@@ -3431,6 +3431,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1736122168}
   - component: {fileID: 1736122169}
+  - component: {fileID: 1736122170}
   m_Layer: 5
   m_Name: Item
   m_TagString: Untagged
@@ -3481,7 +3482,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.26415092, g: 0.25542894, b: 0.25542894, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -3504,6 +3505,17 @@ MonoBehaviour:
     m_TypeName: UnityEngine.UI.Toggle+ToggleEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
   m_IsOn: 1
+--- !u!114 &1736122170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1736122167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bdda3153886edc48aa35f279241e61e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1739216068
 GameObject:
   m_ObjectHideFlags: 0

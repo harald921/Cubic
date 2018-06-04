@@ -65,6 +65,7 @@
     <Compile Include="Assets\Code\Player.cs" />
     <Compile Include="Assets\Code\TileDatabase.cs" />
     <Compile Include="Assets\Code\TileEditor\MessagePromt.cs" />
+    <Compile Include="Assets\Code\TileEditor\SetDropdownObjectInactive.cs" />
     <Compile Include="Assets\Code\TileEditor\TileEditor.cs" />
     <Compile Include="Assets\Code\TileMap\Tile.cs" />
     <Compile Include="Assets\Code\TileMap\TileMap.cs" />
