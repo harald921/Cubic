@@ -67,7 +67,7 @@ public class TileEditor : MonoBehaviour
 		_camera = Camera.main;
 
 		// freeze camera
-		_camera.GetComponent<UnityTemplateProjects.SimpleCameraController>().frozen = true;
+		_camera.GetComponent<SimpleCameraController>().Freeze();
 
 		// generate standard 10x10 grid
 		GenerateGrid(_gridDefaultSize.x, _gridDefaultSize.y);

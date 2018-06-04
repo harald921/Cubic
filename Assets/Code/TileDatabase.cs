@@ -6,7 +6,7 @@ public class TileDatabase : MonoBehaviour
 {
     public static TileDatabase instance { get; private set; }
 
-    public List<NameTileKVP> tilesToSerialize = new List<NameTileKVP>();        // Collection gathering data from the inspector to insert into "_tiles" and "_tileTypes" upon program start
+    public List<TileModel> tilesToSerialize = new List<TileModel>();        // Collection gathering data from the inspector to insert into "_tiles" and "_tileTypes" upon program start
 
     Dictionary<string, TileModel> _tiles = new Dictionary<string, TileModel>();
     List<string> _tileTypes = new List<string>();
@@ -16,10 +16,10 @@ public class TileDatabase : MonoBehaviour
     {
         instance = this;
 
-        foreach (var kvp in tilesToSerialize)
+        foreach (TileModel tileModelToSerialize in tilesToSerialize)
         {
-            _tileTypes.Add(kvp.tileName);
-            _tiles.Add(kvp.tileName, kvp.tile);
+            _tileTypes.Add(tileModelToSerialize.typeName);
+            _tiles.Add(tileModelToSerialize.typeName, tileModelToSerialize);
         }
     }
 
@@ -35,12 +35,4 @@ public class TileDatabase : MonoBehaviour
 
     public int GetTileTypeIndex(string inName) =>
         _tileTypes.IndexOf(inName);
-
-
-    [System.Serializable]
-    public struct NameTileKVP
-    {
-        public string tileName;
-        public TileModel tile;
-    }
 }

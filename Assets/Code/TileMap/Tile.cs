@@ -6,7 +6,7 @@ using UnityEngine;
 [System.Serializable]
 public class TileModel
 {
-    string _typeName; public string typeName => _typeName;
+    [SerializeField] string _typeName; public string typeName => _typeName;
 
     [SerializeField] Data _data; public Data data => _data;
     [SerializeField] View _view; public View view => _view;
