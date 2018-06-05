@@ -20,7 +20,7 @@ public class Player
     }
 
 
-    void Move(Vector2DInt inDirection)
+    public void Move(Vector2DInt inDirection)
     {
         Tile targetTile = _currentTile.GetRelativeTile(inDirection);
 
