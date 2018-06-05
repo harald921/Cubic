@@ -37,7 +37,7 @@ public class TileMap
             foreach (var tilesKVP in _tiles)
             {
                 tilesKVP.Key.BinarySave(writer);                  // Write: Position
-                writer.Write(tilesKVP.Value.tileModel.typeName);  // Write: Tile type name
+                writer.Write(tilesKVP.Value.model.typeName);  // Write: Tile type name
             }
         }
     }

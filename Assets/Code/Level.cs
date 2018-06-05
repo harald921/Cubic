@@ -13,5 +13,8 @@ public class Level : MonoBehaviour
         instance = this;
 
         tileMap = new TileMap("SavedFromInputField");
+
+
+        new Player(tileMap.GetTile(Vector2DInt.One));
     }
 }

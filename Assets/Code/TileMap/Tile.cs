@@ -32,14 +32,15 @@ public class TileModel
 // Holds the instance data of a Tile, which separates different instances of the same type of tile
 public class Tile
 {
-    public readonly TileModel tileModel;
+    public readonly TileModel model;
 
-    readonly Data _data;
+    public readonly Data data;
     readonly View _view;
 
     readonly TileMap _tileMap;
 
     static TileDatabase _tileDB;
+
 
     static Tile()
     {
@@ -48,29 +49,40 @@ public class Tile
 
     public Tile(Vector2DInt inPosition, string inTileName, TileMap inTileMap)
     {
-        tileModel = _tileDB.GetTile(inTileName);
+        model = _tileDB.GetTile(inTileName);
 
-        _data = new Data(tileModel.data, inPosition);
-        _view = new View(tileModel.view, inPosition);
+        data = new Data(model.data, inPosition);
+        _view = new View(model.view, inPosition);
 
         _tileMap = inTileMap;
     }
+
 
     public void Delete()
     {
         Object.Destroy(_view.mainGO);
     }
 
+
+
+
     public Tile GetRelativeTile(Vector2DInt inOffset) =>
-        _tileMap.GetTile(_data.position + inOffset);
+        _tileMap.GetTile(data.position + inOffset);
         
 
     public class Data
     {
         public readonly Vector2DInt position;
 
-        public Player _player { get; private set; }
+        Player _player;
         int _currentHealth = 0;
+
+
+        public void SetPlayer(Player inPlayer) =>
+            _player = inPlayer;
+
+        public void RemovePlayer() =>
+            _player = null;
 
 
         public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
