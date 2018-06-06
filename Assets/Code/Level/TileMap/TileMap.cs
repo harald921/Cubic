@@ -59,7 +59,7 @@ public class TileMap
 
                 string typeName = reader.ReadString(); // Read: Tile type name  
 
-                _tiles.Add(tilePosition, new Tile(tilePosition, typeName, this));
+                _tiles.Add(tilePosition, new Tile(tilePosition, typeName));
             }
         }
     }

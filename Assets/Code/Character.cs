@@ -29,7 +29,7 @@ public class Character
 
     public void Move(Vector2DInt inDirection)
     {
-        Tile targetTile = _currentTile.GetRelativeTile(inDirection);
+        Tile targetTile = _currentTile.data.GetRelativeTile(inDirection);
 
         if (!targetTile.model.data.walkable)
             return;
@@ -73,5 +73,7 @@ public class Character
 
         _view.transform.position = targetPosition;
         _view.transform.rotation = targetRotation;
+
+        inTargetTile.data.DamageTile();
     }
 }

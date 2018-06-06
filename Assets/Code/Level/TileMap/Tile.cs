@@ -37,8 +37,6 @@ public class Tile
     public readonly Data data;
     readonly View _view;
 
-    readonly TileMap _tileMap;
-
     static TileDatabase _tileDB;
 
 
@@ -47,14 +45,12 @@ public class Tile
         _tileDB = TileDatabase.instance;
     }
 
-    public Tile(Vector2DInt inPosition, string inTileName, TileMap inTileMap)
+    public Tile(Vector2DInt inPosition, string inTileName)
     {
         model = _tileDB.GetTile(inTileName);
 
         data  = new Data(model.data, inPosition);
         _view = new View(model.view, inPosition);
-
-        _tileMap = inTileMap;
     }
 
 
@@ -64,18 +60,23 @@ public class Tile
     }
 
 
-
-
-    public Tile GetRelativeTile(Vector2DInt inOffset) =>
-        _tileMap.GetTile(data.position + inOffset);
-
-
     public class Data
     {
         public readonly Vector2DInt position;
 
-        Character _character;
+        static TileMap _tileMap;
+        TileMap tileMap => _tileMap ?? (_tileMap = Level.instance.tileMap);
+
         int _currentHealth = 0;
+
+        Character _character;
+
+
+        public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
+        {
+            position = inPosition;
+            _currentHealth = inDataModel.health;
+        }
 
 
         public void SetPlayer(Character inCharacter) =>
@@ -84,13 +85,17 @@ public class Tile
         public void RemovePlayer() =>
             _character = null;
 
-
-        public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
+        public void DamageTile()
         {
-            position = inPosition;
+            _currentHealth--;
 
-            _currentHealth = inDataModel.health;
+            if (_currentHealth == 0)
+                tileMap.SetTile(position, new Tile(position, "empty"));
         }
+
+
+        public Tile GetRelativeTile(Vector2DInt inOffset) =>
+            tileMap.GetTile(position + inOffset);
     }
 
     public class View

@@ -131,7 +131,7 @@ MonoBehaviour:
         type: 2}
   - _typeName: Metal
     _data:
-      walkable: 0
+      walkable: 1
       health: 0
       deadly: 1
       unBreakable: 0
@@ -140,7 +140,7 @@ MonoBehaviour:
         type: 2}
   - _typeName: Empty
     _data:
-      walkable: 0
+      walkable: 1
       health: 0
       deadly: 1
       unBreakable: 0
