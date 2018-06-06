@@ -54,6 +54,8 @@ public class Character
         float movementProgress = 0;
         while (movementProgress < 1)
         {
+            movementProgress += _model.moveSpeed * Time.deltaTime;
+
             _view.transform.position = Vector3.Lerp(fromPosition, targetPosition, movementProgress);
             _view.transform.position = new Vector3(_view.transform.position.x, 1 + Mathf.Sin(movementProgress * (float)Math.PI), _view.transform.position.z);
 
@@ -70,13 +72,7 @@ public class Character
                 inTargetTile.data.SetPlayer(this);
             }
 
-            movementProgress += _model.moveSpeed * Time.deltaTime;
             yield return Timing.WaitForOneFrame;
-        }
-
-        _view.transform.position = targetPosition;
-        _view.transform.rotation = targetRotation;
-
-        
+        }               
     }
 }
