@@ -26,7 +26,7 @@ public class Player
 
     public void Move(Vector2DInt inDirection)
     {
-        Tile targetTile = _currentTile.GetRelativeTile(inDirection);
+        Tile targetTile = _currentTile.data.GetRelativeTile(inDirection);
 
         if (!targetTile.model.data.walkable)
             return;
@@ -38,6 +38,9 @@ public class Player
         // Update tile player references
         previousTile.data.RemovePlayer();
         targetTile.data.SetPlayer(this);
+
+		if (!previousTile.model.data.unBreakable && !previousTile.model.data.deadly)
+			 previousTile.data.DamageTile();
 
         UpdateView();
     }

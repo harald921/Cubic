@@ -51,7 +51,7 @@ public class Tile
     {
         model = _tileDB.GetTile(inTileName);
 
-        data = new Data(model.data, inPosition);
+        data = new Data(model.data, inTileMap, inPosition);
         _view = new View(model.view, inPosition);
 
         _tileMap = inTileMap;
@@ -62,21 +62,15 @@ public class Tile
     {
         Object.Destroy(_view.mainGO);
     }
-
-
-
-
-    public Tile GetRelativeTile(Vector2DInt inOffset) =>
-        _tileMap.GetTile(data.position + inOffset);
-        
-
+         
     public class Data
     {
         public readonly Vector2DInt position;
 
         Player _player;
-        int _currentHealth = 0;
+		TileMap _tileMap;
 
+        int _currentHealth = 0;
 
         public void SetPlayer(Player inPlayer) =>
             _player = inPlayer;
@@ -84,9 +78,21 @@ public class Tile
         public void RemovePlayer() =>
             _player = null;
 
+		public Tile GetRelativeTile(Vector2DInt inOffset) =>
+		_tileMap.GetTile(position + inOffset);
 
-        public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
+		// damage tile and if helth is 0 replace it with an empty tile
+		public void DamageTile()
+		{
+			_currentHealth--;
+			if (_currentHealth == 0)
+				_tileMap.SetTile(position, new Tile(position, "empty", _tileMap));
+		}
+
+		public Data(TileModel.Data inDataModel, TileMap tileMap, Vector2DInt inPosition)
         {
+			_tileMap = tileMap;
+
             position = inPosition;
 
             _currentHealth = inDataModel.health;

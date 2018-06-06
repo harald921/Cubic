@@ -55,7 +55,7 @@ MonoBehaviour:
   - _typeName: lava
     _data:
       walkable: 1
-      health: 0
+      health: 3
       deadly: 0
       unBreakable: 0
     _view:
@@ -64,7 +64,7 @@ MonoBehaviour:
   - _typeName: ice
     _data:
       walkable: 1
-      health: 0
+      health: 3
       deadly: 0
       unBreakable: 0
     _view:
@@ -75,7 +75,7 @@ MonoBehaviour:
       walkable: 1
       health: 0
       deadly: 1
-      unBreakable: 0
+      unBreakable: 1
     _view:
       _mainGO: {fileID: 0}
   - _typeName: metal
