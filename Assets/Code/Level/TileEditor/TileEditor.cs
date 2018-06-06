@@ -79,7 +79,7 @@ public class TileEditor : MonoBehaviour
 														
 		// create tile of first type in typearray
 		_selectedTile = Instantiate(_tileDB.GetTile(0).view.mainGO, _tileFolder);
-		_selectedTileType = _tileDB.GetTile(0).typeName;
+		_selectedTileType = _tileDB.GetTile(0).typeName.ToLower();
 		_currentEditMode = EDIT_MODE.PLACE_SINGLE;
 
 		// add collider and set layer of tile (need this to be able to select alredy placed tiles)
@@ -92,7 +92,7 @@ public class TileEditor : MonoBehaviour
 		float scrollDelta = Input.GetAxisRaw("Mouse ScrollWheel");
 		if(scrollDelta != 0)
 		{
-			int currentType = _tileDB.GetTileTypeIndex(_selectedTileType); // get index of current tiletyp
+			int currentType = _tileDB.GetTileTypeIndex(_selectedTileType.ToLower()); // get index of current tiletyp
 			
 			// check if there is a tile available at previous or next index of current tile 
 			if (scrollDelta > 0 && currentType < _tileDB.tileCount - 1) // scroll up
@@ -166,7 +166,7 @@ public class TileEditor : MonoBehaviour
 			if(CoordX >= 0 && CoordX < _gridSize.x && CoordY >= 0 && CoordY < _gridSize.y)
 			{
 				// check if tile is already placed on coords (all tiles is set to "Death" by defualt meaning they are empty)
-				bool occupied = _tileProperties[CoordY, CoordX].name != "empty";
+				bool occupied = _tileProperties[CoordY, CoordX].name.ToLower() != "empty";
 				float yPos = 0.0f;
 				if (occupied)
 					yPos = 1.0f;

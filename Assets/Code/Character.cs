@@ -39,7 +39,10 @@ public class Character
 
     public IEnumerator<float> _Move(Tile inTargetTile)
     {
-        Vector3 fromPosition   = new Vector3(_currentTile.data.position.x, 1, _currentTile.data.position.y);
+		if(!_currentTile.model.data.unBreakable)
+		    _currentTile.data.DamageTile();
+
+		Vector3 fromPosition   = new Vector3(_currentTile.data.position.x, 1, _currentTile.data.position.y);
         Vector3 targetPosition = new Vector3(inTargetTile.data.position.x, 1, inTargetTile.data.position.y);
 
         Vector3 movementDirection = (targetPosition - fromPosition).normalized;
@@ -74,6 +77,6 @@ public class Character
         _view.transform.position = targetPosition;
         _view.transform.rotation = targetRotation;
 
-        inTargetTile.data.DamageTile();
+        
     }
 }

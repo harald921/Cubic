@@ -23,13 +23,11 @@ public class TileDatabase : MonoBehaviour
         }
     }
 
-
     public int tileCount => 
         _tiles.Count;
 
     public TileModel GetTile(string inTileName) =>
         _tiles[inTileName.ToLower()];
-
 
     public TileModel GetTile(int inID) =>
         _tiles[_tileTypes[inID]];

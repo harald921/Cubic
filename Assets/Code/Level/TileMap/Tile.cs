@@ -56,9 +56,8 @@ public class Tile
 
     public void Delete()
     {
-        Object.Destroy(_view.mainGO);
+        Object.Destroy(_view.mainGO, 1.0f); // hardcoded to same lenght as animation for now, dont like this too much
     }
-
 
     public class Data
     {
@@ -71,13 +70,11 @@ public class Tile
 
         Character _character;
 
-
         public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
         {
             position = inPosition;
             _currentHealth = inDataModel.health;
         }
-
 
         public void SetPlayer(Character inCharacter) =>
             _character = inCharacter;
@@ -89,10 +86,11 @@ public class Tile
         {
             _currentHealth--;
 
+			_tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", _currentHealth); // cant get my tile model in a batter way right now, this should be fixed
+
             if (_currentHealth == 0)
                 tileMap.SetTile(position, new Tile(position, "empty"));
         }
-
 
         public Tile GetRelativeTile(Vector2DInt inOffset) =>
             tileMap.GetTile(position + inOffset);
