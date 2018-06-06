@@ -52,6 +52,7 @@ public class Character
         Quaternion targetRotation = Quaternion.Euler(movementDirectionRight * 90) * _view.transform.rotation;
 
         float movementProgress = 0;
+		bool tileRefSet = false;
         while (movementProgress < 1)
         {
             movementProgress += _model.moveSpeed * Time.deltaTime;
@@ -62,7 +63,7 @@ public class Character
 
             _view.transform.rotation = Quaternion.Lerp(fromRotation, targetRotation, movementProgress);
 
-            if (movementProgress > 0.5f)
+            if (movementProgress > 0.5f && !tileRefSet)
             {
                 // Set player tile references
                 Tile previousTile = _currentTile;
@@ -71,6 +72,8 @@ public class Character
                 // Update tile player references
                 previousTile.data.RemovePlayer();
                 inTargetTile.data.SetPlayer(this);
+
+				tileRefSet = true;
             }
 
             yield return Timing.WaitForOneFrame;
