@@ -47,8 +47,12 @@ public class TileMap
         using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.Open, FileAccess.Read))
         using (BinaryReader reader = new BinaryReader(stream))
         {
-            int tileCount = reader.ReadInt32();        // Read: Num tiles
-            for (int i = 0; i < tileCount; i++)
+            int gridSizeY = reader.ReadInt32();        // Read: Num tiles Vertical
+			int gridSizeX = reader.ReadInt32();        // Read: Num tiles Horizontal
+
+			int tileCount = gridSizeY * gridSizeX;        // Num tiles in total
+
+			for (int i = 0; i < tileCount; i++)
             {
                 Vector2DInt tilePosition = Vector2DInt.Zero;
                 tilePosition.BinaryLoad(reader);       // Read: Position

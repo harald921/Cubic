@@ -213,6 +213,10 @@ public class TileEditor : MonoBehaviour
 		_tileProperties[y, x].name = _selectedTileType;
 		_tileProperties[y, x].position = new Vector2DInt(x, y);
 
+		// dont spawn any tile if it is empty
+		if (_selectedTileType == "empty") 
+			return;
+
 		// spawn new tile
 		_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
 		AddcolliderToSelectedTile();
@@ -362,7 +366,8 @@ public class TileEditor : MonoBehaviour
 		using (BinaryWriter writer = new BinaryWriter(stream))
 		{
 			// write gridsize
-			writer.Write(_gridSize.x * _gridSize.y);
+			writer.Write(_gridSize.y);
+			writer.Write(_gridSize.x);
 
 			// loop over and write down the properties of each tile in grid
 			for (int y = 0; y < _gridSize.y; y++)
@@ -376,21 +381,42 @@ public class TileEditor : MonoBehaviour
 		}
 	}
 
-	public void BinaryLoad( string levelname)
+	public void BinaryLoad(string levelName)
 	{
-		//using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.Open, FileAccess.Read))
-		//using (BinaryReader reader = new BinaryReader(stream))
-		//{
-		//	int tileCount = reader.ReadInt32();        // Read: Num tiles
-		//	for (int i = 0; i < tileCount; i++)
-		//	{
-		//		Vector2DInt tilePosition = Vector2DInt.Zero;
-		//		tilePosition.BinaryLoad(reader);       // Read: Position
+		if (File.Exists(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, levelName)))
+		{
+			using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, levelName), FileMode.Open, FileAccess.Read))
+			using (BinaryReader reader = new BinaryReader(stream))
+			{				
+				int Y = reader.ReadInt32();        // Read: gridsize y
+				int X = reader.ReadInt32();        // Read: gridsize x
 
-		//		string typeName = reader.ReadString(); // Read: Tile type name  
+				ClearAllTiles();
+				GenerateGrid(X, Y);
 
-		//		tiles.Add(tilePosition, new Tile(tilePosition, typeName)); // TODO: Add serialization / Deserialization for tiles
-		//	}
-		//}
+				for (int y = 0; y < Y; y++)
+					for (int x = 0; x < X; x++)
+					{
+						Vector2DInt tilePosition = Vector2DInt.Zero;
+						tilePosition.BinaryLoad(reader);       // Read: Position
+						string typeName = reader.ReadString(); // Read: Tile type name  
+
+						_tileProperties[y, x].name = typeName;
+						_tileProperties[y, x].position = new Vector2DInt(x, y);
+
+						// dont spawn any tile if it is empty
+						if (typeName == "empty")
+							continue;
+
+						// spawn new tile
+						GameObject tile = Instantiate(_tileDB.GetTile(typeName).view.mainGO, new Vector3(x, 0, y), Quaternion.identity, _tileFolder);
+						tile.AddComponent<BoxCollider>();
+						tile.layer = 9;
+					}
+			}
+		}
+		else
+			_promt.SetAndShow(string.Format("ERROR!! Level {0} could not be found", levelName), () => print("Ok button pressed, seems to work"));
+
 	}
 }
