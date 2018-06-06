@@ -13,12 +13,12 @@ public class TileModel
 
 
     [System.Serializable]
-    public struct Data        // Hmpf, cannot be readonly due to Unity's serialization system...
+    public struct Data           // Hmpf, cannot be readonly due to Unity's serialization system...
     {
-        public bool walkable; // Can a player ever enter this tile?
-        public int  health;   // How many times can a player step on this tile?
-        public bool deadly;   // Will a player die if it steps on this tile?
-		public bool unBreakable; // tile cant break 
+        public bool walkable;    // Can a player ever enter this tile?
+        public int  health;      // How many times can a player step on this tile?
+        public bool deadly;      // Will a player die if it steps on this tile?
+        public bool unBreakable; // tile cant break 
     }
 
     [System.Serializable]
@@ -51,7 +51,7 @@ public class Tile
     {
         model = _tileDB.GetTile(inTileName);
 
-        data = new Data(model.data, inPosition);
+        data  = new Data(model.data, inPosition);
         _view = new View(model.view, inPosition);
 
         _tileMap = inTileMap;
@@ -68,21 +68,21 @@ public class Tile
 
     public Tile GetRelativeTile(Vector2DInt inOffset) =>
         _tileMap.GetTile(data.position + inOffset);
-        
+
 
     public class Data
     {
         public readonly Vector2DInt position;
 
-        Player _player;
+        Character _character;
         int _currentHealth = 0;
 
 
-        public void SetPlayer(Player inPlayer) =>
-            _player = inPlayer;
+        public void SetPlayer(Character inCharacter) =>
+            _character = inCharacter;
 
         public void RemovePlayer() =>
-            _player = null;
+            _character = null;
 
 
         public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
@@ -96,18 +96,19 @@ public class Tile
     public class View
     {
         GameObject _mainGO;
-        public GameObject mainGO => _mainGO; 
+        public GameObject mainGO => _mainGO;
 
 
         public View(TileModel.View inViewModel, Vector2DInt inPosition)
         {
-			if (inViewModel.mainGO == null)
-				return;
+            if (inViewModel.mainGO == null)
+                return;
 
             _mainGO = Object.Instantiate(inViewModel.mainGO);
             _mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
     }
 }
+
 
 
