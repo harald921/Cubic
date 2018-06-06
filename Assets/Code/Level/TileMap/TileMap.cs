@@ -20,7 +20,7 @@ public class TileMap
     public Tile GetTile(Vector2DInt inPosition) => _tiles[inPosition];
     public void SetTile(Vector2DInt inPosition, Tile inTile)
     {
-        _tiles[inPosition].Delete(); // this can´t be deleted right away later when the tile have animations
+        _tiles[inPosition].Delete();
         _tiles[inPosition] = inTile;
     }
 

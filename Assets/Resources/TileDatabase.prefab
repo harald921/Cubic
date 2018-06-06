@@ -33,8 +33,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1127859096490038}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.55719, y: -6.3899126, z: 9.859732}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 5.078494, y: -3.9500933, z: 8.480405}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -52,38 +52,38 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilesToSerialize:
-  - _typeName: lava
+  - _typeName: Lava
     _data:
       walkable: 1
-      health: 3
+      health: 0
       deadly: 0
       unBreakable: 0
     _view:
       _mainGO: {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a,
         type: 2}
-  - _typeName: ice
+  - _typeName: Ice
     _data:
       walkable: 1
-      health: 3
+      health: 0
       deadly: 0
       unBreakable: 0
     _view:
       _mainGO: {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21,
         type: 2}
-  - _typeName: empty
+  - _typeName: Metal
     _data:
-      walkable: 1
+      walkable: 0
       health: 0
       deadly: 1
-      unBreakable: 1
-    _view:
-      _mainGO: {fileID: 0}
-  - _typeName: metal
-    _data:
-      walkable: 1
-      health: 0
-      deadly: 0
-      unBreakable: 1
+      unBreakable: 0
     _view:
       _mainGO: {fileID: 1960800530658806, guid: a817afb52fc188d4aa9950402ea509aa,
         type: 2}
+  - _typeName: Empty
+    _data:
+      walkable: 0
+      health: 0
+      deadly: 1
+      unBreakable: 0
+    _view:
+      _mainGO: {fileID: 0}

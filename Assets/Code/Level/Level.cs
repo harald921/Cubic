@@ -4,13 +4,11 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
-	[SerializeField] PlayerValues _playerValues;
-
     public static Level instance { get; private set; }
 
     public TileMap tileMap { get; private set; }
 
-    Player debugPlayer;
+    Character debugPlayer;
 
 
     void Start()
@@ -19,19 +17,19 @@ public class Level : MonoBehaviour
 
         tileMap = new TileMap("SavedFromInputField");
 
-
-        debugPlayer = new Player(tileMap.GetTile(Vector2DInt.One), _playerValues);
+        debugPlayer = new Character(tileMap.GetTile(Vector2DInt.One), CharacterDatabase.instance.standardModel);
     }
+
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKey(KeyCode.W))
             debugPlayer.Move(Vector2DInt.Up);
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKey(KeyCode.S))
             debugPlayer.Move(Vector2DInt.Down);
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKey(KeyCode.A))
             debugPlayer.Move(Vector2DInt.Left);
-        if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKey(KeyCode.D))
             debugPlayer.Move(Vector2DInt.Right);
     }
 }
