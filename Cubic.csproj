@@ -622,6 +622,7 @@
     <Compile Include="Assets\Code\Character.cs" />
     <Compile Include="Assets\Code\Data Types\Vector2DInt.cs" />
     <Compile Include="Assets\Code\Free Flight Camera\SimpleCameraController.cs" />
+    <Compile Include="Assets\Code\GithubDesktopIsWeird.cs" />
     <Compile Include="Assets\Code\Level\CharacterDatabase.cs" />
     <Compile Include="Assets\Code\Level\Level.cs" />
     <Compile Include="Assets\Code\Level\TileDatabase.cs" />
