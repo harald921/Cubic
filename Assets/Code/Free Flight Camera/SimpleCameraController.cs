@@ -19,7 +19,7 @@ public class SimpleCameraController : MonoBehaviour
     [Tooltip("Time it takes to interpolate camera rotation 99% of the way to the target."), Range(0.001f, 1f)]
     [SerializeField] float _rotationLerpTime = 0.01f;
 
-    bool _frozen = false;
+    bool _frozen = true;
 
     public void Freeze()   => _frozen = true;
     public void UnFreeze() => _frozen = false;

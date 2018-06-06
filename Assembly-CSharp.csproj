@@ -63,6 +63,7 @@
     <Compile Include="Assets\Code\Free Flight Camera\SimpleCameraController.cs" />
     <Compile Include="Assets\Code\Level.cs" />
     <Compile Include="Assets\Code\Player.cs" />
+    <Compile Include="Assets\Code\ScriptableObjects\PlayerValues.cs" />
     <Compile Include="Assets\Code\TileDatabase.cs" />
     <Compile Include="Assets\Code\TileEditor\MessagePromt.cs" />
     <Compile Include="Assets\Code\TileEditor\SetDropdownObjectInactive.cs" />

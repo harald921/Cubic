@@ -9,12 +9,16 @@ public class Player
 
     GameObject _view;
 
+	PlayerValues _values;
 
-    public Player(Tile inSpawnTile)
+
+    public Player(Tile inSpawnTile, PlayerValues values)
     {
         _currentTile = inSpawnTile;
 
         _view = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+		_values = values;
 
         UpdateView();
     }

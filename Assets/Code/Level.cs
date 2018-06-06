@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
+	[SerializeField] PlayerValues _playerValues;
+
     public static Level instance { get; private set; }
 
     public TileMap tileMap { get; private set; }
 
     Player debugPlayer;
+
 
     void Start()
     {
@@ -17,7 +20,7 @@ public class Level : MonoBehaviour
         tileMap = new TileMap("SavedFromInputField");
 
 
-        debugPlayer = new Player(tileMap.GetTile(Vector2DInt.One));
+        debugPlayer = new Player(tileMap.GetTile(Vector2DInt.One), _playerValues);
     }
 
     void Update()
