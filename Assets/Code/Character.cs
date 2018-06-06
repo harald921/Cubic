@@ -55,6 +55,7 @@ public class Character
         while (movementProgress < 1)
         {
             movementProgress += _model.moveSpeed * Time.deltaTime;
+			movementProgress = Mathf.Clamp01(movementProgress);
 
             _view.transform.position = Vector3.Lerp(fromPosition, targetPosition, movementProgress);
             _view.transform.position = new Vector3(_view.transform.position.x, 1 + Mathf.Sin(movementProgress * (float)Math.PI), _view.transform.position.z);
@@ -73,6 +74,9 @@ public class Character
             }
 
             yield return Timing.WaitForOneFrame;
-        }               
+        }
+
+        
+       
     }
 }
