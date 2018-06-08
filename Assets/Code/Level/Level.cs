@@ -17,19 +17,22 @@ public class Level : MonoBehaviour
 
         tileMap = new TileMap("SavedFromInputField");
 
-        debugPlayer = new Character(tileMap.GetTile(Vector2DInt.One), CharacterDatabase.instance.standardModel);
+        debugPlayer = new Character(tileMap.GetTile(Vector2DInt.One), CharacterDatabase.instance.standardModel, tileMap);
     }
-
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.W))
+		if (Input.GetKey(KeyCode.Space))
+			debugPlayer.InitiateDash();
+
+		if (Input.GetKey(KeyCode.W))
             debugPlayer.Move(Vector2DInt.Up);
         if (Input.GetKey(KeyCode.S))
             debugPlayer.Move(Vector2DInt.Down);
         if (Input.GetKey(KeyCode.A))
             debugPlayer.Move(Vector2DInt.Left);
         if (Input.GetKey(KeyCode.D))
-            debugPlayer.Move(Vector2DInt.Right);
+            debugPlayer.Move(Vector2DInt.Right);		
     }
+
 }
