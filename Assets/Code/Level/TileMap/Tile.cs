@@ -26,8 +26,20 @@ public class TileModel
     {
         [SerializeField] GameObject _mainGO; public GameObject mainGO => _mainGO; // Main visual representation
     }
-}
 
+	public void MakeEdgeTile()
+	{
+		_typeName = Constants.EDGE_TYPE;
+		_data = new Data();
+		_view = new View();
+
+		_data.walkable = true;
+		_data.health = 0;
+		_data.deadly = true;
+		_data.unBreakable = true;
+
+	}
+}
 
 // Holds the instance data of a Tile, which separates different instances of the same type of tile
 public class Tile

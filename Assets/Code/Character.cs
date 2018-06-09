@@ -112,6 +112,14 @@ public class Character
             yield return Timing.WaitForOneFrame;
         }
 
+		// here we need a way to check if tile is a edge tile and die
+		if (_currentTile.model.typeName == Constants.EDGE_TYPE)
+		{
+			// killMeHere();
+			_CURRENT_STATE = PLAYER_STATE.DEAD;
+			yield break;
+		}
+
 		_CURRENT_STATE = PLAYER_STATE.IDLE;
     }
 
@@ -200,7 +208,7 @@ public class Character
 			}
 
 			// here we need a way to check if tile is a edge tile, then abort more dashes and die
-			if (_currentTile.model.typeName == "EdgeDeath") // edgedeath is yet not implemented
+			if (_currentTile.model.typeName == Constants.EDGE_TYPE)
 			{
 				// killMeHere();
 				_CURRENT_STATE = PLAYER_STATE.DEAD;

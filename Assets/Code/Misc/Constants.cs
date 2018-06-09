@@ -8,4 +8,7 @@ public static class Constants
     public static readonly string APP_NAME = "Cubic";
 
     public static string TILEMAP_SAVE_FOLDER => Path.Combine(Application.dataPath + "/../", "Maps");
+
+	public static string EDGE_TYPE = "edge";
+
 }

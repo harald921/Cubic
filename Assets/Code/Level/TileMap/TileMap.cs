@@ -61,9 +61,30 @@ public class TileMap
 
                 _tiles.Add(tilePosition, new Tile(tilePosition, typeName));
             }
+
+			AddEdgeTiles(gridSizeX, gridSizeY);
         }
     }
     #endregion
+
+	public void AddEdgeTiles(int sizeX, int sizeY)
+	{
+		// left edges
+		for (int i = 0; i < sizeY; i++)
+			_tiles.Add(new Vector2DInt(-1, i), new Tile(new Vector2DInt(-1, i), Constants.EDGE_TYPE));
+
+		// right edges
+		for (int i = 0; i < sizeY; i++)
+			_tiles.Add(new Vector2DInt(sizeX, i), new Tile(new Vector2DInt(sizeX, i), Constants.EDGE_TYPE));
+
+		// top edges
+		for (int i = 0; i < sizeX; i++)
+			_tiles.Add(new Vector2DInt(i, sizeY), new Tile(new Vector2DInt(i, sizeY), Constants.EDGE_TYPE));
+
+		// bottom edges
+		for (int i = 0; i < sizeX; i++)
+			_tiles.Add(new Vector2DInt(i, -1), new Tile(new Vector2DInt(i, -1), Constants.EDGE_TYPE));
+	}
 }
 
 
