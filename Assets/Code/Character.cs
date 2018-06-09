@@ -16,10 +16,11 @@ public enum PLAYER_STATE
 
 public class Character 
 {
-    Tile _currentTile;
+    Tile _currentTile; public Tile currentTile => _currentTile;
 	TileMap _tileMap;
 
-	PLAYER_STATE _CURRENT_STATE = PLAYER_STATE.IDLE;
+	PLAYER_STATE _CURRENT_STATE = PLAYER_STATE.IDLE; public PLAYER_STATE currentState => _CURRENT_STATE;
+	int _currentDashCharges = 2; public int currentDashCharges => _currentDashCharges;
 
     GameObject _view;
 
@@ -42,7 +43,13 @@ public class Character
 		_model = inModel;
 
         _view.transform.position = new Vector3(_currentTile.data.position.x, 1, _currentTile.data.position.y);
-    }
+
+#if DEBUG_TOOLS
+
+		PlayerPage.instance.player = this;
+
+#endif
+	}
 
 
     public void Move(Vector2DInt inDirection)
@@ -128,7 +135,7 @@ public class Character
 		_CURRENT_STATE = PLAYER_STATE.CHARGING;
 
 		float charger = 0;
-		int numTilesToDash = 2; // do a minumum of 2 tiles if quickdashing??
+		_currentDashCharges = 2; // do a minumum of 2 tiles if quickdashing??
 
 		// set next tile to direction of last movement
 		Vector2DInt tileDirection = new Vector2DInt((int)_lastMoveDirection.x, (int)_lastMoveDirection.z);
@@ -140,10 +147,8 @@ public class Character
 			charger += Time.deltaTime;
 			if(charger >= 1 / _model.dashChargeRate)
 			{
-				numTilesToDash = Mathf.Clamp(numTilesToDash + 1, 2, _model.maxDashDistance);
+				_currentDashCharges = Mathf.Clamp(_currentDashCharges + 1, 2, _model.maxDashDistance);
 				charger = 0.0f;
-
-				Debug.Log(string.Format("Num tiles to dash : {0} ", numTilesToDash));
 			}
 
 			// while charging direction can be changed
@@ -162,7 +167,7 @@ public class Character
 		_CURRENT_STATE = PLAYER_STATE.DASHING;
 
 		// loop over all dashtiles
-		for(int i =0; i < numTilesToDash; i++)
+		for(int i =0; i < _currentDashCharges; i++)
 		{
 			if (!_currentTile.model.data.unBreakable) // hurt tile on leaving
 				_currentTile.data.DamageTile();
@@ -200,7 +205,7 @@ public class Character
 			}
 
 			// here we die if we are in last dash and tile is deadly
-			if (i +1 == numTilesToDash && _currentTile.model.data.deadly)
+			if (i +1 == _currentDashCharges && _currentTile.model.data.deadly)
 			{
 				// killMeHere();
 				_CURRENT_STATE = PLAYER_STATE.DEAD;
@@ -215,6 +220,8 @@ public class Character
 				yield break;
 			}
 		}
+
+		_currentDashCharges = 2;
 
 		_CURRENT_STATE = PLAYER_STATE.IDLE;
 

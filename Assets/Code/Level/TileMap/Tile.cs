@@ -78,7 +78,7 @@ public class Tile
         static TileMap _tileMap;
         TileMap tileMap => _tileMap ?? (_tileMap = Level.instance.tileMap);
 
-        int _currentHealth = 0;
+        int _currentHealth = 0; public int currentHealth => _currentHealth;
 
         Character _character;
 
