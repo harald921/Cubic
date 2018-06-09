@@ -128,7 +128,15 @@ public class Character
 		}
 
 		_CURRENT_STATE = PLAYER_STATE.IDLE;
-    }
+
+		// cooldown before next available move
+		float cooldown = _model.moveCooldown;
+		while (cooldown > 0)
+		{
+			cooldown -= Time.deltaTime;
+			yield return Timing.WaitForOneFrame;
+		}
+	}
 
 	public IEnumerator<float> _dash()
 	{
@@ -223,15 +231,20 @@ public class Character
 
 		_currentDashCharges = 2;
 
-		_CURRENT_STATE = PLAYER_STATE.IDLE;
-
 		// cooldown before naxt available dash
 		float cooldown = _model.dashCoolDown;
 		while (cooldown > 0)
 		{
 			cooldown -= Time.deltaTime;
+
+			// do the walk cooldown before we can control the player again
+			if(cooldown <= (_model.dashCoolDown - _model.moveCooldown))
+				_CURRENT_STATE = PLAYER_STATE.IDLE;
+
 			yield return Timing.WaitForOneFrame;
 		}
+
+		
 
 	}
 
