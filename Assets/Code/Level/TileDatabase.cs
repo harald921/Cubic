@@ -10,8 +10,7 @@ public class TileDatabase : MonoBehaviour
 
     Dictionary<string, TileModel> _tiles = new Dictionary<string, TileModel>();
     List<string> _tileTypes = new List<string>();
-
-
+	
     public void Awake()
     {
         instance = this;
@@ -21,6 +20,12 @@ public class TileDatabase : MonoBehaviour
             _tileTypes.Add(tileModelToSerialize.typeName.ToLower());
             _tiles.Add(tileModelToSerialize.typeName.ToLower(), tileModelToSerialize);
         }
+		
+		// the model that will represent a edgetile, this should not be exposed in the regular list becuase it is a constant tiletype that never should be edited and niether have to exist in editor
+		TileModel edgeModel = new TileModel();
+		edgeModel.MakeEdgeTile();
+		_tileTypes.Add(edgeModel.typeName.ToLower());
+		_tiles.Add(edgeModel.typeName.ToLower(), edgeModel);
     }
 
     public int tileCount => 

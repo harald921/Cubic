@@ -87,38 +87,7 @@ public class TileEditor : MonoBehaviour
 	}
 
 	void Update()
-	{
-		// check if scrollwheel has moved
-		float scrollDelta = Input.GetAxisRaw("Mouse ScrollWheel");
-		if(scrollDelta != 0)
-		{
-			int currentType = _tileDB.GetTileTypeIndex(_selectedTileType.ToLower()); // get index of current tiletyp
-			
-			// check if there is a tile available at previous or next index of current tile 
-			if (scrollDelta > 0 && currentType < _tileDB.tileCount - 1) // scroll up
-			{
-				if (_tileDB.GetTile(currentType + 1).typeName == "empty") // if the next tile is the empty tile skip it and move to next
-				{
-					if (currentType + 1 < _tileDB.tileCount - 1) // check so a next tile exist
-						currentType += 2;
-				}
-				else
-					currentType += 1;
-			} 
-			else if (scrollDelta < 0 && currentType > 0)
-			{
-				if (_tileDB.GetTile(currentType - 1).typeName == "empty")
-				{
-					if (currentType - 2 >= 0)
-						currentType -= 2;
-				}
-				else
-					currentType -= 1;
-			}
-
-			ChangeTile(currentType);
-		}
-		
+	{				
 		// change editmode
 		if (Input.GetMouseButtonDown(1))
 		{

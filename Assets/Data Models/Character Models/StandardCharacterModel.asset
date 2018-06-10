@@ -12,5 +12,9 @@ MonoBehaviour:
   m_Name: StandardCharacterModel
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  maxDashDistance: 4
+  moveCooldown: 0.1
+  maxDashDistance: 6
   dashChargeRate: 2
+  dashCoolDown: 0.5
+  dashSpeed: 20
+  numBarrelRollsPerDashTile: 2

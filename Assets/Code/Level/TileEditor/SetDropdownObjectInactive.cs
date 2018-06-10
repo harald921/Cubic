@@ -8,7 +8,7 @@ public class SetDropdownObjectInactive : MonoBehaviour
 
 	void Start()
 	{
-		if(GetComponentInChildren<Text>().text == "empty")
+		if(GetComponentInChildren<Text>().text == "empty" || GetComponentInChildren<Text>().text == "edge")
 		{
 			GetComponent<Toggle>().interactable = false;
 		}

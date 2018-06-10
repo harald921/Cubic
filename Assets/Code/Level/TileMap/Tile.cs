@@ -26,8 +26,20 @@ public class TileModel
     {
         [SerializeField] GameObject _mainGO; public GameObject mainGO => _mainGO; // Main visual representation
     }
-}
 
+	public void MakeEdgeTile()
+	{
+		_typeName = Constants.EDGE_TYPE;
+		_data = new Data();
+		_view = new View();
+
+		_data.walkable = true;
+		_data.health = 0;
+		_data.deadly = true;
+		_data.unBreakable = true;
+
+	}
+}
 
 // Holds the instance data of a Tile, which separates different instances of the same type of tile
 public class Tile
@@ -66,7 +78,7 @@ public class Tile
         static TileMap _tileMap;
         TileMap tileMap => _tileMap ?? (_tileMap = Level.instance.tileMap);
 
-        int _currentHealth = 0;
+        int _currentHealth = 0; public int currentHealth => _currentHealth;
 
         Character _character;
 
@@ -86,7 +98,7 @@ public class Tile
         {
             _currentHealth--;
 
-			_tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", _currentHealth); // cant get my tile model in a batter way right now, this should be fixed
+			tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", _currentHealth); // cant get my tile model in a batter way right now, this should be fixed
 
             if (_currentHealth == 0)
                 tileMap.SetTile(position, new Tile(position, "empty"));
