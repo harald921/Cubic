@@ -98,7 +98,7 @@ public class Tile
         {
             _currentHealth--;
 
-			_tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", _currentHealth); // cant get my tile model in a batter way right now, this should be fixed
+			tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", _currentHealth); // cant get my tile model in a batter way right now, this should be fixed
 
             if (_currentHealth == 0)
                 tileMap.SetTile(position, new Tile(position, "empty"));
