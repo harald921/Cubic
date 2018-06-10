@@ -9,10 +9,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8e6292b2c06870d4495f009f912b9600, type: 3}
-  m_Name: Main Camera Profile
+  m_Name: Graphics_TestScene
   m_EditorClassIdentifier: 
   settings:
   - {fileID: 114588963224638832}
+  - {fileID: 114976794559274190}
 --- !u!114 &114588963224638832
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -30,10 +31,10 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 11.56
+    value: 2.03
   threshold:
     overrideState: 1
-    value: 0.9
+    value: 0.7
   softKnee:
     overrideState: 0
     value: 0.5
@@ -47,8 +48,8 @@ MonoBehaviour:
     overrideState: 0
     value: 0
   color:
-    overrideState: 0
-    value: {r: 1, g: 1, b: 1, a: 1}
+    overrideState: 1
+    value: {r: 0.92530227, g: 0.3254717, b: 1, a: 1}
   fastMode:
     overrideState: 0
     value: 0
@@ -59,3 +60,39 @@ MonoBehaviour:
   dirtIntensity:
     overrideState: 0
     value: 0
+--- !u!114 &114976794559274190
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a34fa72bd4185749832024e9c8010bf, type: 3}
+  m_Name: ScreenSpaceReflections
+  m_EditorClassIdentifier: 
+  active: 1
+  enabled:
+    overrideState: 1
+    value: 1
+  preset:
+    overrideState: 1
+    value: 2
+  maximumIterationCount:
+    overrideState: 0
+    value: 16
+  resolution:
+    overrideState: 0
+    value: 0
+  thickness:
+    overrideState: 0
+    value: 8
+  maximumMarchDistance:
+    overrideState: 0
+    value: 100
+  distanceFade:
+    overrideState: 0
+    value: 0.5
+  vignette:
+    overrideState: 0
+    value: 0.5
