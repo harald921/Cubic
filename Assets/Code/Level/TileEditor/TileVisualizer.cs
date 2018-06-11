@@ -13,6 +13,8 @@ public class TileVisualizer : MonoBehaviour
 	[SerializeField] TileDatabase _tileDatabase;
 	[SerializeField] Material _gridMaterial;
 
+	int _lastX = 5;
+	int _lastY = 5;
 
 	public void Show()
 	{
@@ -122,4 +124,15 @@ public class TileVisualizer : MonoBehaviour
 		grid.transform.SetParent(transform);
 	}
 
+	public void CheckGrid()
+	{
+		if (_sizeX != _lastX)
+			ShowGrid();
+
+		if (_sizeY != _lastY)
+			ShowGrid();
+
+		_lastX = _sizeX;
+		_lastY = _sizeY;
+	}
 }

@@ -21,6 +21,8 @@ public class TileVisualizerEditor : Editor
 
 		if (GUILayout.Button("CLEAR"))
 			TV.Clear();
+
+		TV.CheckGrid();
 	}
 
 }
