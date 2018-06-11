@@ -58,6 +58,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Editor\TileVisualizerEditor.cs" />
     <Compile Include="Assets\Photon Unity Networking\Editor\PhotonNetwork\AccountService.cs" />
     <Compile Include="Assets\Photon Unity Networking\Editor\PhotonNetwork\CullAreaEditor.cs" />
     <Compile Include="Assets\Photon Unity Networking\Editor\PhotonNetwork\PhotonConverter.cs" />
@@ -75,6 +76,9 @@
     <Compile Include="Assets\Photon Unity Networking\Editor\PhotonNetwork\Views\PhotonTransformViewEditor.cs" />
     <Compile Include="Assets\Photon Unity Networking\UtilityScripts\PhotonPlayer\Editor\PlayerRoomIndexingInspector.cs" />
     <Compile Include="Assets\Photon Unity Networking\UtilityScripts\PhotonPlayer\Editor\PunTeamsInspector.cs" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Editor\Trackball.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Editor\ConvertToLog.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Editor\CurveGrid.shader" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>C:/Users/nilss/Desktop/Cubic/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
@@ -320,9 +324,6 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:/Users/nilss/Desktop/Cubic/Assets/Photon Unity Networking/Editor/PhotonNetwork/Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>C:/Repositories/Cubic/Assets/Photon Unity Networking/Editor/PhotonNetwork/Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Photon3Unity3D">
       <HintPath>C:/Users/nilss/Desktop/Cubic/Assets/Plugins/Photon3Unity3D.dll</HintPath>
@@ -702,6 +703,14 @@
     <ProjectReference Include="Assembly-CSharp.csproj">
       <Project>{258E59A3-47CA-8A8E-F9BC-46B654D85703}</Project>
       <Name>Assembly-CSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="com.unity.postprocessing.Editor.csproj">
+      <Project>{1ADCAE97-A701-9219-109B-49F4B0DD078D}</Project>
+      <Name>com.unity.postprocessing.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="com.unity.postprocessing.Runtime.csproj">
+      <Project>{3DFC4B22-3461-BDC5-52C8-B026474C4B1A}</Project>
+      <Name>com.unity.postprocessing.Runtime</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

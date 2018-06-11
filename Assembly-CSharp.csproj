@@ -68,6 +68,7 @@
     <Compile Include="Assets\Code\Level\TileEditor\MessagePromt.cs" />
     <Compile Include="Assets\Code\Level\TileEditor\SetDropdownObjectInactive.cs" />
     <Compile Include="Assets\Code\Level\TileEditor\TileEditor.cs" />
+    <Compile Include="Assets\Code\Level\TileEditor\TileVisualizer.cs" />
     <Compile Include="Assets\Code\Level\TileMap\Tile.cs" />
     <Compile Include="Assets\Code\Level\TileMap\TileMap.cs" />
     <Compile Include="Assets\Code\Misc\Constants.cs" />
@@ -133,12 +134,72 @@
     <Compile Include="Assets\Photon Unity Networking\UtilityScripts\UI\TextButtonTransition.cs" />
     <Compile Include="Assets\Photon Unity Networking\UtilityScripts\UI\TextToggleIsOnTransition.cs" />
     <Compile Include="Assets\Third Party Plugins\More Efficient Coroutines\Timing.cs" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\FinalPass.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Debug\Waveform.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Uber.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Texture3DLerp.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\CopyStd.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Bloom.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\xRLib.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\Switch.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\MultiScaleVOUpsample.compute" />
     <None Include="Assets\Photon Unity Networking\link.xml" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\PSSL.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Debug\Vectorscope.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\GaussianDownsample.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\ScreenSpaceReflections.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\DepthOfField.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\DiscardAlpha.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Lut3DBaker.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Dithering.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Colors.hlsl" />
     <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Wireframe Functions.cginc" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\Vulkan.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\GrainBaker.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\ExposureHistogram.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Debug\LightMeter.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\D3D12.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\OpenGL.hlsl" />
     <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Wireframe.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\DiskKernels.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\MultiScaleVODownsample2.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\ScalableAO.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\ACES.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\MultiScaleVODownsample1.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\StdLib.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\MultiScaleVO.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\DepthOfField.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\FastApproximateAntialiasing.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Fog.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\MultiScaleVORender.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\ScalableAO.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\SubpixelMorphologicalAntialiasing.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\MotionBlur.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\SubpixelMorphologicalAntialiasing.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Texture2DLerp.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\DeferredFog.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\D3D9.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Lut2DBaker.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\AutoExposure.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Debug\Overlays.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\Metal.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Distortion.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Debug\Vectorscope.compute" />
     <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Cutout Wireframe.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\TemporalAntialiasing.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\SubpixelMorphologicalAntialiasingBridge.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\ScreenSpaceReflections.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\Copy.shader" />
     <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Double-Sided Wireframe.shader" />
     <None Include="Assets\Third Party Plugins\UCLAGameLab\Wireframe\Shaders\UCLA GameLab Double-Sided Cutout Wireframe.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\D3D11.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Debug\Waveform.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\XboxOne.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Sampling.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\API\PSP2.hlsl" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Debug\Histogram.compute" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Debug\Histogram.shader" />
+    <None Include="Assets\Third Party Plugins\PostProcessing-2\PostProcessing\Shaders\Builtins\ExposureHistogram.compute" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>C:/Users/nilss/Desktop/Cubic/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
@@ -699,6 +760,14 @@
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
       <Project>{A34F3C7F-22F1-2C56-A929-F1F09BF96C3E}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
+    </ProjectReference>
+    <ProjectReference Include="com.unity.postprocessing.Editor.csproj">
+      <Project>{1ADCAE97-A701-9219-109B-49F4B0DD078D}</Project>
+      <Name>com.unity.postprocessing.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="com.unity.postprocessing.Runtime.csproj">
+      <Project>{3DFC4B22-3461-BDC5-52C8-B026474C4B1A}</Project>
+      <Name>com.unity.postprocessing.Runtime</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
