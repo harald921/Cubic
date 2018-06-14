@@ -18,7 +18,7 @@ public class TileModel
         public bool walkable;    // Can a player ever enter this tile?
         public int  health;      // How many times can a player step on this tile?
         public bool deadly;      // Will a player die if it steps on this tile?
-        public bool unBreakable; // tile cant break 
+        public bool unbreakable; // tile cant break 
     }
 
     [System.Serializable]
@@ -36,7 +36,7 @@ public class TileModel
 		_data.walkable = true;
 		_data.health = 0;
 		_data.deadly = true;
-		_data.unBreakable = true;
+		_data.unbreakable = true;
 
 	}
 }

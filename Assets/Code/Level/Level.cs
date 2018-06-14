@@ -23,7 +23,7 @@ public class Level : MonoBehaviour
     void Update()
     {
 		if (Input.GetKey(KeyCode.Space))
-			debugPlayer.InitiateDash();
+			debugPlayer.TryCharge();
 
 		if (Input.GetKey(KeyCode.W))
             debugPlayer.Move(Vector2DInt.Up);

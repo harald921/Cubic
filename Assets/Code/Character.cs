@@ -16,25 +16,24 @@ public enum PLAYER_STATE
 
 public class Character 
 {
-    Tile _currentTile; public Tile currentTile => _currentTile;
-	TileMap _tileMap;
+    public Tile         currentTile        { get; private set; }
+    public PLAYER_STATE currentState       { get; private set; } = PLAYER_STATE.IDLE;
+    public int          currentDashCharges { get; private set; } 
 
-	PLAYER_STATE _CURRENT_STATE = PLAYER_STATE.IDLE; public PLAYER_STATE currentState => _CURRENT_STATE;
-	int _currentDashCharges = 2; public int currentDashCharges => _currentDashCharges;
+    CharacterModel _model;
+    GameObject     _view;
 
-    GameObject _view;
-
-	CharacterModel _model;
+    TileMap _tileMap;
 
     CoroutineHandle _moveHandle;
-	CoroutineHandle _dashHandle;
+	CoroutineHandle _chargeHandle;
 
 	Vector3 _lastMoveDirection = Vector3.forward;
 
 
     public Character(Tile inSpawnTile, CharacterModel inModel, TileMap inTileMap)
     {
-        _currentTile = inSpawnTile;
+        currentTile = inSpawnTile;
 
 		_tileMap = inTileMap;
 
@@ -42,22 +41,18 @@ public class Character
 
 		_model = inModel;
 
-        _view.transform.position = new Vector3(_currentTile.data.position.x, 1, _currentTile.data.position.y);
+        _view.transform.position = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
 
-#if DEBUG_TOOLS
-
-		PlayerPage.instance.player = this;
-
-#endif
+        GameObject.FindObjectOfType<PlayerPage>().Initialize(this);
 	}
 
 
     public void Move(Vector2DInt inDirection)
     {
-		if (_CURRENT_STATE != PLAYER_STATE.IDLE)
+		if (currentState != PLAYER_STATE.IDLE)
 			return;
 
-        Tile targetTile = _currentTile.data.GetRelativeTile(inDirection);
+        Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
 
         if (!targetTile.model.data.walkable)
             return;
@@ -65,38 +60,65 @@ public class Character
         _moveHandle = Timing.RunCoroutineSingleton(_Move(targetTile), _moveHandle, SingletonBehavior.Abort);
     }
 
-	public void InitiateDash()
+	public void TryCharge()
 	{
-		if (_CURRENT_STATE != PLAYER_STATE.IDLE)
+		if (currentState != PLAYER_STATE.IDLE)
 			return;
 
-		_dashHandle = Timing.RunCoroutineSingleton(_dash(), _dashHandle, SingletonBehavior.Abort);
+		_chargeHandle = Timing.RunCoroutineSingleton(_Charge(), _chargeHandle, SingletonBehavior.Abort);
 	}
+
 
     public IEnumerator<float> _Move(Tile inTargetTile)
     {
-		_CURRENT_STATE = PLAYER_STATE.MOVING;
+        currentState = PLAYER_STATE.MOVING;
 
-		if(!_currentTile.model.data.unBreakable)
-		    _currentTile.data.DamageTile();
+        if (!currentTile.model.data.unbreakable)
+            currentTile.data.DamageTile();
 
-		Vector3 fromPosition   = new Vector3(_currentTile.data.position.x, 1, _currentTile.data.position.y);
+        yield return Timing.WaitUntilDone(_WalkInterpolate(inTargetTile));
+
+        // Kill player if it stands on an edge tile
+        if (currentTile.model.typeName == Constants.EDGE_TYPE) // TODO: It's probably unnecessary to have both an edge tile and an empty tile since they are the same
+        {
+            Debug.Log("Character dead!");
+            currentState = PLAYER_STATE.DEAD;
+            yield break;
+        }
+
+        currentState = PLAYER_STATE.IDLE;
+
+        // Cooldown before next available move
+        float cooldown = _model.moveCooldown;
+        while (cooldown > 0)
+        {
+            cooldown -= Time.deltaTime;
+            yield return Timing.WaitForOneFrame;
+        }
+    }
+
+    public IEnumerator<float> _WalkInterpolate(Tile inTargetTile)
+    {
+        // Calculate lerp positions
+        Vector3 fromPosition   = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
         Vector3 targetPosition = new Vector3(inTargetTile.data.position.x, 1, inTargetTile.data.position.y);
 
+        // Calculate lerp rotations
         Vector3 movementDirection = (targetPosition - fromPosition).normalized;
         Vector3 movementDirectionRight = new Vector3(movementDirection.z, movementDirection.y, -movementDirection.x);
 
-        Quaternion fromRotation   = _view.transform.rotation;
+        Quaternion fromRotation = _view.transform.rotation;
         Quaternion targetRotation = Quaternion.Euler(movementDirectionRight * 90) * _view.transform.rotation;
 
-		_lastMoveDirection = movementDirection; // save last movedirection if we would do dash and not give any direction during chargeup
+        // Save last move direction if we would do dash and not give any direction during chargeup
+        _lastMoveDirection = movementDirection;
 
         float movementProgress = 0;
-		bool tileRefSet = false;
+        bool tileRefSet = false;
         while (movementProgress < 1)
         {
             movementProgress += _model.moveSpeed * Time.deltaTime;
-			movementProgress = Mathf.Clamp01(movementProgress);
+            movementProgress = Mathf.Clamp01(movementProgress);
 
             _view.transform.position = Vector3.Lerp(fromPosition, targetPosition, movementProgress);
             _view.transform.position = new Vector3(_view.transform.position.x, 1 + Mathf.Sin(movementProgress * (float)Math.PI), _view.transform.position.z);
@@ -106,147 +128,139 @@ public class Character
             if (movementProgress > 0.5f && !tileRefSet)
             {
                 // Set player tile references
-                Tile previousTile = _currentTile;
-                _currentTile = inTargetTile;
+                Tile previousTile = currentTile;
+                currentTile = inTargetTile;
 
                 // Update tile player references
                 previousTile.data.RemovePlayer();
                 inTargetTile.data.SetPlayer(this);
 
-				tileRefSet = true;
+                tileRefSet = true;
             }
 
             yield return Timing.WaitForOneFrame;
         }
+    }
 
-		// here we need a way to check if tile is a edge tile and die
-		if (_currentTile.model.typeName == Constants.EDGE_TYPE)
-		{
-			// killMeHere();
-			_CURRENT_STATE = PLAYER_STATE.DEAD;
-			yield break;
-		}
 
-		_CURRENT_STATE = PLAYER_STATE.IDLE;
+    public IEnumerator<float> _Charge()
+    {
+        Debug.Log("Begin charge");
+        currentState = PLAYER_STATE.CHARGING;
 
-		// cooldown before next available move
-		float cooldown = _model.moveCooldown;
-		while (cooldown > 0)
-		{
-			cooldown -= Time.deltaTime;
-			yield return Timing.WaitForOneFrame;
-		}
-	}
+        // Set next tile to direction of last movement
+        Vector2DInt dashDirection = new Vector2DInt((int)_lastMoveDirection.x, (int)_lastMoveDirection.z);
 
-	public IEnumerator<float> _dash()
+        // Charge dash while holding button
+        float chargeAmount = 2; // TODO: Expose "min dash distance" variable
+        while (Input.GetKey(KeyCode.Space))
+        {
+            // Add dashes to count
+            chargeAmount = Mathf.Clamp(chargeAmount += _model.dashChargeRate * Time.deltaTime, 2, _model.maxDashDistance);
+
+            // while charging direction can be changed
+            if (Input.GetKey(KeyCode.W))
+                dashDirection = Vector2DInt.Up;
+            if (Input.GetKey(KeyCode.S))
+                dashDirection = Vector2DInt.Down;
+            if (Input.GetKey(KeyCode.A))
+                dashDirection = Vector2DInt.Left;
+            if (Input.GetKey(KeyCode.D))
+                dashDirection = Vector2DInt.Right;
+
+            currentDashCharges = (int)chargeAmount;
+
+            yield return Timing.WaitForOneFrame;
+        }
+
+        Timing.RunCoroutine(_Dash((int)chargeAmount, dashDirection));
+    }
+
+	public IEnumerator<float> _Dash(int inDashStrength, Vector2DInt inDirection)
 	{
-		_CURRENT_STATE = PLAYER_STATE.CHARGING;
+		currentState = PLAYER_STATE.DASHING;
 
-		float charger = 0;
-		_currentDashCharges = 2; // do a minumum of 2 tiles if quickdashing??
-
-		// set next tile to direction of last movement
-		Vector2DInt tileDirection = new Vector2DInt((int)_lastMoveDirection.x, (int)_lastMoveDirection.z);
-
-		// charge while holding button
-		while (Input.GetKey(KeyCode.Space))
+        // Move over all dashtiles
+        for (int i = 0; i < inDashStrength; i++)
 		{
-			// add dashes to count
-			charger += Time.deltaTime;
-			if(charger >= 1 / _model.dashChargeRate)
-			{
-				_currentDashCharges = Mathf.Clamp(_currentDashCharges + 1, 2, _model.maxDashDistance);
-				charger = 0.0f;
-			}
+			if (!currentTile.model.data.unbreakable) 
+				currentTile.data.DamageTile();
 
-			// while charging direction can be changed
-			if (Input.GetKey(KeyCode.W))
-				tileDirection = Vector2DInt.Up;
-			if (Input.GetKey(KeyCode.S))
-				tileDirection = Vector2DInt.Down;
-			if (Input.GetKey(KeyCode.A))
-				tileDirection = Vector2DInt.Left;
-			if (Input.GetKey(KeyCode.D))
-				tileDirection = Vector2DInt.Right;
+            Tile targetTile = _tileMap.GetTile(currentTile.data.position + inDirection);
 
-			yield return Timing.WaitForOneFrame;
-		}
 
-		_CURRENT_STATE = PLAYER_STATE.DASHING;
+            yield return Timing.WaitUntilDone(_DashInterpolate(targetTile));
 
-		// loop over all dashtiles
-		for(int i =0; i < _currentDashCharges; i++)
-		{
-			if (!_currentTile.model.data.unBreakable) // hurt tile on leaving
-				_currentTile.data.DamageTile();
-
-			Vector3 fromPosition = new Vector3(_currentTile.data.position.x, 1, _currentTile.data.position.y);
-			Vector3 targetPosition = new Vector3(fromPosition.x + tileDirection.x, 1, fromPosition.z + tileDirection.y);
-
-			Quaternion fromRotation = _view.transform.rotation;
-			Quaternion targetRotation = Quaternion.Euler(new Vector3(tileDirection.x, 0, tileDirection.y) * (90 * _model.numBarrelRollsPerDashTile)) * _view.transform.rotation;
-
-			float movementProgress = 0;
-			bool tileRefSet = false;
-			while (movementProgress < 1)
-			{
-				movementProgress += _model.dashSpeed * Time.deltaTime;
-				movementProgress = Mathf.Clamp01(movementProgress);
-
-				_view.transform.position = Vector3.Lerp(fromPosition, targetPosition, movementProgress);
-				_view.transform.rotation = Quaternion.Lerp(fromRotation, targetRotation, movementProgress);
-
-				if (movementProgress > 0.5f && !tileRefSet)
-				{
-					// Set player tile references
-					Tile previousTile = _currentTile;
-					_currentTile = _tileMap.GetTile(new Vector2DInt((int)targetPosition.x, (int)targetPosition.z));
-
-					// Update tile player references
-					previousTile.data.RemovePlayer();
-					_currentTile.data.SetPlayer(this);
-
-					tileRefSet = true;
-				}
-
-				yield return Timing.WaitForOneFrame;
-			}
-
-			// here we die if we are in last dash and tile is deadly
-			if (i +1 == _currentDashCharges && _currentTile.model.data.deadly)
+			// Kill player if it dashed into the edge
+			if (currentTile.model.typeName == Constants.EDGE_TYPE)
 			{
 				// killMeHere();
-				_CURRENT_STATE = PLAYER_STATE.DEAD;
-				yield break;
-			}
-
-			// here we need a way to check if tile is a edge tile, then abort more dashes and die
-			if (_currentTile.model.typeName == Constants.EDGE_TYPE)
-			{
-				// killMeHere();
-				_CURRENT_STATE = PLAYER_STATE.DEAD;
+				currentState = PLAYER_STATE.DEAD;
 				yield break;
 			}
 		}
 
-		_currentDashCharges = 2;
+        if (currentTile.model.data.deadly)
+        {
+            Debug.Log("Character died!");
+            currentState = PLAYER_STATE.DEAD;
+            yield break;
+        }
 
-		// cooldown before naxt available dash
-		float cooldown = _model.dashCoolDown;
+        // ?? Unsure of what does. Is it okay to remove this?
+        /*
+        float cooldown = _model.dashCooldownTime;
 		while (cooldown > 0)
 		{
 			cooldown -= Time.deltaTime;
 
-			// do the walk cooldown before we can control the player again
-			if(cooldown <= (_model.dashCoolDown - _model.moveCooldown))
-				_CURRENT_STATE = PLAYER_STATE.IDLE;
+			// Do the walk cooldown before we can control the player again
+			if (cooldown <= (_model.dashCooldownTime - _model.moveCooldown))
+                currentState = PLAYER_STATE.IDLE;
 
 			yield return Timing.WaitForOneFrame;
 		}
+        */
 
-		
+        // Cooldown before next available dash
+        yield return Timing.WaitForSeconds(_model.dashCooldownTime);
+        currentState = PLAYER_STATE.IDLE;
+    }
 
-	}
+    public IEnumerator<float> _DashInterpolate(Tile inTargetTile)
+    {
+        Vector3 fromPosition   = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
+        Vector3 targetPosition = new Vector3(inTargetTile.data.position.x, 1, inTargetTile.data.position.y);
 
+        Vector3 moveDirection = (targetPosition - fromPosition).normalized;
 
+        Quaternion fromRotation = _view.transform.rotation;
+        Quaternion targetRotation = Quaternion.Euler(moveDirection * (90 * _model.numBarrelRollsPerDashTile)) * _view.transform.rotation;
+
+        float movementProgress = 0; 
+        bool tileRefSet = false;
+        while (movementProgress < 1)
+        {
+            movementProgress += _model.dashSpeed * Time.deltaTime;
+            movementProgress = Mathf.Clamp01(movementProgress);
+
+            _view.transform.position = Vector3.Lerp(fromPosition, targetPosition, movementProgress);
+            _view.transform.rotation = Quaternion.Lerp(fromRotation, targetRotation, movementProgress);
+
+            if (movementProgress > 0.5f && !tileRefSet)
+            {
+                // Set player tile references
+                Tile previousTile = currentTile;
+                currentTile = _tileMap.GetTile(new Vector2DInt((int)targetPosition.x, (int)targetPosition.z));
+
+                // Update tile player references
+                previousTile.data.RemovePlayer();
+                currentTile.data.SetPlayer(this);
+
+                tileRefSet = true;
+            }
+
+            yield return Timing.WaitForOneFrame;
+        }
+    }
 }

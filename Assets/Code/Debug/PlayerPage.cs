@@ -5,51 +5,47 @@ using UnityEngine;
 #if DEBUG_TOOLS
 public class PlayerPage : MonoBehaviour
 {
-	static PlayerPage _instance; public static PlayerPage instance { get { return _instance; } }
+    Character _targetCharacter;
 
-	Character _player; public Character player { set { _player = value; } }
-
-	void Awake()
-	{
-		_instance = this;	
-	}
+    public void Initialize(Character inCharacter) =>
+        _targetCharacter = inCharacter;
 
 	void OnGUI()
-	{		
-		GUILayout.Window(99, new Rect(0, 0, 300, 200), DrawStats, "Debug");
+	{
+        if (_targetCharacter == null)
+            return;
+
+        GUILayout.Window(99, new Rect(0, 0, 300, 200), DrawStats, "Debug");
 	}
 
 	void DrawStats(int id)
 	{
-		if (_player == null)
-			return;
-
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("PLAYER STATE : {0}", _player.currentState));
+		GUILayout.Label(string.Format("PLAYER STATE : {0}", _targetCharacter.currentState));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("DASH CHARGED TO : {0}", _player.currentDashCharges));
+		GUILayout.Label(string.Format("DASH CHARGED TO : {0}", _targetCharacter.currentDashCharges));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("CURRENT POSITION : X{0} Y{1}", _player.currentTile.data.position.x, _player.currentTile.data.position.y));
+		GUILayout.Label(string.Format("CURRENT POSITION : X{0} Y{1}", _targetCharacter.currentTile.data.position.x, _targetCharacter.currentTile.data.position.y));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("CURRENT TILETYPE : {0}", _player.currentTile.model.typeName.ToUpper()));
+		GUILayout.Label(string.Format("CURRENT TILETYPE : {0}", _targetCharacter.currentTile.model.typeName.ToUpper()));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("TILE HEALTH : {0}", _player.currentTile.data.currentHealth));
+		GUILayout.Label(string.Format("TILE HEALTH : {0}", _targetCharacter.currentTile.data.currentHealth));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("TILE UNBREAKABLE ? : {0}", _player.currentTile.model.data.unBreakable.ToString().ToUpper()));
+		GUILayout.Label(string.Format("TILE UNBREAKABLE ? : {0}", _targetCharacter.currentTile.model.data.unbreakable.ToString().ToUpper()));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("TILE DEADLY ? : {0}", _player.currentTile.model.data.deadly.ToString().ToUpper()));
+		GUILayout.Label(string.Format("TILE DEADLY ? : {0}", _targetCharacter.currentTile.model.data.deadly.ToString().ToUpper()));
 		GUILayout.EndHorizontal();
 	}
 }
