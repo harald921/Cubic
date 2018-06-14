@@ -80,7 +80,7 @@ public class Character
 
         // Kill player if it stands on an edge tile
         if (currentTile.model.typeName == Constants.EDGE_TYPE) // TODO: It's probably unnecessary to have both an edge tile and an empty tile since they are the same
-        {
+        {													   // EDIT: (Johan) dash need to know the difference between edge tiles and empty tiles, empty tiles can be dashed over, edge tiles can not, meaning that player should die directly even if it have more dash charges left if traversing an edgetile
             Debug.Log("Character dead!");
             currentState = PLAYER_STATE.DEAD;
             yield break;
