@@ -28,6 +28,9 @@ public class Character
     CoroutineHandle _moveHandle;
 	CoroutineHandle _chargeHandle;
 
+	CoroutineHandle _moveCooldownHandle;
+	CoroutineHandle _chargeCooldownHandle;
+
 	Vector3 _lastMoveDirection = Vector3.forward;
 
 
@@ -49,7 +52,7 @@ public class Character
 
     public void Move(Vector2DInt inDirection)
     {
-		if (currentState != PLAYER_STATE.IDLE)
+		if (currentState != PLAYER_STATE.IDLE || _moveCooldownHandle.IsRunning)
 			return;
 
         Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
@@ -62,7 +65,7 @@ public class Character
 
 	public void TryCharge()
 	{
-		if (currentState != PLAYER_STATE.IDLE)
+		if (currentState != PLAYER_STATE.IDLE || _chargeCooldownHandle.IsRunning)
 			return;
 
 		_chargeHandle = Timing.RunCoroutineSingleton(_Charge(), _chargeHandle, SingletonBehavior.Abort);
@@ -80,7 +83,7 @@ public class Character
 
         // Kill player if it stands on an edge tile
         if (currentTile.model.typeName == Constants.EDGE_TYPE) // TODO: It's probably unnecessary to have both an edge tile and an empty tile since they are the same
-        {
+        {													   // EDIT: (Johan) dash need to know the difference between edge tiles and empty tiles, empty tiles can be dashed over, edge tiles can not, meaning that player should die directly even if it have more dash charges left if traversing an edgetile
             Debug.Log("Character dead!");
             currentState = PLAYER_STATE.DEAD;
             yield break;
@@ -88,14 +91,8 @@ public class Character
 
         currentState = PLAYER_STATE.IDLE;
 
-        // Cooldown before next available move
-        float cooldown = _model.moveCooldown;
-        while (cooldown > 0)
-        {
-            cooldown -= Time.deltaTime;
-            yield return Timing.WaitForOneFrame;
-        }
-    }
+		_moveCooldownHandle = Timing.RunCoroutineSingleton(_moveCooldown(), _moveCooldownHandle, SingletonBehavior.Abort);
+	}
 
     public IEnumerator<float> _WalkInterpolate(Tile inTargetTile)
     {
@@ -206,26 +203,13 @@ public class Character
             currentState = PLAYER_STATE.DEAD;
             yield break;
         }
-
-        // ?? Unsure of what does. Is it okay to remove this?
-        /*
-        float cooldown = _model.dashCooldownTime;
-		while (cooldown > 0)
-		{
-			cooldown -= Time.deltaTime;
-
-			// Do the walk cooldown before we can control the player again
-			if (cooldown <= (_model.dashCooldownTime - _model.moveCooldown))
-                currentState = PLAYER_STATE.IDLE;
-
-			yield return Timing.WaitForOneFrame;
-		}
-        */
-
-        // Cooldown before next available dash
-        yield return Timing.WaitForSeconds(_model.dashCooldownTime);
+				
         currentState = PLAYER_STATE.IDLE;
-    }
+
+		_moveCooldownHandle   = Timing.RunCoroutineSingleton(_moveCooldown(), _moveCooldownHandle, SingletonBehavior.Abort);
+		_chargeCooldownHandle = Timing.RunCoroutineSingleton(_chargeCooldown(), _chargeCooldownHandle, SingletonBehavior.Abort);
+
+	}
 
     public IEnumerator<float> _DashInterpolate(Tile inTargetTile)
     {
@@ -263,4 +247,14 @@ public class Character
             yield return Timing.WaitForOneFrame;
         }
     }
+
+	IEnumerator<float> _moveCooldown()
+	{
+		yield return Timing.WaitForSeconds(_model.moveCooldown);
+	}
+
+	IEnumerator<float> _chargeCooldown()
+	{
+		yield return Timing.WaitForSeconds(_model.dashCooldownTime);
+	}
 }
