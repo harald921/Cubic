@@ -59,6 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Code\Character.cs" />
+    <Compile Include="Assets\Code\Character\CharacterFlagComponent.cs" />
+    <Compile Include="Assets\Code\Character\CharacterMovementComponent.cs" />
+    <Compile Include="Assets\Code\Character\NewCharacter.cs" />
     <Compile Include="Assets\Code\CharacterCommander.cs" />
     <Compile Include="Assets\Code\Data Types\Vector2DInt.cs" />
     <Compile Include="Assets\Code\Debug\PlayerPage.cs" />
