@@ -24,6 +24,8 @@ public class NewCharacter : MonoBehaviour
     {
         model = inModel;
 
+        FindObjectOfType<PlayerPage>().Initialize(this);
+
         movementComponent = GetComponent<CharacterMovementComponent>();
         flagComponent     = GetComponent<CharacterFlagComponent>();
         stateComponent    = GetComponent<CharacterStateComponent>();
