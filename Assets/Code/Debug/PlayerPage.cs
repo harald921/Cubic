@@ -5,9 +5,9 @@ using UnityEngine;
 #if DEBUG_TOOLS
 public class PlayerPage : MonoBehaviour
 {
-    NewCharacter _targetCharacter;
+    Character _targetCharacter;
 
-    public void Initialize(NewCharacter inCharacter) =>
+    public void Initialize(Character inCharacter) =>
         _targetCharacter = inCharacter;
 
 	void OnGUI()

@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterMovementComponent))]
 [RequireComponent(typeof(CharacterFlagComponent))]
 [RequireComponent(typeof(CharacterStateComponent))]
-public class NewCharacter : MonoBehaviour
+public class Character : MonoBehaviour
 {
     // Will be renamed to "Character" when it's fully transfered
 
@@ -24,7 +24,6 @@ public class NewCharacter : MonoBehaviour
     {
         model = inModel;
 
-        FindObjectOfType<PlayerPage>().Initialize(this);
 
         movementComponent = GetComponent<CharacterMovementComponent>();
         flagComponent     = GetComponent<CharacterFlagComponent>();
@@ -37,7 +36,11 @@ public class NewCharacter : MonoBehaviour
         // Setup the correct view, probably in a view component
         view = GameObject.CreatePrimitive(PrimitiveType.Cube);
         view.transform.SetParent(transform, false);
-    }
+
+#if DEBUG_TOOLS
+		FindObjectOfType<PlayerPage>().Initialize(this);
+#endif
+	}
 
     public void Spawn(Tile inSpawnTile)
     {

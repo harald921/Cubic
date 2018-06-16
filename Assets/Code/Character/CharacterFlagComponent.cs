@@ -5,7 +5,7 @@ using MEC;
 
 public class CharacterFlagComponent : MonoBehaviour
 {
-    NewCharacter _character;
+    Character _character;
 
     Dictionary<CharacterFlag, bool> _flags = new Dictionary<CharacterFlag, bool>(); // Can be replaced with bit enum when I am not lazy
     Dictionary<CharacterFlag, CoroutineHandle> _durationHandles = new Dictionary<CharacterFlag, CoroutineHandle>();
@@ -13,7 +13,7 @@ public class CharacterFlagComponent : MonoBehaviour
 
     public void ManualAwake()
     {
-        _character = GetComponent<NewCharacter>();
+        _character = GetComponent<Character>();
 
         foreach (CharacterFlag stateValue in System.Enum.GetValues(typeof(CharacterFlag)))
         {

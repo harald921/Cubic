@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class CharacterStateComponent : MonoBehaviour
 {
-    NewCharacter _character;
+    Character _character;
 
     public CharacterState currentState { get; private set; } = CharacterState.Idle;
 
     public void ManualAwake()
     {
-        _character = GetComponent<NewCharacter>();
+        _character = GetComponent<Character>();
     }
 
 

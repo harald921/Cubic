@@ -9,7 +9,7 @@ public class CharacterMovementComponent : MonoBehaviour
     public Tile currentTile        {get; private set;}
     public int  currentDashCharges {get; private set;}
 
-    NewCharacter _character;
+    Character _character;
     CharacterModel _model;
 
     CharacterStateComponent _stateComponent;
@@ -20,7 +20,7 @@ public class CharacterMovementComponent : MonoBehaviour
 
     public void ManualAwake()
     {
-        _character      = GetComponent<NewCharacter>();
+        _character      = GetComponent<Character>();
         _model = _character.model;
 
         _stateComponent = _character.stateComponent;

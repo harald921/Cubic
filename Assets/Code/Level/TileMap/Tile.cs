@@ -80,7 +80,7 @@ public class Tile
 
         public int currentHealth { get; private set; } = 0;
 
-        NewCharacter _character;
+        Character _character;
 
         public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
         {
@@ -88,7 +88,7 @@ public class Tile
             currentHealth = inDataModel.health;
         }
 
-        public void SetCharacter(NewCharacter inCharacter) =>
+        public void SetCharacter(Character inCharacter) =>
             _character = inCharacter;
 
         public void RemovePlayer() =>

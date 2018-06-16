@@ -10,14 +10,14 @@ public class Level : MonoBehaviour
 
 
     [SerializeField] GameObject _characterPrefab; // The character gameobject that Photon automagically creates 
-    NewCharacter _character;
+    Character _character;
 
     void Start()
     {
         instance = this;
 
         GameObject spawnedCharacterGO = Instantiate(_characterPrefab);
-        _character = spawnedCharacterGO.GetComponent<NewCharacter>();
+        _character = spawnedCharacterGO.GetComponent<Character>();
 
         _character.Initialize(CharacterDatabase.instance.standardModel, "ExampleCharacterView");
         tileMap = new TileMap("SavedFromInputField");
