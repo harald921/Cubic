@@ -47,4 +47,19 @@ public class Character : MonoBehaviour
         transform.position = new Vector3(inSpawnTile.data.position.x, 1, inSpawnTile.data.position.y);
         OnCharacterSpawned?.Invoke(inSpawnTile);
     }
+
+	void Update()
+	{
+		if (Input.GetKey(KeyCode.Space))
+			movementComponent.TryCharge();
+
+		if (Input.GetKey(KeyCode.W))
+			movementComponent.TryWalk(Vector2DInt.Up);
+		if (Input.GetKey(KeyCode.S))
+			movementComponent.TryWalk(Vector2DInt.Down);
+		if (Input.GetKey(KeyCode.A))
+			movementComponent.TryWalk(Vector2DInt.Left);
+		if (Input.GetKey(KeyCode.D))
+			movementComponent.TryWalk(Vector2DInt.Right);
+	}
 }

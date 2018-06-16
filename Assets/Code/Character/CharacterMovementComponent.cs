@@ -49,8 +49,7 @@ public class CharacterMovementComponent : MonoBehaviour
         yield return Timing.WaitUntilDone(_WalkInterpolation(inDirection));
 
         if (currentTile.model.typeName == Constants.EDGE_TYPE || currentTile.model.data.deadly)
-        {
-            Debug.Log("Character dead!");
+        {           
             _stateComponent.SetState(CharacterState.Dead);
             yield break;
         }
