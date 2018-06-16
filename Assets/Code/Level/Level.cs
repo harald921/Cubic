@@ -8,31 +8,35 @@ public class Level : MonoBehaviour
 
     public TileMap tileMap { get; private set; }
 
-    Character debugPlayer;
 
+    [SerializeField] GameObject _characterPrefab; // The character gameobject that Photon automagically creates 
+    NewCharacter _character;
 
     void Start()
     {
         instance = this;
 
+        GameObject spawnedCharacterGO = Instantiate(_characterPrefab);
+        _character = spawnedCharacterGO.GetComponent<NewCharacter>();
+
+        _character.Initialize(CharacterDatabase.instance.standardModel, "ExampleCharacterView");
         tileMap = new TileMap("SavedFromInputField");
 
-        debugPlayer = new Character(tileMap.GetTile(Vector2DInt.One), CharacterDatabase.instance.standardModel, tileMap);
+        _character.Spawn(tileMap.GetTile(Vector2DInt.One));
     }
 
     void Update()
     {
 		if (Input.GetKey(KeyCode.Space))
-			debugPlayer.TryCharge();
+            _character.movementComponent.TryCharge();
 
 		if (Input.GetKey(KeyCode.W))
-            debugPlayer.Move(Vector2DInt.Up);
+            _character.movementComponent.TryWalk(Vector2DInt.Up);
         if (Input.GetKey(KeyCode.S))
-            debugPlayer.Move(Vector2DInt.Down);
+            _character.movementComponent.TryWalk(Vector2DInt.Down);
         if (Input.GetKey(KeyCode.A))
-            debugPlayer.Move(Vector2DInt.Left);
+            _character.movementComponent.TryWalk(Vector2DInt.Left);
         if (Input.GetKey(KeyCode.D))
-            debugPlayer.Move(Vector2DInt.Right);		
+            _character.movementComponent.TryWalk(Vector2DInt.Right);		
     }
-
 }

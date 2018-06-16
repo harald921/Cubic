@@ -78,17 +78,17 @@ public class Tile
         static TileMap _tileMap;
         TileMap tileMap => _tileMap ?? (_tileMap = Level.instance.tileMap);
 
-        int _currentHealth = 0; public int currentHealth => _currentHealth;
+        public int currentHealth { get; private set; } = 0;
 
-        Character _character;
+        NewCharacter _character;
 
         public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
         {
             position = inPosition;
-            _currentHealth = inDataModel.health;
+            currentHealth = inDataModel.health;
         }
 
-        public void SetPlayer(Character inCharacter) =>
+        public void SetCharacter(NewCharacter inCharacter) =>
             _character = inCharacter;
 
         public void RemovePlayer() =>
@@ -96,11 +96,11 @@ public class Tile
 
         public void DamageTile()
         {
-            _currentHealth--;
+            currentHealth--;
 
-			tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", _currentHealth); // cant get my tile model in a batter way right now, this should be fixed
+			tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", currentHealth); // cant get my tile model in a batter way right now, this should be fixed
 
-            if (_currentHealth == 0)
+            if (currentHealth == 0)
                 tileMap.SetTile(position, new Tile(position, "empty"));
         }
 
@@ -110,17 +110,15 @@ public class Tile
 
     public class View
     {
-        GameObject _mainGO;
-        public GameObject mainGO => _mainGO;
-
+        public readonly GameObject mainGO;
 
         public View(TileModel.View inViewModel, Vector2DInt inPosition)
         {
             if (inViewModel.mainGO == null)
                 return;
 
-            _mainGO = Object.Instantiate(inViewModel.mainGO);
-            _mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
+            mainGO = Object.Instantiate(inViewModel.mainGO);
+            mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
     }
 }
