@@ -48,7 +48,7 @@ public class CharacterMovementComponent : MonoBehaviour
 
         yield return Timing.WaitUntilDone(_WalkInterpolation(inDirection));
 
-        if (currentTile.model.typeName == Constants.EDGE_TYPE)
+        if (currentTile.model.typeName == Constants.EDGE_TYPE || currentTile.model.data.deadly)
         {
             Debug.Log("Character dead!");
             _stateComponent.SetState(CharacterState.Dead);
@@ -150,9 +150,30 @@ public class CharacterMovementComponent : MonoBehaviour
         _stateComponent.SetState(CharacterState.Dashing);
 
         for (int i = 0; i < inDashStrength; i++)
-            yield return Timing.WaitUntilDone(_DashInterpolation(inDirection)); 
+		{
+			// hurt tile if it is destructible
+			if (!currentTile.model.data.unbreakable)
+				currentTile.data.DamageTile();
 
-        _stateComponent.SetState(CharacterState.Idle);
+			// do dash movement for one tile
+			yield return Timing.WaitUntilDone(_DashInterpolation(inDirection));
+
+			// check for edgetile after every tile dashed
+			if (currentTile.model.typeName == Constants.EDGE_TYPE)
+			{
+				_stateComponent.SetState(CharacterState.Dead);
+				yield break;
+			}
+		}
+
+		// check if we ended up on deadly tile
+		if (currentTile.model.data.deadly)
+		{
+			_stateComponent.SetState(CharacterState.Dead);
+			yield break;
+		}
+
+		_stateComponent.SetState(CharacterState.Idle);
         _flagComponent.SetFlag(CharacterFlag.Cooldown_Walk, true, _model.walkCooldown, SingletonBehavior.Overwrite);
         _flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
     }

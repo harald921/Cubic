@@ -36,7 +36,7 @@ public class NewCharacter : MonoBehaviour
 
         // Setup the correct view, probably in a view component
         view = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        view.transform.SetParent(transform);
+        view.transform.SetParent(transform, false);
     }
 
     public void Spawn(Tile inSpawnTile)

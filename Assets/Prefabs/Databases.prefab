@@ -116,7 +116,7 @@ MonoBehaviour:
       walkable: 1
       health: 3
       deadly: 0
-      unBreakable: 0
+      unbreakable: 0
     _view:
       _mainGO: {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a,
         type: 2}
@@ -125,7 +125,7 @@ MonoBehaviour:
       walkable: 1
       health: 3
       deadly: 0
-      unBreakable: 0
+      unbreakable: 0
     _view:
       _mainGO: {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21,
         type: 2}
@@ -134,7 +134,7 @@ MonoBehaviour:
       walkable: 1
       health: 0
       deadly: 0
-      unBreakable: 1
+      unbreakable: 1
     _view:
       _mainGO: {fileID: 1960800530658806, guid: a817afb52fc188d4aa9950402ea509aa,
         type: 2}
@@ -143,7 +143,7 @@ MonoBehaviour:
       walkable: 1
       health: 0
       deadly: 1
-      unBreakable: 1
+      unbreakable: 1
     _view:
       _mainGO: {fileID: 0}
 --- !u!114 &114660886813412552

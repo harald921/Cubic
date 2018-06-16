@@ -11,10 +11,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5090a44b29ed22747ad58bc045c7a3cd, type: 3}
   m_Name: StandardCharacterModel
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  moveCooldown: 0.1
-  maxDashDistance: 6
-  dashChargeRate: 2
-  dashCoolDown: 0.5
+  walkSpeed: 6
+  walkCooldown: 0.15
   dashSpeed: 20
-  numBarrelRollsPerDashTile: 2
+  dashCooldown: 0.5
+  dashMinCharge: 2
+  dashMaxCharge: 4
+  dashChargeRate: 2
+  dashRotationSpeed: 1
