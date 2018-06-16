@@ -6,11 +6,11 @@ public struct Vector2DInt
 {
     public int x, y;
 
-    public static Vector2DInt Zero => new Vector2DInt(0, 0);
-    public static Vector2DInt One => new Vector2DInt(1);
-    public static Vector2DInt Up => new Vector2DInt(0, 1);
-    public static Vector2DInt Down => new Vector2DInt(0, -1);
-    public static Vector2DInt Left => new Vector2DInt(-1, 0);
+    public static Vector2DInt Zero  => new Vector2DInt(0, 0);
+    public static Vector2DInt One   => new Vector2DInt(1);
+    public static Vector2DInt Up    => new Vector2DInt(0, 1);
+    public static Vector2DInt Down  => new Vector2DInt(0, -1);
+    public static Vector2DInt Left  => new Vector2DInt(-1, 0);
     public static Vector2DInt Right => new Vector2DInt(1, 0);
 
 
@@ -55,6 +55,7 @@ public struct Vector2DInt
         y = inReader.ReadInt32();
     }
 
+
     public override string ToString() =>
         "(" + x + ", " + y + ")";
 
@@ -71,6 +72,7 @@ public struct Vector2DInt
         return false;
     }
 
+    #region Operator_Overloads
     public static Vector2DInt operator +(Vector2DInt inVector1, Vector2DInt inVector2) =>
         new Vector2DInt()
         {
@@ -127,4 +129,5 @@ public struct Vector2DInt
     public static bool operator !=(Vector2DInt inVector1, Vector2DInt inVector2) =>
         inVector1.x != inVector2.x ||
         inVector1.y != inVector2.y;
+    #endregion
 }
