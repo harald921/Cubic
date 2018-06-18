@@ -5,7 +5,7 @@ using UnityEngine;
 public class NetworkManager : Photon.MonoBehaviour
 {
     [SerializeField] bool _debugMessages = false;
-
+	
     void Awake()
     {
         PhotonNetwork.sendRate = 64;
@@ -26,12 +26,14 @@ public class NetworkManager : Photon.MonoBehaviour
 
     void OnCreatedRoom()
     {
-        if (_debugMessages) Debug.Log("New room created");
-    }
+        if (_debugMessages) Debug.Log("New room created");		
+	}
 
     void OnJoinedRoom()
     {
         if (_debugMessages) Debug.Log("Connected to room");
+
+		Level.instance.ManualStart();
     }
 
     public static float CalculateNetDelta(double inTimestamp) =>

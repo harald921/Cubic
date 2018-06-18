@@ -168,6 +168,11 @@ Prefab:
       value: 
       objectReference: {fileID: 1300687396863330, guid: c968007a7fbe1f942a234aa54bc2f7e9,
         type: 2}
+    - target: {fileID: 114720730347452064, guid: 76e810a2be3d3644692caefe08e624a3,
+        type: 2}
+      propertyPath: _networkManager
+      value: 
+      objectReference: {fileID: 1161870732}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76e810a2be3d3644692caefe08e624a3, type: 2}
   m_IsPrefabParent: 0
@@ -286,6 +291,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &1161870732 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 114959107458526430, guid: afa4598a9ea7f944594cc5789944b143,
+    type: 2}
+  m_PrefabInternal: {fileID: 1872478508}
+  m_Script: {fileID: 11500000, guid: 9102dc2d374a4c949b49b1f9e1aceef0, type: 3}
 --- !u!1001 &1417201924
 Prefab:
   m_ObjectHideFlags: 0

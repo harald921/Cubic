@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterMovementComponent))]
 [RequireComponent(typeof(CharacterFlagComponent))]
 [RequireComponent(typeof(CharacterStateComponent))]
-public class Character : MonoBehaviour
+public class Character : Photon.MonoBehaviour
 {
     // Will be renamed to "Character" when it's fully transfered
 
@@ -17,39 +17,52 @@ public class Character : MonoBehaviour
     public CharacterFlagComponent     flagComponent     {get; private set;}
     public CharacterStateComponent    stateComponent    {get; private set;}
 
-    public event Action<Tile> OnCharacterSpawned;
+    public event Action<Vector2DInt> OnCharacterSpawned;
 
-
-    public void Initialize(CharacterModel inModel, string inViewName)
+	public void Initialize(string inViewName)
     {
-        model = inModel;
+		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName); // wont need be buffered later when level loading is synced
+	}
 
+	public void Spawn(Vector2DInt inSpawnTile)
+	{
+		photonView.RPC("NetworkSpawn", PhotonTargets.AllBuffered, inSpawnTile.x, inSpawnTile.y); // wont need be buffered later when level loading is synced
+	}
 
-        movementComponent = GetComponent<CharacterMovementComponent>();
-        flagComponent     = GetComponent<CharacterFlagComponent>();
-        stateComponent    = GetComponent<CharacterStateComponent>();
+	[PunRPC]
+	void NetworkInitialize(string inViewNam)
+	{
+		model = CharacterDatabase.instance.standardModel;
+		movementComponent = GetComponent<CharacterMovementComponent>();
+		flagComponent = GetComponent<CharacterFlagComponent>();
+		stateComponent = GetComponent<CharacterStateComponent>();
 
-        movementComponent.ManualAwake();
-        flagComponent.ManualAwake();
-        stateComponent.ManualAwake();
+		movementComponent.ManualAwake();
+		flagComponent.ManualAwake();
+		stateComponent.ManualAwake();
 
-        // Setup the correct view, probably in a view component
-        view = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        view.transform.SetParent(transform, false);
+		// Setup the correct view, probably in a view component
+		view = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		view.transform.SetParent(transform, false);
 
 #if DEBUG_TOOLS
-		FindObjectOfType<PlayerPage>().Initialize(this);
+		if(photonView.isMine)
+			FindObjectOfType<PlayerPage>().Initialize(this);
 #endif
 	}
 
-    public void Spawn(Tile inSpawnTile)
-    {
-        transform.position = new Vector3(inSpawnTile.data.position.x, 1, inSpawnTile.data.position.y);
-        OnCharacterSpawned?.Invoke(inSpawnTile);
-    }
-
+	[PunRPC]
+	void NetworkSpawn(int inSpawnTileX, int inSpawnTileY)
+	{
+		transform.position = new Vector3(inSpawnTileX, 1, inSpawnTileY);
+		OnCharacterSpawned?.Invoke(new Vector2DInt(inSpawnTileX, inSpawnTileY));
+	}
+	
 	void Update()
 	{
+		if (!photonView.isMine)
+			return;
+
 		if (Input.GetKey(KeyCode.Space))
 			movementComponent.TryCharge();
 

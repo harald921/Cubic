@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MEC;
+using Photon;
 
-public class CharacterMovementComponent : MonoBehaviour
+public class CharacterMovementComponent : Photon.MonoBehaviour
 {
     public Tile currentTile        {get; private set;}
     public int  currentDashCharges {get; private set;}
@@ -26,8 +27,8 @@ public class CharacterMovementComponent : MonoBehaviour
         _stateComponent = _character.stateComponent;
         _flagComponent  = _character.flagComponent;
 
-        _character.OnCharacterSpawned += (Tile inSpawnTile) =>
-            currentTile = inSpawnTile;
+        _character.OnCharacterSpawned += (Vector2DInt inSpawnTile) =>
+            currentTile = Level.instance.tileMap.GetTile(inSpawnTile);
     }
 
 
@@ -36,8 +37,14 @@ public class CharacterMovementComponent : MonoBehaviour
         if (_stateComponent.currentState != CharacterState.Idle || _flagComponent.GetFlag(CharacterFlag.Cooldown_Walk))
             return;
 
-        Timing.RunCoroutineSingleton(_Walk(inDirection), gameObject.GetInstanceID() + 0, SingletonBehavior.Abort);
+		photonView.RPC("NetworkWalk", PhotonTargets.All, inDirection.x, inDirection.y);
     }
+
+	[PunRPC]
+	void NetworkWalk(int inDirectionX, int inDirectionY)
+	{
+		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(inDirectionX, inDirectionY)), gameObject.GetInstanceID() + 0, SingletonBehavior.Abort);
+	}
 
     IEnumerator<float> _Walk(Vector2DInt inDirection)
     {
