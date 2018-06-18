@@ -22,7 +22,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
     public void ManualAwake()
     {
         _character      = GetComponent<Character>();
-        _model = _character.model;
+        _model			= _character.model;
 
         _stateComponent = _character.stateComponent;
         _flagComponent  = _character.flagComponent;
@@ -119,14 +119,31 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
         if (_stateComponent.currentState != CharacterState.Idle || _flagComponent.GetFlag(CharacterFlag.Cooldown_Dash))
             return;
 
+		photonView.RPC("NetworkCharge", PhotonTargets.Others); // send to all other then me, we start coroutine instead
+
         Timing.RunCoroutineSingleton(_Charge(), gameObject.GetInstanceID() + 1, SingletonBehavior.Abort);
     }
+
+	[PunRPC]
+	void NetworkCharge()
+	{
+		_stateComponent.SetState(CharacterState.Charging);
+		_character.view.GetComponent<Renderer>().material.color = Color.red; // temp for feedback when charging
+	}
+
+	[PunRPC]
+	void NetworkDash(int inDirectionX, int inDirectionY, int inDashCharges)
+	{
+		Timing.RunCoroutine(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges));
+	}
 
     IEnumerator<float> _Charge()
     {
         _stateComponent.SetState(CharacterState.Charging); // TODO: Make this happen via events instead (I can fix that -Harald)
 
-        float chargeAmount = _model.dashMinCharge;
+		_character.view.GetComponent<Renderer>().material.color = Color.red; // temp for feedback when charging
+
+		float chargeAmount = _model.dashMinCharge;
 
         while (Input.GetKey(KeyCode.Space))
         {
@@ -148,14 +165,16 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
             yield return Timing.WaitForOneFrame;
         }
 
-        Timing.RunCoroutine(_Dash(_lastMoveDirection, (int)chargeAmount));
+		photonView.RPC("NetworkDash", PhotonTargets.All, _lastMoveDirection.x, _lastMoveDirection.y, currentDashCharges);        
     }
 
     public IEnumerator<float> _Dash(Vector2DInt inDirection, int inDashStrength)
     {
         _stateComponent.SetState(CharacterState.Dashing);
 
-        for (int i = 0; i < inDashStrength; i++)
+		_character.view.GetComponent<Renderer>().material.color = Color.white; // temp for feedback when charging
+
+		for (int i = 0; i < inDashStrength; i++)
 		{
 			// hurt tile if it is destructible
 			if (!currentTile.model.data.unbreakable)

@@ -12,6 +12,7 @@ public class Character : Photon.MonoBehaviour
 
     public CharacterModel model {get; private set;}
     public GameObject     view  {get; private set;} 
+	public bool isMasterClient  {get; private set;}
 
     public CharacterMovementComponent movementComponent {get; private set;}
     public CharacterFlagComponent     flagComponent     {get; private set;}
@@ -21,6 +22,7 @@ public class Character : Photon.MonoBehaviour
 
 	public void Initialize(string inViewName)
     {
+		isMasterClient = PhotonNetwork.isMasterClient;
 		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName); // wont need be buffered later when level loading is synced
 	}
 

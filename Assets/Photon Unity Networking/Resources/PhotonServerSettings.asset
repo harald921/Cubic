@@ -39,4 +39,6 @@ MonoBehaviour:
   - NetworkInitialize
   - NetworkSpawn
   - NetworkWalk
+  - NetworkCharge
+  - NetworkDash
   DisableAutoOpenWizard: 1

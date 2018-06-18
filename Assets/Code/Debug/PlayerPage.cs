@@ -15,7 +15,7 @@ public class PlayerPage : MonoBehaviour
         if (_targetCharacter == null)
             return;
 
-        GUILayout.Window(99, new Rect(0, 0, 300, 200), DrawStats, "Debug");
+        GUILayout.Window(99, new Rect(0, 0, 350, 200), DrawStats, "Debug");
 	}
 
 	void DrawStats(int id)
@@ -23,7 +23,7 @@ public class PlayerPage : MonoBehaviour
         Tile currentTile = _targetCharacter.movementComponent.currentTile;
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("PLAYER STATE : {0}", _targetCharacter.stateComponent.currentState));
+		GUILayout.Label(string.Format("PLAYER STATE : {0}", _targetCharacter.stateComponent.currentState.ToString().ToUpper()));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
@@ -48,6 +48,14 @@ public class PlayerPage : MonoBehaviour
 
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(string.Format("TILE DEADLY ? : {0}", currentTile.model.data.deadly.ToString().ToUpper()));
+		GUILayout.EndHorizontal();
+
+		GUILayout.BeginVertical();
+		GUILayout.Space(10);
+		GUILayout.EndVertical();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.Label(string.Format("IS MASTER CLIENT ? : {0}", _targetCharacter.isMasterClient.ToString().ToUpper()));
 		GUILayout.EndHorizontal();
 	}
 }
