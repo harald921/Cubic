@@ -52,14 +52,14 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
         Timing.RunCoroutineSingleton(_Charge(), gameObject.GetInstanceID(), SingletonBehavior.Abort);
     }
 
-	public void OnGettingDashed(Vector2DInt startTile, Vector2DInt direction, int hitPower)
+	public void OnGettingDashed(Vector2DInt startTile, Vector2DInt direction, int hitPower, Vector3 rot)
 	{
-		photonView.RPC("NetworkOnGettingDashed", PhotonTargets.All, startTile.x, startTile.y, direction.x, direction.y, hitPower);
+		photonView.RPC("NetworkOnGettingDashed", PhotonTargets.All, startTile.x, startTile.y, direction.x, direction.y, hitPower, rot.x, rot.y, rot.z);
 	}
 
-	public void OnDashingOther(Vector2DInt lastTile)
+	public void OnDashingOther(Vector2DInt lastTile, Vector3 rot)
 	{
-		photonView.RPC("NetworkOnDashingOther", PhotonTargets.All, lastTile.x, lastTile.y);
+		photonView.RPC("NetworkOnDashingOther", PhotonTargets.All, lastTile.x, lastTile.y, rot.x, rot.y, rot.z);
 	}
 
 	[PunRPC]
@@ -82,20 +82,21 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkOnGettingDashed(int x, int y, int dX, int dY, int numDashtiles)
+	void NetworkOnGettingDashed(int pX, int pY, int dX, int dY, int numDashtiles, float rX, float rY, float rZ)
 	{
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 
 		currentTile.data.RemovePlayer();
-		currentTile = Level.instance.tileMap.GetTile(new Vector2DInt(x, y));
+		currentTile = Level.instance.tileMap.GetTile(new Vector2DInt(pX, pY));
 		currentTile.data.SetCharacter(_character);
-		transform.position = new Vector3(x, 1, y);
+		transform.position = new Vector3(pX, 1, pY);
+		transform.rotation = Quaternion.Euler(new Vector3(rX, rY, rZ));
 
 		Timing.RunCoroutine(_Dash(new Vector2DInt(dX, dY), numDashtiles), gameObject.GetInstanceID());
 	}
 
 	[PunRPC]
-	void NetworkOnDashingOther(int x, int y)
+	void NetworkOnDashingOther(int x, int y, float rX, float rY, float rZ)
 	{
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 
@@ -103,7 +104,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		currentTile = Level.instance.tileMap.GetTile(new Vector2DInt(x, y));
 		currentTile.data.SetCharacter(_character);
 		transform.position = new Vector3(x, 1, y);
-		
+		transform.rotation = Quaternion.Euler(new Vector3(rX, rY, rZ));
+
 		_stateComponent.SetState(CharacterState.Idle);
 		_flagComponent.SetFlag(CharacterFlag.Cooldown_Walk, true, _model.walkCooldown, SingletonBehavior.Overwrite);
 		_flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
@@ -237,9 +239,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				if (targetTile.data.IsOccupied())
 				{
 					Character playerToDash = targetTile.data.GetOccupyingPlayer();
-					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, _lastMoveDirection, inDashStrength - i);
+					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, inDirection, inDashStrength - i, fromRotation.eulerAngles);
 
-					OnDashingOther(currentTile.data.position);
+					OnDashingOther(currentTile.data.position, fromRotation.eulerAngles);
 				}
 			}
 
