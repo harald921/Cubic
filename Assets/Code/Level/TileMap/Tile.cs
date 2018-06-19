@@ -94,6 +94,12 @@ public class Tile
         public void RemovePlayer() =>
             _character = null;
 
+		public bool IsOccupied() =>
+			_character != null;
+
+		public Character GetOccupyingPlayer() =>
+			_character;
+
         public void DamageTile()
         {
             currentHealth--;

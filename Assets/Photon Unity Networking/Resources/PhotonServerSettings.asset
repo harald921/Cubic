@@ -41,4 +41,6 @@ MonoBehaviour:
   - NetworkWalk
   - NetworkCharge
   - NetworkDash
+  - NetworkOnDashingOther
+  - NetworkOnGettingDashed
   DisableAutoOpenWizard: 1
