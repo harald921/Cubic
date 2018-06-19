@@ -62,7 +62,6 @@
     <Compile Include="Assets\Code\Character\CharacterFlagComponent.cs" />
     <Compile Include="Assets\Code\Character\CharacterMovementComponent.cs" />
     <Compile Include="Assets\Code\Character\CharacterStateComponent.cs" />
-    <Compile Include="Assets\Code\CharacterCommander.cs" />
     <Compile Include="Assets\Code\Data Types\Vector2DInt.cs" />
     <Compile Include="Assets\Code\Debug\PlayerPage.cs" />
     <Compile Include="Assets\Code\Free Flight Camera\SimpleCameraController.cs" />
@@ -77,7 +76,6 @@
     <Compile Include="Assets\Code\Level\TileMap\TileMap.cs" />
     <Compile Include="Assets\Code\Misc\Constants.cs" />
     <Compile Include="Assets\Code\NetworkManager.cs" />
-    <Compile Include="Assets\Code\Player.cs" />
     <Compile Include="Assets\Code\ScriptableObjects\CharacterModel.cs" />
     <Compile Include="Assets\Photon Unity Networking\Plugins\PhotonNetwork\CustomTypes.cs" />
     <Compile Include="Assets\Photon Unity Networking\Plugins\PhotonNetwork\Enums.cs" />
