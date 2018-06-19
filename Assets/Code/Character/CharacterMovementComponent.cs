@@ -212,11 +212,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_character.view.GetComponent<Renderer>().material.color = Color.white; // temp for feedback when charging
 
 		for (int i = 0; i < inDashStrength; i++)
-		{
-			// hurt tile if it is destructible
-			if (!currentTile.model.data.unbreakable)
-				currentTile.data.DamageTile();
-
+		{			
 			Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
 			if (targetTile == null)
 				throw new Exception("Tried to dash onto a tile that is null.");
@@ -245,8 +241,12 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				}
 			}
 
-			if (targetTile.data.IsOccupied()) // stop movement no matter who we are, clients will have time to contiunue movement for several tiles otherwise and be teleported back when the server is done
+			if (targetTile.data.IsOccupied()) // stop movement no matter who we are, clients will have time to contiunue movement for several tiles otherwise and be teleported back when the server is done(don't now how we should handle this)
 				yield break;
+
+			// hurt tile if it is destructible
+			if (!currentTile.model.data.unbreakable)
+				currentTile.data.DamageTile();
 
 			while (movementProgress < 1)
 			{
