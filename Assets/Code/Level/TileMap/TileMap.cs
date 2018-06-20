@@ -9,6 +9,7 @@ public class TileMap
 
     Dictionary<Vector2DInt, Tile> _tiles = new Dictionary<Vector2DInt, Tile>();
 
+	Vector2DInt _gridSize;
 
     public TileMap(string inMapName)
     {
@@ -24,7 +25,9 @@ public class TileMap
         _tiles[inPosition] = inTile;
     }
 
-
+	public Vector2DInt GetRandomTileCoords() =>	
+		new Vector2DInt(Random.Range(0, _gridSize.x), Random.Range(0, _gridSize.y));
+	
     #region Serialization
     public void BinarySave()
     {
@@ -51,6 +54,8 @@ public class TileMap
 			int gridSizeX = reader.ReadInt32();        // Read: Num tiles Horizontal
 
 			int tileCount = gridSizeY * gridSizeX;        // Num tiles in total
+
+			_gridSize = new Vector2DInt(gridSizeX, gridSizeY); // save gridsize if we need it later
 
 			for (int i = 0; i < tileCount; i++)
             {

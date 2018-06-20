@@ -9,7 +9,7 @@ using UnityEngine;
 public class Character : Photon.MonoBehaviour
 {
     // Will be renamed to "Character" when it's fully transfered
-
+	public Color color          {get; private set;}
     public CharacterModel model {get; private set;}
     public GameObject     view  {get; private set;} 
 	public bool isMasterClient  {get; private set;}
@@ -20,10 +20,10 @@ public class Character : Photon.MonoBehaviour
 
     public event Action<Vector2DInt> OnCharacterSpawned;
 
-	public void Initialize(string inViewName)
+	public void Initialize(string inViewName, Color color)
     {
 		isMasterClient = PhotonNetwork.isMasterClient;
-		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName); // wont need be buffered later when level loading is synced
+		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName, color.r, color.g, color.b); // wont need be buffered later when level loading is synced
 	}
 
 	public void Spawn(Vector2DInt inSpawnTile)
@@ -32,12 +32,12 @@ public class Character : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkInitialize(string inViewNam)
+	void NetworkInitialize(string inViewNam, float cR, float cG, float cB)
 	{
 		model = CharacterDatabase.instance.standardModel;
 		movementComponent = GetComponent<CharacterMovementComponent>();
-		flagComponent = GetComponent<CharacterFlagComponent>();
-		stateComponent = GetComponent<CharacterStateComponent>();
+		flagComponent     = GetComponent<CharacterFlagComponent>();
+		stateComponent    = GetComponent<CharacterStateComponent>();
 
 		movementComponent.ManualAwake();
 		flagComponent.ManualAwake();
@@ -47,8 +47,12 @@ public class Character : Photon.MonoBehaviour
 		view = GameObject.CreatePrimitive(PrimitiveType.Cube);
 		view.transform.SetParent(transform, false);
 
+		// give a unique color for debuging 
+		color = new Color(cR, cG, cB, 1.0f);
+		view.GetComponent<Renderer>().material.color = color;
+
 #if DEBUG_TOOLS
-		if(photonView.isMine)
+		if (photonView.isMine)
 			FindObjectOfType<PlayerPage>().Initialize(this);
 #endif
 	}
