@@ -39,6 +39,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
         if (_stateComponent.currentState != CharacterState.Idle || _flagComponent.GetFlag(CharacterFlag.Cooldown_Walk))
             return;
 
+		// cant walk to tile if occupied by other player or if not walkable tile
+		Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
+		if (targetTile.data.IsOccupied() || !targetTile.model.data.walkable)
+			return;
+
 		photonView.RPC("NetworkWalk", PhotonTargets.All, inDirection.x, inDirection.y);
     }
 	
@@ -136,8 +141,12 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// Save last move direction if we would do dash and not give any direction during chargeup
 		_lastMoveDirection = new Vector2DInt((int)movementDirection.x, (int)movementDirection.z);
 
-		float movementProgress = 0;
-		bool tileRefSet = false;
+		// Update tile player references NOTE: this is done right when a player starts moving to avoid players being able to move to the same tile (gives the same teleport bug as in the original game when being dashed in middle of movement, maybe can be solved with interpolation to look ok?) or we have to solve this in other way
+		currentTile.data.RemovePlayer();
+		targetTile.data.SetCharacter(_character);
+		currentTile = targetTile;
+
+		float movementProgress = 0;		
 		while (movementProgress < 1)
 		{
 			movementProgress += _model.walkSpeed * Time.deltaTime;
@@ -146,20 +155,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			transform.position = Vector3.Lerp(fromPosition, targetPosition, movementProgress);
 			transform.position = new Vector3(transform.position.x, 1 + Mathf.Sin(movementProgress * (float)Math.PI), transform.position.z);
 
-			transform.rotation = Quaternion.Lerp(fromRotation, targetRotation, movementProgress);
-
-			if (movementProgress > 0.5f && !tileRefSet)
-			{
-				// Set player tile references
-				Tile previousTile = currentTile;
-				currentTile = targetTile;
-
-				// Update tile player references
-				previousTile.data.RemovePlayer();
-				targetTile.data.SetCharacter(_character);
-
-				tileRefSet = true;
-			}
+			transform.rotation = Quaternion.Lerp(fromRotation, targetRotation, movementProgress);			
 
 			yield return Timing.WaitForOneFrame;
 		}
@@ -217,18 +213,19 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			if (targetTile == null)
 				throw new Exception("Tried to dash onto a tile that is null.");
 
+			// abort dash if running into non walkable tile
+			if (!targetTile.model.data.walkable)
+				yield break;
+
 			// Calculate lerp positions
-			Vector3 fromPosition = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
+			Vector3 fromPosition   = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
 			Vector3 targetPosition = new Vector3(targetTile.data.position.x, 1, targetTile.data.position.y);
 
 			// Calculate lerp rotations
 			Vector3 movementDirection = (targetPosition - fromPosition).normalized;
 
 			Quaternion fromRotation = transform.rotation;
-			Quaternion targetRotation = Quaternion.Euler(movementDirection * (90 * _model.dashRotationSpeed)) * transform.rotation;
-
-			float movementProgress = 0;
-			bool tileRefSet = false;
+			Quaternion targetRotation = Quaternion.Euler(movementDirection * (90 * _model.dashRotationSpeed)) * transform.rotation;						
 
 			if (PhotonNetwork.isMasterClient) // do collision on master client
 			{
@@ -238,16 +235,23 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, inDirection, inDashStrength - i, fromRotation.eulerAngles);
 
 					OnDashingOther(currentTile.data.position, fromRotation.eulerAngles);
+					yield break;
 				}
 			}
 
 			if (targetTile.data.IsOccupied()) // stop movement no matter who we are, clients will have time to contiunue movement for several tiles otherwise and be teleported back when the server is done(don't now how we should handle this)
 				yield break;
 
+			// Update tile player references NOTE: this is done right when a player starts moving to avoid players being able to move to the same tile (gives the same teleport bug as in the original game when being dashed in middle of movement, maybe can be solved with interpolation to look ok?) or we have to solve this in other way
+			currentTile.data.RemovePlayer();
+			targetTile.data.SetCharacter(_character);
+			currentTile = targetTile;
+
 			// hurt tile if it is destructible
 			if (!currentTile.model.data.unbreakable)
 				currentTile.data.DamageTile();
 
+			float movementProgress = 0;
 			while (movementProgress < 1)
 			{
 				movementProgress += _model.dashSpeed * Time.deltaTime;
@@ -255,20 +259,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 				transform.position = Vector3.Lerp(fromPosition, targetPosition, movementProgress);
 				transform.rotation = Quaternion.Lerp(fromRotation, targetRotation, movementProgress);
-
-				if (movementProgress > 0.5f && !tileRefSet)
-				{
-					// Set player tile references
-					Tile previousTile = currentTile;
-					currentTile = targetTile;
-
-					// Update tile player references
-					previousTile.data.RemovePlayer();
-					targetTile.data.SetCharacter(_character);
-
-					tileRefSet = true;
-				}
-
+				
 				yield return Timing.WaitForOneFrame;
 			}
 
