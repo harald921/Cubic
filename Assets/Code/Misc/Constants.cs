@@ -12,4 +12,9 @@ public static class Constants
 
 	public static string EDGE_TYPE = "edge";
 
+
+	// input mapping strings
+	public static string AXIS_HORIZONTAL = "Horizontal";
+	public static string AXIS_VERTICAL   = "Vertical";
+	public static string BUTTON_CHARGE   = "Charge";
 }

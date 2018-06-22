@@ -8,8 +8,8 @@ public class Level : Photon.MonoBehaviour
     public static Level instance { get; private set; }
 
     public TileMap tileMap { get; private set; }
-	[SerializeField] NetworkManager _networkManager; 
-
+	[SerializeField] NetworkManager _networkManager;
+	[SerializeField] string _mapToLoad;
     [SerializeField] GameObject _characterPrefab; // The character gameobject that Photon automagically creates 
     Character _character;
 
@@ -23,7 +23,7 @@ public class Level : Photon.MonoBehaviour
 		_character = PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity, 0).GetComponent<Character>();
 		_character.Initialize("ExampleCharacterView", GetRandomColor());
 
-		tileMap = new TileMap("SavedFromInputField");
+		tileMap = new TileMap(_mapToLoad);
 		
 		_character.Spawn(tileMap.GetRandomTileCoords());
 

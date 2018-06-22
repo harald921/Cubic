@@ -69,16 +69,16 @@ public class Character : Photon.MonoBehaviour
 		if (!photonView.isMine)
 			return;
 
-		if (Input.GetKey(KeyCode.Space))
+		if (Input.GetButton(Constants.BUTTON_CHARGE))
 			movementComponent.TryCharge();
 
-		if (Input.GetKey(KeyCode.W))
+		if (Input.GetAxisRaw(Constants.AXIS_VERTICAL) > 0)
 			movementComponent.TryWalk(Vector2DInt.Up);
-		if (Input.GetKey(KeyCode.S))
+		if (Input.GetAxisRaw(Constants.AXIS_VERTICAL) < 0)
 			movementComponent.TryWalk(Vector2DInt.Down);
-		if (Input.GetKey(KeyCode.A))
+		if (Input.GetAxisRaw(Constants.AXIS_HORIZONTAL) < 0)
 			movementComponent.TryWalk(Vector2DInt.Left);
-		if (Input.GetKey(KeyCode.D))
+		if (Input.GetAxisRaw(Constants.AXIS_HORIZONTAL) > 0)
 			movementComponent.TryWalk(Vector2DInt.Right);
 	}
 }

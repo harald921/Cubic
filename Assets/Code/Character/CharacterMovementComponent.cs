@@ -182,22 +182,22 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		float chargeAmount = _model.dashMinCharge;
 
-        while (Input.GetKey(KeyCode.Space))
+        while (Input.GetButton(Constants.BUTTON_CHARGE))
         {
             chargeAmount += (_model.dashChargeRate * Time.deltaTime);
             chargeAmount = Mathf.Clamp(chargeAmount, _model.dashMinCharge, _model.dashMaxCharge);
 
-            // while charging direction can be changed
-            if (Input.GetKey(KeyCode.W))
-                _lastMoveDirection = Vector2DInt.Up;
-            if (Input.GetKey(KeyCode.S))
-                _lastMoveDirection = Vector2DInt.Down;
-            if (Input.GetKey(KeyCode.A))
-                _lastMoveDirection = Vector2DInt.Left;
-            if (Input.GetKey(KeyCode.D))
-                _lastMoveDirection = Vector2DInt.Right;
+			// while charging direction can be changed
+			if (Input.GetAxisRaw(Constants.AXIS_VERTICAL) > 0)
+				_lastMoveDirection = Vector2DInt.Up;
+			if (Input.GetAxisRaw(Constants.AXIS_VERTICAL) < 0)
+				_lastMoveDirection = Vector2DInt.Down;
+			if (Input.GetAxisRaw(Constants.AXIS_HORIZONTAL) < 0)
+				_lastMoveDirection = Vector2DInt.Left;
+			if (Input.GetAxisRaw(Constants.AXIS_HORIZONTAL) > 0)
+				_lastMoveDirection = Vector2DInt.Right;
 
-            currentDashCharges = (int)chargeAmount; 
+			currentDashCharges = (int)chargeAmount; 
 
             yield return Timing.WaitForOneFrame;
         }
