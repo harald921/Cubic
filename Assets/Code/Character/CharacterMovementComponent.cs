@@ -43,7 +43,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		if (targetTile.data.IsOccupied() || !targetTile.model.data.walkable)
 			return;
 
-		photonView.RPC("NetworkWalk", PhotonTargets.All, inDirection.x, inDirection.y);
+		photonView.RPC("NetworkWalk", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y, targetTile.data.position.x, targetTile.data.position.y, transform.rotation.x, transform.rotation.y, transform.rotation.z);
     }
 	
     public void TryCharge()
@@ -53,7 +53,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		photonView.RPC("NetworkCharge", PhotonTargets.Others); // send to all other then me, we start coroutine instead
 
-        Timing.RunCoroutineSingleton(_Charge(), gameObject.GetInstanceID(), SingletonBehavior.Abort);
+        Timing.RunCoroutineSingleton(_Charge(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
     }
 
 	public void OnGettingDashed(Vector2DInt startTile, Vector2DInt direction, int hitPower, Vector3 rot)
@@ -67,9 +67,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkWalk(int inDirectionX, int inDirectionY)
+	void NetworkWalk(int fromX, int fromY, int toX, int toY, float rotX, float rotY, float rotZ)
 	{
-		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(inDirectionX, inDirectionY)), gameObject.GetInstanceID(), SingletonBehavior.Abort);
+		transform.rotation = Quaternion.Euler(new Vector3(rotX, rotY, rotZ)); // set rotation to start rotation right away (should be lerped if desync)
+		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(fromX, fromY), new Vector2DInt(toX, toY)), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
 	[PunRPC]
@@ -82,7 +83,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkDash(int inDirectionX, int inDirectionY, int inDashCharges)
 	{
-		Timing.RunCoroutine(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges), gameObject.GetInstanceID());
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
 	[PunRPC]
@@ -94,10 +95,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		currentTile = Level.instance.tileMap.GetTile(new Vector2DInt(pX, pY)); // get tile we was on when getting hit by other player
 		currentTile.data.SetCharacter(_character);                             // set our reference on this tile
 
-		//transform.position = new Vector3(pX, 1, pY);                         // try not setting position to tile from where you should get dashed, interpolate from current position if we are in middle of movement
+		transform.position = new Vector3(pX, 1, pY);                           // set pos where it should be
 		transform.rotation = Quaternion.Euler(new Vector3(rX, rY, rZ));        // just set rotation to where it should be, this could be interpolated to
 
-		Timing.RunCoroutine(_Dash(new Vector2DInt(dX, dY), numDashtiles), gameObject.GetInstanceID()); // takes over the dashPower from the player that dashed into us
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(dX, dY), numDashtiles), gameObject.GetInstanceID(), SingletonBehavior.Overwrite); // takes over the dashPower from the player that dashed into us
 	}
 
 	[PunRPC]
@@ -118,19 +119,23 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
 	}
 		
-	IEnumerator<float> _Walk(Vector2DInt inDirection)
+	IEnumerator<float> _Walk(Vector2DInt inFromTile, Vector2DInt inToTile)
 	{
 		_stateComponent.SetState(CharacterState.Walking);
 
 		if (!currentTile.model.data.unbreakable)
 			currentTile.data.DamageTile();
 
-		Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
+		TileMap tileMap = Level.instance.tileMap;
+
+		Tile fromTile   = tileMap.GetTile(inFromTile);
+		Tile targetTile = tileMap.GetTile(inToTile);
+
 		if (targetTile == null)
 			throw new Exception("Tried to walk onto a tile that is null.");
 
 		// Calculate lerp positions
-		Vector3 fromPosition = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
+		Vector3 fromPosition   = new Vector3(fromTile.data.position.x, 1, fromTile.data.position.y);
 		Vector3 targetPosition = new Vector3(targetTile.data.position.x, 1, targetTile.data.position.y);
 
 		// Calculate lerp rotations
@@ -224,8 +229,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				yield break;
 
 			// Calculate lerp positions
-			Vector3 fromPosition   = new Vector3(transform.position.x, 1, transform.position.z);
-			Vector3 targetPosition = new Vector3(targetTile.data.position.x, 1, targetTile.data.position.y);
+			Vector3 fromPosition   = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
+			Vector3 targetPosition = new Vector3(targetTile.data.position.x,  1, targetTile.data.position.y);
 
 			// Calculate lerp rotations
 			Vector3 movementDirection = (targetPosition - fromPosition).normalized;

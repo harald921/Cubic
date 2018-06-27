@@ -21,6 +21,8 @@ public class PlayerPage : MonoBehaviour
 	void DrawStats(int id)
 	{
         Tile currentTile = _targetCharacter.movementComponent.currentTile;
+		if (currentTile == null)
+			return;
 
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(string.Format("PLAYER STATE : {0}", _targetCharacter.stateComponent.currentState.ToString().ToUpper()));
