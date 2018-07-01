@@ -251,9 +251,6 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				}
 			}
 
-			if (targetTile.data.IsOccupied()) // stop movement no matter who we are, clients will have time to contiunue movement for several tiles otherwise and be teleported back when the server is done(don't now how we should handle this)
-				yield break;
-
 			// hurt tile if it is destructible
 			if (!currentTile.model.data.unbreakable)
 				currentTile.data.DamageTile();
