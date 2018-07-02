@@ -158,3 +158,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _standardModel: {fileID: 11400000, guid: 5da90e43f2a9d5f4fbdd085fe4fcf930, type: 2}
+  _characterModelViews:
+  - name: harald
+    prefab: {fileID: 1978023637765966, guid: 5abd753268e12f64fb3cd905282beeb3, type: 2}
+  - name: simon
+    prefab: {fileID: 1744302026940898, guid: a60c486242858444eae0325ebac4cd42, type: 2}
+  _fallBackView: {fileID: 1201945228868484, guid: 9820109b85664c34c8619f8e17ac8698,
+    type: 2}

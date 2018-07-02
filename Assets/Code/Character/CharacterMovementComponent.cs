@@ -43,7 +43,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		if (targetTile.data.IsOccupied() || !targetTile.model.data.walkable)
 			return;
 
-		photonView.RPC("NetworkWalk", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y, targetTile.data.position.x, targetTile.data.position.y, transform.rotation.x, transform.rotation.y, transform.rotation.z);
+		Vector3 rotation = transform.localEulerAngles;
+
+		photonView.RPC("NetworkWalk", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y, targetTile.data.position.x, targetTile.data.position.y, rotation.x, rotation.y, rotation.z);
     }
 	
     public void TryCharge()
@@ -68,9 +70,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 	[PunRPC]
 	void NetworkWalk(int fromX, int fromY, int toX, int toY, float rotX, float rotY, float rotZ)
-	{
-		transform.rotation = Quaternion.Euler(new Vector3(rotX, rotY, rotZ)); // set rotation to start rotation right away (should be lerped if desync)
-		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(fromX, fromY), new Vector2DInt(toX, toY)), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+	{		
+		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(fromX, fromY), new Vector2DInt(toX, toY), new Vector3(rotX, rotY, rotZ)), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
 	[PunRPC]
@@ -119,7 +120,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
 	}
 		
-	IEnumerator<float> _Walk(Vector2DInt inFromTile, Vector2DInt inToTile)
+	IEnumerator<float> _Walk(Vector2DInt inFromTile, Vector2DInt inToTile, Vector3 inFromRotation)
 	{
 		_stateComponent.SetState(CharacterState.Walking);
 
@@ -133,6 +134,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		if (targetTile == null)
 			throw new Exception("Tried to walk onto a tile that is null.");
+
+		transform.rotation = Quaternion.Euler(inFromRotation); // the rotation the master client had when he moved the character, should be considered in lerp if desynced
 
 		// Calculate lerp positions
 		Vector3 fromPosition   = new Vector3(fromTile.data.position.x, 1, fromTile.data.position.y);

@@ -20,10 +20,10 @@ public class Character : Photon.MonoBehaviour
 
     public event Action<Vector2DInt> OnCharacterSpawned;
 
-	public void Initialize(string inViewName, Color color)
+	public void Initialize(string inViewName)
     {
 		isMasterClient = PhotonNetwork.isMasterClient;
-		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName, color.r, color.g, color.b); // wont need be buffered later when level loading is synced
+		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName); // wont need be buffered later when level loading is synced
 	}
 
 	public void Spawn(Vector2DInt inSpawnTile)
@@ -32,7 +32,7 @@ public class Character : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkInitialize(string inViewNam, float cR, float cG, float cB)
+	void NetworkInitialize(string inViewName)
 	{
 		model = CharacterDatabase.instance.standardModel;
 		movementComponent = GetComponent<CharacterMovementComponent>();
@@ -44,12 +44,8 @@ public class Character : Photon.MonoBehaviour
 		stateComponent.ManualAwake();
 
 		// Setup the correct view, probably in a view component
-		view = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		view = Instantiate(CharacterDatabase.instance.GetViewFromName(inViewName));
 		view.transform.SetParent(transform, false);
-
-		// give a unique color for debuging 
-		color = new Color(cR, cG, cB, 1.0f);
-		view.GetComponent<Renderer>().material.color = color;
 
 #if DEBUG_TOOLS
 		if (photonView.isMine)

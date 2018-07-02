@@ -51,4 +51,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03c5dd859341e34448690ed3e5af4b7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerValues: {fileID: 11400000, guid: 1f9676876d1e1cd4aa48360c771f70c3, type: 2}
+  _networkManager: {fileID: 0}
+  _mapToLoad: DebugLevel
+  _characterPrefab: {fileID: 1300687396863330, guid: c968007a7fbe1f942a234aa54bc2f7e9,
+    type: 2}
+  _modelView: IWantToBeMatti
