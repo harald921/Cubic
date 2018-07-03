@@ -47,6 +47,8 @@ public class Character : Photon.MonoBehaviour
 		view = Instantiate(CharacterDatabase.instance.GetViewFromName(inViewName));
 		view.transform.SetParent(transform, false);
 
+		color = view.GetComponent<Renderer>().material.color;
+
 #if DEBUG_TOOLS
 		if (photonView.isMine)
 			FindObjectOfType<PlayerPage>().Initialize(this);

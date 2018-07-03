@@ -13,7 +13,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 2
   walkCooldown: 0.15
-  dashSpeed: 20
+  dashSpeed: 5
   dashCooldown: 0.5
   dashMinCharge: 2
   dashMaxCharge: 4
