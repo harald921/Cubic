@@ -146,6 +146,15 @@ MonoBehaviour:
       unbreakable: 1
     _view:
       _mainGO: {fileID: 0}
+  - _typeName: bricks
+    _data:
+      walkable: 1
+      health: 3
+      deadly: 0
+      unbreakable: 0
+    _view:
+      _mainGO: {fileID: 1126028828871418, guid: 8e0f46bfffbcb434a826a0c373d860ce,
+        type: 2}
 --- !u!114 &114660886813412552
 MonoBehaviour:
   m_ObjectHideFlags: 1
