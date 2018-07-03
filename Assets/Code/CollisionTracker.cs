@@ -1,0 +1,54 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Photon;
+
+public class CollisionTracker : Photon.MonoBehaviour
+{
+
+	public struct CollisionData
+	{
+		public Vector2DInt tile;
+		public int photonId;
+		public int timeStamp;			
+	}
+
+	List <CollisionData> _recentCollisions;
+
+	public void ManualStart()
+	{
+		if (PhotonNetwork.isMasterClient)
+		{
+			_recentCollisions = new List<CollisionData>();			
+		}
+	}
+
+	public void AddCollision(int timeStamp, int photonId, int tileX, int tileY)
+	{
+		if (_recentCollisions.Count == Constants.NUM_COLLISIONS_TO_SAVE_ON_SERVER)
+			_recentCollisions.RemoveAt(0);
+
+		_recentCollisions.Add(new CollisionData { tile = new Vector2DInt(tileX, tileY), photonId = photonId, timeStamp = timeStamp });
+	}
+
+	[PunRPC]
+	public void CheckServerCollision(int timeStamp, int photonIdHit, int photonIdMine, int myTileX, int myTileY, int HitTileX, int hitTileY, int directionX, int directionY, int chargesLeft)
+	{
+		Vector2DInt tile = new Vector2DInt(HitTileX, hitTileY);
+
+		for(int i =0; i < _recentCollisions.Count; i++)
+		{
+			if(_recentCollisions[i].tile == tile) // found collision on requested tile			
+				if (_recentCollisions[i].photonId == photonIdHit) // the photon id of hit character matches, collision happened on server aswell and we don't need to take action
+				{
+					_recentCollisions.RemoveAt(i); // remove from list 
+					return;
+				} 			
+		}
+
+		// if we get here it means no collision was found and the client cancelled his dash incorrectly, tell him to finish rest of dash
+		PhotonView.Find(photonIdMine).RPC("FinishCancelledDash", PhotonTargets.Others, myTileX, myTileY, directionX, directionY, chargesLeft);
+						
+	}
+
+}

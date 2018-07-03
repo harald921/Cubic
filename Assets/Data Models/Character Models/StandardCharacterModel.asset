@@ -11,7 +11,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5090a44b29ed22747ad58bc045c7a3cd, type: 3}
   m_Name: StandardCharacterModel
   m_EditorClassIdentifier: 
-  walkSpeed: 6
+  walkSpeed: 2
   walkCooldown: 0.15
   dashSpeed: 20
   dashCooldown: 0.5

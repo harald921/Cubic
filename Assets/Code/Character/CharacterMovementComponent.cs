@@ -17,6 +17,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
     CharacterFlagComponent  _flagComponent;
 
     Vector2DInt _lastMoveDirection = Vector2DInt.Up;
+
+	CollisionTracker _collisionTracker;
+
+	Quaternion _lastTargetRotation; // used to keep track of the rotation the player last was targeting when getting interupted by getting hit
 	
     public void ManualAwake()
     {
@@ -25,6 +29,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
         _stateComponent = _character.stateComponent;
         _flagComponent  = _character.flagComponent;
+
+		_collisionTracker = FindObjectOfType<CollisionTracker>();
+
+		_lastTargetRotation = transform.rotation;
 
 		_character.OnCharacterSpawned += (Vector2DInt inSpawnTile) =>
 		{
@@ -42,10 +50,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
 		if (targetTile.data.IsOccupied() || !targetTile.model.data.walkable)
 			return;
-
-		Vector3 rotation = transform.localEulerAngles;
-
-		photonView.RPC("NetworkWalk", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y, targetTile.data.position.x, targetTile.data.position.y, rotation.x, rotation.y, rotation.z);
+		
+		photonView.RPC("NetworkWalk", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y, targetTile.data.position.x, targetTile.data.position.y);
     }
 	
     public void TryCharge()
@@ -58,9 +64,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
         Timing.RunCoroutineSingleton(_Charge(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
     }
 
-	public void OnGettingDashed(Vector2DInt startTile, Vector2DInt direction, int hitPower, Vector3 rot)
+	public void OnGettingDashed(Vector2DInt startTile, Vector2DInt direction, int hitPower)
 	{
-		photonView.RPC("NetworkOnGettingDashed", PhotonTargets.All, startTile.x, startTile.y, direction.x, direction.y, hitPower, rot.x, rot.y, rot.z);
+		photonView.RPC("NetworkOnGettingDashed", PhotonTargets.All, startTile.x, startTile.y, direction.x, direction.y, hitPower);
 	}
 
 	public void OnDashingOther(Vector2DInt lastTile, Vector3 rot)
@@ -69,9 +75,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkWalk(int fromX, int fromY, int toX, int toY, float rotX, float rotY, float rotZ)
+	void NetworkWalk(int fromX, int fromY, int toX, int toY)
 	{		
-		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(fromX, fromY), new Vector2DInt(toX, toY), new Vector3(rotX, rotY, rotZ)), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(fromX, fromY), new Vector2DInt(toX, toY)), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
 	[PunRPC]
@@ -82,45 +88,57 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkDash(int inDirectionX, int inDirectionY, int inDashCharges)
+	void NetworkDash(int fromX, int fromY, int inDirectionX, int inDirectionY, int inDashCharges, float rX, float rY, float rZ)
 	{
-		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+		// set new current tile if desynced, should never happen becuase of chargetime before dash (maybe on quickdash?)
+		SetNewTileReferences(new Vector2DInt(fromX, fromY));
+
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);	
 	}
 
 	[PunRPC]
-	void NetworkOnGettingDashed(int pX, int pY, int dX, int dY, int numDashtiles, float rX, float rY, float rZ)
+	void NetworkOnGettingDashed(int pX, int pY, int dX, int dY, int numDashtiles)
 	{
-		Timing.KillCoroutines(gameObject.GetInstanceID());                     // kill all coroutines on this layer
+		// kill all coroutines on this layer
+		Timing.KillCoroutines(gameObject.GetInstanceID());                     
 
-		currentTile.data.RemovePlayer();                                       // remove player from current tile, (can be different then the tile from the server if desynced)
-		currentTile = Level.instance.tileMap.GetTile(new Vector2DInt(pX, pY)); // get tile we was on when getting hit by other player
-		currentTile.data.SetCharacter(_character);                             // set our reference on this tile
-
-		transform.position = new Vector3(pX, 1, pY);                           // set pos where it should be
-		transform.rotation = Quaternion.Euler(new Vector3(rX, rY, rZ));        // just set rotation to where it should be, this could be interpolated to
-
+		// set new current tile if desynced
+		SetNewTileReferences(new Vector2DInt(pX, pY));		                           
+		
 		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(dX, dY), numDashtiles), gameObject.GetInstanceID(), SingletonBehavior.Overwrite); // takes over the dashPower from the player that dashed into us
 	}
 
 	[PunRPC]
 	void NetworkOnDashingOther(int x, int y, float rX, float rY, float rZ)
 	{
+		// kill all coroutines on this layer
+		Timing.KillCoroutines(gameObject.GetInstanceID());                    
+
+		// set new current tile if desynced
+		SetNewTileReferences(new Vector2DInt(x, y));
+		
+		// this should not have to be interpolated becuase everyone stops locally aswell
+		// used as safety if we only detects collision on server and not locally, should be very rare and be a small teleport if happens
+		transform.position = new Vector3(x, 1, y);                             
+		transform.rotation = Quaternion.Euler(new Vector3(rX, rY, rZ));
+
+		StopMovementAndAddCooldowns();
+	}
+
+	[PunRPC]
+	public void FinishCancelledDash(int fromX, int fromY, int inDirectionX, int inDirectionY, int inDashCharges)
+	{
 		Timing.KillCoroutines(gameObject.GetInstanceID());                     // kill all coroutines on this layer
 
-		currentTile.data.RemovePlayer();                                       // remove player from current tile, (can be different then the tile from the server if desynced)
-		currentTile = Level.instance.tileMap.GetTile(new Vector2DInt(x, y));   // get tile we was on when getting hit by other player
-		currentTile.data.SetCharacter(_character);                             // set our reference on this tile
+		SetNewTileReferences(new Vector2DInt(fromX, fromY));
+		
 
-		transform.position = new Vector3(x, 1, y);                             // this should to be interpolated, should only be able to be off by very little so is not as noticible as the player that gets dashed
-		transform.rotation = Quaternion.Euler(new Vector3(rX, rY, rZ)); 
+		transform.position = new Vector3(fromX, 1, fromY);
 
-		// reset states and add cooldowns
-		_stateComponent.SetState(CharacterState.Idle);
-		_flagComponent.SetFlag(CharacterFlag.Cooldown_Walk, true, _model.walkCooldown, SingletonBehavior.Overwrite);
-		_flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 		
-	IEnumerator<float> _Walk(Vector2DInt inFromTile, Vector2DInt inToTile, Vector3 inFromRotation)
+	IEnumerator<float> _Walk(Vector2DInt inFromTile, Vector2DInt inToTile)
 	{
 		_stateComponent.SetState(CharacterState.Walking);
 
@@ -134,8 +152,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		if (targetTile == null)
 			throw new Exception("Tried to walk onto a tile that is null.");
-
-		transform.rotation = Quaternion.Euler(inFromRotation); // the rotation the master client had when he moved the character, should be considered in lerp if desynced
+		
 
 		// Calculate lerp positions
 		Vector3 fromPosition   = new Vector3(fromTile.data.position.x, 1, fromTile.data.position.y);
@@ -144,8 +161,13 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// Calculate lerp rotations
 		Vector3 movementDirection      = (targetPosition - fromPosition).normalized;
 		Vector3 movementDirectionRight = new Vector3(movementDirection.z, movementDirection.y, -movementDirection.x);
-		Quaternion fromRotation        = transform.rotation;
-		Quaternion targetRotation      = Quaternion.Euler(movementDirectionRight * 90) * transform.rotation;
+
+		// do lerp from where we are even if desynced(will catch up)
+		// target is calculated using the target rotation we had during last movement if we are lagging behind
+		Quaternion fromRotation        = transform.rotation;                                                     
+		Quaternion targetRotation      = Quaternion.Euler(movementDirectionRight * 90) * _lastTargetRotation;
+
+		_lastTargetRotation = targetRotation;
 
 		// Save last move direction if we would do dash and not give any direction during chargeup
 		_lastMoveDirection = new Vector2DInt((int)movementDirection.x, (int)movementDirection.z);
@@ -210,7 +232,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
             yield return Timing.WaitForOneFrame;
         }
 
-		photonView.RPC("NetworkDash", PhotonTargets.All, _lastMoveDirection.x, _lastMoveDirection.y, currentDashCharges);        
+		Vector2DInt currentPos = currentTile.data.position;
+		Vector3 currentRotation = transform.localEulerAngles;
+
+		photonView.RPC("NetworkDash", PhotonTargets.All, currentPos.x, currentPos.y, _lastMoveDirection.x, _lastMoveDirection.y, currentDashCharges, currentRotation.x, currentRotation.y, currentRotation.z);        
     }
 
     public IEnumerator<float> _Dash(Vector2DInt inDirection, int inDashStrength)
@@ -222,8 +247,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// loop over all dash charges
 		for (int i = 0; i < inDashStrength; i++)
 		{			
-			// get next tile in dash path
-			Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
+			// get next tile in dash path			
+			// current tile is corrected before coroutine if lagging so this should be safe
+			Tile targetTile = currentTile.data.GetRelativeTile(inDirection); 
 			if (targetTile == null)
 				throw new Exception("Tried to dash onto a tile that is null.");
 
@@ -232,13 +258,17 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				yield break;
 
 			// Calculate lerp positions
-			Vector3 fromPosition   = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
+			Vector3 fromPosition = transform.position; // interpolate from current position to avoid teleporting if lagging
 			Vector3 targetPosition = new Vector3(targetTile.data.position.x,  1, targetTile.data.position.y);
 
 			// Calculate lerp rotations
+			// note: use last target rotation as base if we was in middle of movement when this dash started from getting hit from other player
+			// this will make the rotation that was left from last movement to be caught up
 			Vector3 movementDirection = (targetPosition - fromPosition).normalized;
 			Quaternion fromRotation   = transform.rotation;
-			Quaternion targetRotation = Quaternion.Euler(movementDirection * (90 * _model.dashRotationSpeed)) * transform.rotation;						
+			Quaternion targetRotation = Quaternion.Euler(movementDirection * (90 * _model.dashRotationSpeed)) * _lastTargetRotation;
+
+			_lastTargetRotation = targetRotation;
 
 			if (PhotonNetwork.isMasterClient) // do collision on master client
 			{
@@ -246,17 +276,32 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				{
 					// get occupying player and tell it to send an rpc that it got dashed
 					Character playerToDash = targetTile.data.GetOccupyingPlayer();
-					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, inDirection, inDashStrength - i, fromRotation.eulerAngles);
+
+					_collisionTracker.AddCollision(PhotonNetwork.ServerTimestamp, playerToDash.photonView.viewID, targetTile.data.position.x, targetTile.data.position.y);
+
+					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, inDirection, inDashStrength - i);
 
 					// send rpc that we hit other player and cancel all our current movement
 					OnDashingOther(currentTile.data.position, fromRotation.eulerAngles);
+
 					yield break;
 				}
 			}
 
+			if (targetTile.data.IsOccupied())
+			{
+				StopMovementAndAddCooldowns();
+				_collisionTracker.photonView.RPC("CheckServerCollision", PhotonTargets.MasterClient, 
+												PhotonNetwork.ServerTimestamp, targetTile.data.GetOccupyingPlayer().photonView.viewID, 
+												photonView.viewID, currentTile.data.position.x,	currentTile.data.position.y,
+												targetTile.data.position.x, targetTile.data.position.y,
+												inDirection.x, inDirection.y, inDashStrength - i);
+				yield break;
+			}
+
 			// hurt tile if it is destructible
 			if (!currentTile.model.data.unbreakable)
-				currentTile.data.DamageTile();
+			currentTile.data.DamageTile();
 
 			// Update tile player references NOTE: this is done right when a player starts moving to avoid players being able to move to the same tile (gives the same teleport bug as in the original game when being dashed in middle of movement, maybe can be solved with interpolation to look ok?) or we have to solve this in other way
 			currentTile.data.RemovePlayer();
@@ -291,10 +336,22 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			yield break;
 		}
 
-		// reset state and add cooldowns
-		_stateComponent.SetState(CharacterState.Idle);
-        _flagComponent.SetFlag(CharacterFlag.Cooldown_Walk, true, _model.walkCooldown, SingletonBehavior.Overwrite);
-        _flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
+		StopMovementAndAddCooldowns();
+		
     }
 
+	void StopMovementAndAddCooldowns()
+	{
+		// reset state and add cooldowns
+		_stateComponent.SetState(CharacterState.Idle);
+		_flagComponent.SetFlag(CharacterFlag.Cooldown_Walk, true, _model.walkCooldown, SingletonBehavior.Overwrite);
+		_flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
+	}
+
+	void SetNewTileReferences(Vector2DInt tile)
+	{
+		currentTile.data.RemovePlayer();                                       // remove player from current tile, (can be different then the tile from the server if desynced)
+		currentTile = Level.instance.tileMap.GetTile(tile);                    // get tile we was on when getting hit by other player
+		currentTile.data.SetCharacter(_character);                             // set our reference on this tile
+	}
 }

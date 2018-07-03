@@ -43,4 +43,6 @@ MonoBehaviour:
   - NetworkDash
   - NetworkOnDashingOther
   - NetworkOnGettingDashed
+  - CheckServerCollision
+  - FinishCancelledDash
   DisableAutoOpenWizard: 1

@@ -12,6 +12,7 @@ public static class Constants
 
 	public static string EDGE_TYPE = "edge";
 
+	public static int NUM_COLLISIONS_TO_SAVE_ON_SERVER = 10;
 
 	// input mapping strings
 	public static string AXIS_HORIZONTAL = "Horizontal";

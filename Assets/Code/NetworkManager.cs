@@ -34,6 +34,9 @@ public class NetworkManager : Photon.MonoBehaviour
         if (_debugMessages) Debug.Log("Connected to room");
 
 		Level.instance.ManualStart();
+
+		if (PhotonNetwork.isMasterClient)
+			FindObjectOfType<CollisionTracker>().ManualStart();
     }
 
     public static float CalculateNetDelta(double inTimestamp) =>
