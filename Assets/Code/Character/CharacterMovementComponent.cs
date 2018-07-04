@@ -64,6 +64,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
         Timing.RunCoroutineSingleton(_Charge(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
     }
 
+	public void InfiniteDash()
+	{
+		photonView.RPC("NetworkDash", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y, _lastMoveDirection.x, _lastMoveDirection.y, 100);
+	}
+
 	public void OnGettingDashed(Vector2DInt inStartTile, Vector2DInt inDirection, int inHitPower)
 	{
 		photonView.RPC("NetworkOnGettingDashed", PhotonTargets.All, inStartTile.x, inStartTile.y, inDirection.x, inDirection.y, inHitPower);
@@ -263,15 +268,17 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			// Calculate lerp positions
 			Vector3 fromPosition = transform.position; // interpolate from current position to avoid teleporting if lagging
 			Vector3 targetPosition = new Vector3(targetTile.data.position.x,  1, targetTile.data.position.y);
-
+			
+			Vector3 currentTilePos = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
 			// Calculate lerp rotations
 			// note: use last target rotation as base if we was in middle of movement when this dash started from getting hit from other player
 			// this will make the rotation that was left from last movement to be caught up
-			Vector3 movementDirection = (targetPosition - fromPosition).normalized;
+			Vector3 movementDirection = (targetPosition - currentTilePos).normalized;
 			Quaternion fromRotation   = transform.rotation;
 			Quaternion targetRotation = Quaternion.Euler(movementDirection * (90 * _model.dashRotationSpeed)) * _lastTargetRotation;
 
 			_lastTargetRotation = targetRotation;
+
 
 			if (PhotonNetwork.isMasterClient) // do collision on master client
 			{

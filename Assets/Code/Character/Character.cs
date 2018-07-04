@@ -78,5 +78,8 @@ public class Character : Photon.MonoBehaviour
 			movementComponent.TryWalk(Vector2DInt.Left);
 		if (Input.GetAxisRaw(Constants.AXIS_HORIZONTAL) > 0)
 			movementComponent.TryWalk(Vector2DInt.Right);
+
+		if (Input.GetKeyDown(KeyCode.P))
+			movementComponent.InfiniteDash();
 	}
 }
