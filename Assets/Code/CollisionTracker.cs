@@ -40,8 +40,7 @@ public class CollisionTracker : Photon.MonoBehaviour
 		{
 			if(_recentCollisions[i].tile == tile) // found collision on requested tile			
 				if (_recentCollisions[i].photonId == photonIdHit) // the photon id of hit character matches, collision happened on server aswell and we don't need to take action
-				{
-					_recentCollisions.RemoveAt(i); // remove from list 
+				{					 
 					return;
 				} 			
 		}

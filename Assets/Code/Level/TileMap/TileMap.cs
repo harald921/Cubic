@@ -10,10 +10,12 @@ public class TileMap
     Dictionary<Vector2DInt, Tile> _tiles = new Dictionary<Vector2DInt, Tile>();
 
 	Vector2DInt _gridSize;
+	Transform _tilesFolder;
 
-    public TileMap(string inMapName)
+    public TileMap(string inMapName, Transform inTilesFolder)
     {
         name = inMapName;
+		_tilesFolder = inTilesFolder;
         BinaryLoad();
     }
 
@@ -64,7 +66,7 @@ public class TileMap
 
                 string typeName = reader.ReadString(); // Read: Tile type name  
 
-                _tiles.Add(tilePosition, new Tile(tilePosition, typeName));
+                _tiles.Add(tilePosition, new Tile(tilePosition, typeName, _tilesFolder));
             }
 
 			AddEdgeTiles(gridSizeX, gridSizeY);
@@ -76,19 +78,31 @@ public class TileMap
 	{
 		// left edges
 		for (int i = 0; i < sizeY; i++)
-			_tiles.Add(new Vector2DInt(-1, i), new Tile(new Vector2DInt(-1, i), Constants.EDGE_TYPE));
+			_tiles.Add(new Vector2DInt(-1, i), new Tile(new Vector2DInt(-1, i), Constants.EDGE_TYPE, null));
 
 		// right edges
 		for (int i = 0; i < sizeY; i++)
-			_tiles.Add(new Vector2DInt(sizeX, i), new Tile(new Vector2DInt(sizeX, i), Constants.EDGE_TYPE));
+			_tiles.Add(new Vector2DInt(sizeX, i), new Tile(new Vector2DInt(sizeX, i), Constants.EDGE_TYPE, null));
 
 		// top edges
 		for (int i = 0; i < sizeX; i++)
-			_tiles.Add(new Vector2DInt(i, sizeY), new Tile(new Vector2DInt(i, sizeY), Constants.EDGE_TYPE));
+			_tiles.Add(new Vector2DInt(i, sizeY), new Tile(new Vector2DInt(i, sizeY), Constants.EDGE_TYPE, null));
 
 		// bottom edges
 		for (int i = 0; i < sizeX; i++)
-			_tiles.Add(new Vector2DInt(i, -1), new Tile(new Vector2DInt(i, -1), Constants.EDGE_TYPE));
+			_tiles.Add(new Vector2DInt(i, -1), new Tile(new Vector2DInt(i, -1), Constants.EDGE_TYPE, null));
+	}
+
+	public void ClearTileViews()
+	{
+		for (int i = 0; i < _tilesFolder.childCount; i++)
+			Object.Destroy(_tilesFolder.GetChild(i).gameObject);
+	}
+
+	public void ResetMap()
+	{
+		_tiles.Clear();
+		BinaryLoad();
 	}
 }
 

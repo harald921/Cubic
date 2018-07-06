@@ -5,6 +5,8 @@ using UnityEngine;
 #if DEBUG_TOOLS
 public class PlayerPage : MonoBehaviour
 {
+	[SerializeField] GUISkin _skin;
+
     Character _targetCharacter;
 
     public void Initialize(Character inCharacter) =>
@@ -15,7 +17,9 @@ public class PlayerPage : MonoBehaviour
         if (_targetCharacter == null)
             return;
 
-        GUILayout.Window(99, new Rect(0, 0, 350, 200), DrawStats, "Debug");
+		GUI.skin = _skin;
+
+		GUILayout.Window(99, new Rect(0, 0, 350, 200), DrawStats, "Debug");
 	}
 
 	void DrawStats(int id)
@@ -50,15 +54,25 @@ public class PlayerPage : MonoBehaviour
 
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(string.Format("TILE DEADLY ? : {0}", currentTile.model.data.deadly.ToString().ToUpper()));
-		GUILayout.EndHorizontal();
-
-		GUILayout.BeginVertical();
-		GUILayout.Space(10);
-		GUILayout.EndVertical();
+		GUILayout.EndHorizontal();		
 
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(string.Format("IS MASTER CLIENT ? : {0}", _targetCharacter.isMasterClient.ToString().ToUpper()));
 		GUILayout.EndHorizontal();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.Label(string.Format("PING : {0}", PhotonNetwork.GetPing().ToString()));
+		GUILayout.EndHorizontal();
+
+		if (PhotonNetwork.isMasterClient)
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.Width(100);
+			if (GUILayout.Button("Reset Round"))
+				Level.instance.ResetRound();
+
+			GUILayout.EndHorizontal();
+		} 		
 	}
 }
 

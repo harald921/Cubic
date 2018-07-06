@@ -60,6 +60,8 @@ public class Character : Photon.MonoBehaviour
 	{
 		transform.position = new Vector3(inSpawnTileX, 1, inSpawnTileY);
 		OnCharacterSpawned?.Invoke(new Vector2DInt(inSpawnTileX, inSpawnTileY));
+		stateComponent.SetState(CharacterState.Idle);
+
 	}
 	
 	void Update()

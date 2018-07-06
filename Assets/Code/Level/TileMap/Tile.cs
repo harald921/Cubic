@@ -57,12 +57,12 @@ public class Tile
         _tileDB = TileDatabase.instance;
     }
 
-    public Tile(Vector2DInt inPosition, string inTileName)
+    public Tile(Vector2DInt inPosition, string inTileName, Transform tilesFolder)
     {
         model = _tileDB.GetTile(inTileName);
 
         data  = new Data(model.data, inPosition);
-        _view = new View(model.view, inPosition);
+        _view = new View(model.view, inPosition, tilesFolder);
     }
 
 
@@ -107,7 +107,7 @@ public class Tile
 			tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", currentHealth); // cant get my tile model in a batter way right now, this should be fixed
 
             if (currentHealth == 0)
-                tileMap.SetTile(position, new Tile(position, "empty"));
+                tileMap.SetTile(position, new Tile(position, "empty", null));
         }
 
         public Tile GetRelativeTile(Vector2DInt inOffset) =>
@@ -118,12 +118,12 @@ public class Tile
     {
         public readonly GameObject mainGO;
 
-        public View(TileModel.View inViewModel, Vector2DInt inPosition)
+        public View(TileModel.View inViewModel, Vector2DInt inPosition, Transform tilesFolder)
         {
             if (inViewModel.mainGO == null)
                 return;
 
-            mainGO = Object.Instantiate(inViewModel.mainGO);
+            mainGO = Object.Instantiate(inViewModel.mainGO, tilesFolder);
             mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
     }
