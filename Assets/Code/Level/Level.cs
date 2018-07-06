@@ -20,7 +20,9 @@ public class Level : Photon.MonoBehaviour
 
     void Awake()
     {
-        instance = this;				
+        instance = this;
+
+		print(-5 - -5);
     }
 
 	public void ManualStart()

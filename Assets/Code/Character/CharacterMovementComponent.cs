@@ -279,7 +279,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 					// get occupying player and tell it to send an rpc that it got dashed
 					Character playerToDash = targetTile.data.GetOccupyingPlayer();
 
-					_collisionTracker.AddCollision(PhotonNetwork.ServerTimestamp, playerToDash.photonView.viewID, targetTile.data.position.x, targetTile.data.position.y);
+					_collisionTracker.AddCollision(playerToDash.photonView.viewID, targetTile.data.position.x, targetTile.data.position.y);
 
 					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, inDirection, inDashStrength - i);
 
@@ -295,7 +295,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			{
 				StopMovementAndAddCooldowns();
 				_collisionTracker.photonView.RPC("CheckServerCollision", PhotonTargets.MasterClient,
-												PhotonNetwork.ServerTimestamp, targetTile.data.GetOccupyingPlayer().photonView.viewID,
+												targetTile.data.GetOccupyingPlayer().photonView.viewID,
 												photonView.viewID, currentTile.data.position.x, currentTile.data.position.y,
 												targetTile.data.position.x, targetTile.data.position.y,
 												inDirection.x, inDirection.y, inDashStrength - i);
