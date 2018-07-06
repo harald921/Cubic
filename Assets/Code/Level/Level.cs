@@ -42,7 +42,6 @@ public class Level : Photon.MonoBehaviour
 		return new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f);
 	}
 
-
 	public void ResetRound()
 	{
 		photonView.RPC("NetworkResetRound", PhotonTargets.All);
