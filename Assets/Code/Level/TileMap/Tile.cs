@@ -19,6 +19,9 @@ public class TileModel
         public int  health;      // How many times can a player step on this tile?
         public bool deadly;      // Will a player die if it steps on this tile?
         public bool unbreakable; // tile cant break 
+
+		public AudioClip landSound;
+		public AudioClip breakSound;
     }
 
     [System.Serializable]
@@ -44,13 +47,22 @@ public class TileModel
 // Holds the instance data of a Tile, which separates different instances of the same type of tile
 public class Tile
 {
+	public enum TileSounds
+	{
+		Land,
+		Break,
+
+		Count,
+	}
+
     public readonly TileModel model;
 
     public readonly Data data;
-    readonly View _view;
+    readonly View view;
 
     static TileDatabase _tileDB;
 
+	AudioSource[] _sounds;
 
     static Tile()
     {
@@ -61,14 +73,16 @@ public class Tile
     {
         model = _tileDB.GetTile(inTileName);
 
-        data  = new Data(model.data, inPosition);
-        _view = new View(model.view, inPosition, tilesFolder);
-    }
+        data  = new Data(model.data, inPosition, this);
+        view = new View(model.view, inPosition, tilesFolder);
 
+		_sounds = new AudioSource[(int)TileSounds.Count];
+		CreateSounds();
+    }
 
     public void Delete()
     {
-        Object.Destroy(_view.mainGO, 1.0f); // hardcoded to same lenght as animation for now, dont like this too much
+        Object.Destroy(view.mainGO, 1.0f); // hardcoded to same lenght as animation for now, dont like this too much
     }
 
     public class Data
@@ -82,10 +96,13 @@ public class Tile
 
         Character _character;
 
-        public Data(TileModel.Data inDataModel, Vector2DInt inPosition)
+		Tile _myTile;
+
+        public Data(TileModel.Data inDataModel, Vector2DInt inPosition, Tile myTile)
         {
             position = inPosition;
             currentHealth = inDataModel.health;
+			_myTile = myTile;
         }
 
         public void SetCharacter(Character inCharacter) =>
@@ -104,7 +121,9 @@ public class Tile
         {
             currentHealth--;
 
-			tileMap.GetTile(position)._view.mainGO.GetComponent<Animator>().SetInteger("health", currentHealth); // cant get my tile model in a batter way right now, this should be fixed
+			_myTile.view.mainGO.GetComponent<Animator>().SetInteger("health", currentHealth);
+
+			_myTile.PlaySound(TileSounds.Break);
 
             if (currentHealth == 0)
                 tileMap.SetTile(position, new Tile(position, "empty", null));
@@ -127,6 +146,33 @@ public class Tile
             mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
     }
+
+	void CreateSounds()
+	{
+		if (view.mainGO == null)
+			return;
+
+		GameObject soundHolderLand = new GameObject("landSound", typeof(AudioSource));
+		soundHolderLand.transform.SetParent(view.mainGO.transform);
+
+		GameObject soundHolderBreak = new GameObject("breakSound", typeof(AudioSource));
+		soundHolderBreak.transform.SetParent(view.mainGO.transform);
+
+		_sounds[(int)TileSounds.Land] = soundHolderLand.GetComponent<AudioSource>();
+		_sounds[(int)TileSounds.Land].clip = model.data.landSound;
+
+		_sounds[(int)TileSounds.Break] = soundHolderBreak.GetComponent<AudioSource>();
+		_sounds[(int)TileSounds.Break].clip = model.data.breakSound;
+	}
+
+	public void PlaySound(TileSounds type)
+	{
+		if (view.mainGO == null)
+			return;
+
+		if(_sounds[(int)type] != null)
+		   _sounds[(int)type].Play();
+	}
 }
 
 

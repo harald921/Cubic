@@ -205,6 +205,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		if (DeadlyTile())
 			yield break;
 
+		currentTile.PlaySound(Tile.TileSounds.Land);
+
 		// reset state and add cooldown
 		_stateComponent.SetState(CharacterState.Idle);
 		_flagComponent.SetFlag(CharacterFlag.Cooldown_Walk, true, _model.walkCooldown, SingletonBehavior.Overwrite);

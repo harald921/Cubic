@@ -106,15 +106,7 @@ public class TileEditor : MonoBehaviour
 					Destroy(_selectedTile);
 					_selectedTile = null;
 				}
-			}
-			else
-			{
-				if (!_selectedTile)
-				{
-					_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
-					AddcolliderToSelectedTile();
-				}				
-			}
+			}			
 		}
 
 		// in placetile mode
@@ -139,6 +131,12 @@ public class TileEditor : MonoBehaviour
 				float yPos = 0.0f;
 				if (occupied)
 					yPos = 1.0f;
+
+				if (!_selectedTile)
+				{
+					_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
+					AddcolliderToSelectedTile();
+				}
 
 				_selectedTile.transform.position = new Vector3(Mathf.CeilToInt(hitPoint.x), yPos, Mathf.CeilToInt(hitPoint.z));
 
@@ -300,8 +298,7 @@ public class TileEditor : MonoBehaviour
 	public void ClearAllTiles()
 	{
 		int numTiles = _tileFolder.childCount;
-		for (int i = 0; i < numTiles; i++)
-			if (_selectedTile && _tileFolder.GetChild(0).gameObject != _selectedTile || !_selectedTile)
+		for (int i = 0; i < numTiles; i++)			
 				DestroyImmediate(_tileFolder.GetChild(0).gameObject);
 	}
 
@@ -320,6 +317,7 @@ public class TileEditor : MonoBehaviour
 		for (int y = 0; y < _gridSize.y; y++)
 			for (int x = 0; x < _gridSize.x; x++)
 			{
+				PlaceTile(x, y);
 				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), _selectedTileType);
 				GameObject tile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, new Vector3(x,0,y), Quaternion.identity, _tileFolder);
 				tile.AddComponent<BoxCollider>();
