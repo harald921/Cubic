@@ -172,5 +172,9 @@ MonoBehaviour:
     prefab: {fileID: 1978023637765966, guid: 5abd753268e12f64fb3cd905282beeb3, type: 2}
   - name: simon
     prefab: {fileID: 1744302026940898, guid: a60c486242858444eae0325ebac4cd42, type: 2}
+  - name: duplo
+    prefab: {fileID: 1613017766424994, guid: 3dd6cf30176f10e4d8ceb5cd689922c4, type: 2}
+  - name: rubikscube
+    prefab: {fileID: 1436183027928294, guid: 76ab9576951b8064d84c776c44075991, type: 2}
   _fallBackView: {fileID: 1201945228868484, guid: 9820109b85664c34c8619f8e17ac8698,
     type: 2}
