@@ -143,7 +143,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// set back tilereferences to the tile where we stopped
 		SetNewTileReferences(new Vector2DInt(inFromX, inFromY));
 
-		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges, true), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
 	IEnumerator<float> _Walk(Vector2DInt inFromTile, Vector2DInt inToTile)
