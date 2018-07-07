@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NetworkManager : Photon.MonoBehaviour
+// THIS CLASS IS USED TO START A GAME DIRECTLY FROM THE MAIN SCENE
+// EVERYONE WHO STARTS THE GAME FROM THIS SCENE WILL JOIN THE SAME ROOM AND GAME
+public class SimpleNetworkStarter : Photon.MonoBehaviour
 {
     [SerializeField] bool _debugMessages = false;
 	
@@ -10,8 +12,8 @@ public class NetworkManager : Photon.MonoBehaviour
     {
         PhotonNetwork.sendRate = 64;
         PhotonNetwork.sendRateOnSerialize = 64;
-
-        ConnectToServer();
+		
+		ConnectToServer();
     }
 
     void ConnectToServer() =>
@@ -41,4 +43,5 @@ public class NetworkManager : Photon.MonoBehaviour
 
     public static float CalculateNetDelta(double inTimestamp) =>
         (float)(PhotonNetwork.time - inTimestamp);
+	
 }

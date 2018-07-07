@@ -46,4 +46,5 @@ MonoBehaviour:
   - CheckServerCollision
   - FinishCancelledDash
   - NetworkResetRound
+  - NetworkStartGame
   DisableAutoOpenWizard: 1

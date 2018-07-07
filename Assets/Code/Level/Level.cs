@@ -9,7 +9,7 @@ public class Level : Photon.MonoBehaviour
 
     public TileMap tileMap { get; private set; }
 
-	[SerializeField] NetworkManager _networkManager;
+	[SerializeField] SimpleNetworkStarter _networkManager;
     [SerializeField] GameObject _characterPrefab; // The character gameobject that Photon automagically creates 
 	[SerializeField] string _mapToLoad;
 	[SerializeField] string _modelView;
@@ -21,8 +21,6 @@ public class Level : Photon.MonoBehaviour
     void Awake()
     {
         instance = this;
-
-		print(-5 - -5);
     }
 
 	public void ManualStart()
@@ -33,7 +31,13 @@ public class Level : Photon.MonoBehaviour
 		tileMap = new TileMap(_mapToLoad, _tilesFolder);
 		
 		_character.Spawn(tileMap.GetRandomTileCoords());
+	}
 
+	// will wait to all players in this room have loaded in this level scene 
+	public void StartOnAllLoaded()
+	{
+		if (PhotonNetwork.isMasterClient)
+			photonView.RPC("NetworkStartGame", PhotonTargets.AllViaServer);
 	}
 	
 	// use for debbuging so you get a different color
@@ -53,5 +57,14 @@ public class Level : Photon.MonoBehaviour
 		tileMap.ClearTileViews();
 		tileMap.ResetMap();		
 		_character.Spawn(tileMap.GetRandomTileCoords());
+	}
+
+	[PunRPC]
+	void NetworkStartGame()
+	{
+		if (PhotonNetwork.isMasterClient)
+			FindObjectOfType<CollisionTracker>().ManualStart();
+
+		ManualStart();
 	}
 }

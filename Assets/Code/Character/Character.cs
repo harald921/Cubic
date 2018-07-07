@@ -107,6 +107,7 @@ public class Character : Photon.MonoBehaviour
 
 		if (Input.GetKeyDown(KeyCode.L))
 			soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Dash);
+
 #endif
 	}
 }
