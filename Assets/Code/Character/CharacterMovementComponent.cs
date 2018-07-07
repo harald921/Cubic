@@ -84,7 +84,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	void NetworkCharge()
 	{
 		_stateComponent.SetState(CharacterState.Charging);
-		_character.view.GetComponent<Renderer>().material.color = Color.red; // temp for feedback when charging
+		ChangeColor(Color.red, _character.view); // temp for feedback when charging
 	}
 
 	[PunRPC]
