@@ -15,9 +15,9 @@ public class CharacterDatabase : MonoBehaviour
 	[SerializeField] ViewData[] _characterModelViews;
 
 	[Space(5), Header("model to use if fails to find correct one")]
-	[SerializeField] GameObject _fallBackView;
+	[SerializeField] ViewData _fallBackView;
 
-	Dictionary<string, GameObject> _characterViews = new Dictionary<string, GameObject>();
+	Dictionary<string, ViewData> _characterViews = new Dictionary<string, ViewData>();
 
 	[Serializable]
 	public class ViewData
@@ -27,16 +27,16 @@ public class CharacterDatabase : MonoBehaviour
 		public AudioClip walkSound;
 		public AudioClip dashSound;
 		public AudioClip hitSound;
-
+		public AudioClip deathSound;
 	}
 
 	void Awake()
 	{
 		for (int i =0; i < _characterModelViews.Length; i++)		
-			_characterViews.Add(_characterModelViews[i].name, _characterModelViews[i].prefab);		
+			_characterViews.Add(_characterModelViews[i].name, _characterModelViews[i]);		
 	}
 
-	public GameObject GetViewFromName(string name)
+	public ViewData GetViewFromName(string name)
 	{
 		if (_characterViews.ContainsKey(name))
 			return _characterViews[name];

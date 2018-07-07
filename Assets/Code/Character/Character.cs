@@ -6,6 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterMovementComponent))]
 [RequireComponent(typeof(CharacterFlagComponent))]
 [RequireComponent(typeof(CharacterStateComponent))]
+[RequireComponent(typeof(CharacterSoundComponent))]
 public class Character : Photon.MonoBehaviour
 {
     // Will be renamed to "Character" when it's fully transfered
@@ -17,8 +18,9 @@ public class Character : Photon.MonoBehaviour
     public CharacterMovementComponent movementComponent {get; private set;}
     public CharacterFlagComponent     flagComponent     {get; private set;}
     public CharacterStateComponent    stateComponent    {get; private set;}
+	public CharacterSoundComponent    soundComponent    {get; private set;}
 
-    public event Action<Vector2DInt> OnCharacterSpawned;
+	public event Action<Vector2DInt> OnCharacterSpawned;
 
 	public void Initialize(string inViewName)
     {
@@ -35,24 +37,25 @@ public class Character : Photon.MonoBehaviour
 	void NetworkInitialize(string inViewName)
 	{
 		model = CharacterDatabase.instance.standardModel;
+		CharacterDatabase.ViewData vData = CharacterDatabase.instance.GetViewFromName(inViewName);
+
+		// Setup the correct view, probably in a view component	
+		view = Instantiate(vData.prefab);
+		view.transform.SetParent(transform, false);
+
+		// gat components
 		movementComponent = GetComponent<CharacterMovementComponent>();
 		flagComponent     = GetComponent<CharacterFlagComponent>();
 		stateComponent    = GetComponent<CharacterStateComponent>();
+		soundComponent    = GetComponent<CharacterSoundComponent>();
 
+		// initialize components
 		movementComponent.ManualAwake();
 		flagComponent.ManualAwake();
 		stateComponent.ManualAwake();
+		soundComponent.ManualAwake(vData, view.transform);
 
-		// Setup the correct view, probably in a view component
-		view = Instantiate(CharacterDatabase.instance.GetViewFromName(inViewName));
-		view.transform.SetParent(transform, false);
-
-		// temp way of getting original material color, wont be used later at all
-		Renderer r = view.GetComponent<Renderer>();
-		if (r == null)
-			r = view.transform.GetChild(0).GetComponent<Renderer>();
-
-		color = r.material.color;
+		GetOriginalColor();
 
 #if DEBUG_TOOLS
 		if (photonView.isMine)
@@ -66,7 +69,16 @@ public class Character : Photon.MonoBehaviour
 		transform.position = new Vector3(inSpawnTileX, 1, inSpawnTileY);
 		OnCharacterSpawned?.Invoke(new Vector2DInt(inSpawnTileX, inSpawnTileY));
 		stateComponent.SetState(CharacterState.Idle);
+	}
 
+	void GetOriginalColor()
+	{
+		// temp way of getting original material color, wont be used later at all
+		Renderer r = view.GetComponent<Renderer>();
+		if (r == null)
+			r = view.transform.GetChild(0).GetComponent<Renderer>();
+
+		color = r.material.color;
 	}
 	
 	void Update()
@@ -86,10 +98,15 @@ public class Character : Photon.MonoBehaviour
 		if (Input.GetAxisRaw(Constants.AXIS_HORIZONTAL) > 0)
 			movementComponent.TryWalk(Vector2DInt.Right);
 
+		
+
 #if DEBUG_TOOLS
 
 		if (Input.GetKeyDown(KeyCode.P))
 			movementComponent.InfiniteDash();
+
+		if (Input.GetKeyDown(KeyCode.L))
+			soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Dash);
 #endif
 	}
 }

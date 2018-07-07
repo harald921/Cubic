@@ -170,11 +170,32 @@ MonoBehaviour:
   _characterModelViews:
   - name: harald
     prefab: {fileID: 1978023637765966, guid: 5abd753268e12f64fb3cd905282beeb3, type: 2}
+    walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
+    dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
+    hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
+    deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
   - name: simon
     prefab: {fileID: 1744302026940898, guid: a60c486242858444eae0325ebac4cd42, type: 2}
+    walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
+    dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
+    hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
+    deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
   - name: duplo
     prefab: {fileID: 1613017766424994, guid: 3dd6cf30176f10e4d8ceb5cd689922c4, type: 2}
+    walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
+    dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
+    hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
+    deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
   - name: rubikscube
     prefab: {fileID: 1436183027928294, guid: 76ab9576951b8064d84c776c44075991, type: 2}
-  _fallBackView: {fileID: 1201945228868484, guid: 9820109b85664c34c8619f8e17ac8698,
-    type: 2}
+    walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
+    dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
+    hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
+    deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
+  _fallBackView:
+    name: matti
+    prefab: {fileID: 1201945228868484, guid: 9820109b85664c34c8619f8e17ac8698, type: 2}
+    walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
+    dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
+    hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
+    deathSound: {fileID: 0}

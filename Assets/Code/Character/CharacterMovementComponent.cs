@@ -105,7 +105,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// set new current tile if desynced
 		SetNewTileReferences(new Vector2DInt(inFromX, inFromY));
 
-		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), numDashtiles), gameObject.GetInstanceID(), SingletonBehavior.Overwrite); // takes over the dashPower from the player that dashed into us
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), numDashtiles, true), gameObject.GetInstanceID(), SingletonBehavior.Overwrite); // takes over the dashPower from the player that dashed into us
 	}
 
 	[PunRPC]
@@ -113,6 +113,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	{
 		// kill all coroutines on this layer
 		Timing.KillCoroutines(gameObject.GetInstanceID());
+
+		// play hit sound
+		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Punch);
 
 		// set new current tile if desynced
 		SetNewTileReferences(new Vector2DInt(inFromX, inFromY));
@@ -146,6 +149,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	IEnumerator<float> _Walk(Vector2DInt inFromTile, Vector2DInt inToTile)
 	{
 		_stateComponent.SetState(CharacterState.Walking);
+
+		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Walk);
 
 		if (!currentTile.model.data.unbreakable)
 			currentTile.data.DamageTile();
@@ -238,9 +243,13 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		photonView.RPC("NetworkDash", PhotonTargets.All, currentPos.x, currentPos.y, _lastMoveDirection.x, _lastMoveDirection.y, currentDashCharges);
 	}
 
-	public IEnumerator<float> _Dash(Vector2DInt inDirection, int inDashStrength)
+	public IEnumerator<float> _Dash(Vector2DInt inDirection, int inDashStrength, bool fromCollision = false)
 	{
 		_stateComponent.SetState(CharacterState.Dashing); // set state to dashing
+
+		// only play dash sound if this was a volentary dash
+		if(!fromCollision)
+		   _character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Dash);
 
 		ChangeColor(_character.color, _character.view);
 
@@ -383,6 +392,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		currentTile.data.RemovePlayer();
 		_stateComponent.SetState(CharacterState.Dead);
 
+		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Death);
+
 		// sink to bottom
 		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 
@@ -392,21 +403,19 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		}			
 	}
 
-
 	void ChangeColor(Color color, GameObject view)
 	{
+		// loops over and change color of all meshes of a gameobject
 		Renderer r = view.GetComponent<Renderer>();
 		if (r != null)
 			r.material.color = color;
-		else
+		
+		for (int i = 0; i < view.transform.childCount; i++)
 		{
-			for (int i = 0; i < view.transform.childCount; i++)
-			{
-				Renderer meshRenderer = view.transform.GetChild(i).GetComponent<Renderer>();
-				if (meshRenderer)
-					meshRenderer.material.color = color;
-			}
-		}
+			Renderer meshRenderer = view.transform.GetChild(i).GetComponent<Renderer>();
+			if (meshRenderer)
+				meshRenderer.material.color = color;
+		}		
 	}
 
 #if DEBUG_TOOLS
