@@ -209,7 +209,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	{
 		_stateComponent.SetState(CharacterState.Charging);
 
-		_character.view.GetComponent<Renderer>().material.color = Color.red; // temp for feedback when charging
+		ChangeColor(Color.red, _character.view);		
 
 		float chargeAmount = _model.dashMinCharge;
 
@@ -242,7 +242,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	{
 		_stateComponent.SetState(CharacterState.Dashing); // set state to dashing
 
-		_character.view.GetComponent<Renderer>().material.color = _character.color; // temp for feedback when charging
+		ChangeColor(_character.color, _character.view);
 
 		// loop over all dash charges
 		for (int i = 0; i < inDashStrength; i++)
@@ -390,6 +390,23 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		{
 			// should call some gamemanager here to track all deaths of players
 		}			
+	}
+
+
+	void ChangeColor(Color color, GameObject view)
+	{
+		Renderer r = view.GetComponent<Renderer>();
+		if (r != null)
+			r.material.color = color;
+		else
+		{
+			for (int i = 0; i < view.transform.childCount; i++)
+			{
+				Renderer meshRenderer = view.transform.GetChild(i).GetComponent<Renderer>();
+				if (meshRenderer)
+					meshRenderer.material.color = color;
+			}
+		}
 	}
 
 #if DEBUG_TOOLS

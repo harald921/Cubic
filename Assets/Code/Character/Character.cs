@@ -47,7 +47,12 @@ public class Character : Photon.MonoBehaviour
 		view = Instantiate(CharacterDatabase.instance.GetViewFromName(inViewName));
 		view.transform.SetParent(transform, false);
 
-		color = view.GetComponent<Renderer>().material.color;
+		// temp way of getting original material color, wont be used later at all
+		Renderer r = view.GetComponent<Renderer>();
+		if (r == null)
+			r = view.transform.GetChild(0).GetComponent<Renderer>();
+
+		color = r.material.color;
 
 #if DEBUG_TOOLS
 		if (photonView.isMine)
