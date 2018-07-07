@@ -24,6 +24,10 @@ public class CharacterDatabase : MonoBehaviour
 	{
 		public string name;
 		public GameObject prefab;
+		public AudioClip walkSound;
+		public AudioClip dashSound;
+		public AudioClip hitSound;
+
 	}
 
 	void Awake()
