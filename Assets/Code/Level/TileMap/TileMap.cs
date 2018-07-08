@@ -66,7 +66,9 @@ public class TileMap
 
                 string typeName = reader.ReadString(); // Read: Tile type name  
 
-                _tiles.Add(tilePosition, new Tile(tilePosition, typeName, _tilesFolder));
+				float yRot = reader.ReadSingle();
+
+                _tiles.Add(tilePosition, new Tile(tilePosition, typeName, yRot, _tilesFolder));
             }
 
 			AddEdgeTiles(gridSizeX, gridSizeY);
@@ -78,19 +80,19 @@ public class TileMap
 	{
 		// left edges
 		for (int i = 0; i < sizeY; i++)
-			_tiles.Add(new Vector2DInt(-1, i), new Tile(new Vector2DInt(-1, i), Constants.EDGE_TYPE, null));
+			_tiles.Add(new Vector2DInt(-1, i), new Tile(new Vector2DInt(-1, i), Constants.EDGE_TYPE, 0, null));
 
 		// right edges
 		for (int i = 0; i < sizeY; i++)
-			_tiles.Add(new Vector2DInt(sizeX, i), new Tile(new Vector2DInt(sizeX, i), Constants.EDGE_TYPE, null));
+			_tiles.Add(new Vector2DInt(sizeX, i), new Tile(new Vector2DInt(sizeX, i), Constants.EDGE_TYPE, 0, null));
 
 		// top edges
 		for (int i = 0; i < sizeX; i++)
-			_tiles.Add(new Vector2DInt(i, sizeY), new Tile(new Vector2DInt(i, sizeY), Constants.EDGE_TYPE, null));
+			_tiles.Add(new Vector2DInt(i, sizeY), new Tile(new Vector2DInt(i, sizeY), Constants.EDGE_TYPE, 0, null));
 
 		// bottom edges
 		for (int i = 0; i < sizeX; i++)
-			_tiles.Add(new Vector2DInt(i, -1), new Tile(new Vector2DInt(i, -1), Constants.EDGE_TYPE, null));
+			_tiles.Add(new Vector2DInt(i, -1), new Tile(new Vector2DInt(i, -1), Constants.EDGE_TYPE, 0, null));
 	}
 
 	public void ClearTileViews()

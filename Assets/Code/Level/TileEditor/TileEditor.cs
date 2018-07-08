@@ -10,11 +10,13 @@ public class TileInfo
 {
 	public Vector2DInt position;
 	public string name = "";
+	public float yRotation;
 
-	public TileInfo(Vector2DInt inPosition, string inName)
+	public TileInfo(Vector2DInt inPosition, string inName, float inYRotation)
 	{
 		position = inPosition;
 		name = inName;
+		yRotation = inYRotation;
 	}
 }
 
@@ -39,6 +41,8 @@ public class TileEditor : MonoBehaviour
 	Vector2DInt _gridDefaultSize = new Vector2DInt(10, 10);
 	Vector2DInt _gridSize;
 	GameObject _grid;
+
+	float _rotationY = 0.0f;
 
 	// tileinfo
 	TileInfo[,] _tileProperties;
@@ -134,8 +138,20 @@ public class TileEditor : MonoBehaviour
 
 				if (!_selectedTile)
 				{
-					_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
+					_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, Vector3.zero, _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
 					AddcolliderToSelectedTile();
+				}
+
+				if(Input.GetMouseButtonDown(3) || Input.GetKeyDown(KeyCode.R))
+				{
+					_rotationY += 90.0f;
+					if (_rotationY > 360.0f)
+						_rotationY = 90.0f;
+
+					Vector3 oldRotation = _selectedTile.transform.rotation.eulerAngles;
+					oldRotation.y = _rotationY;
+
+					_selectedTile.transform.rotation = Quaternion.Euler(oldRotation);
 				}
 
 				_selectedTile.transform.position = new Vector3(Mathf.CeilToInt(hitPoint.x), yPos, Mathf.CeilToInt(hitPoint.z));
@@ -147,9 +163,9 @@ public class TileEditor : MonoBehaviour
 						return;
 
 					if (_currentEditMode == EDIT_MODE.PLACE_SINGLE && Input.GetMouseButtonDown(0))
-						PlaceTile(CoordX, CoordY);
+						PlaceTile(CoordX, CoordY, _rotationY);
 					else if(_currentEditMode == EDIT_MODE.PAINT && Input.GetMouseButton(0))
-						PlaceTile(CoordX, CoordY);
+						PlaceTile(CoordX, CoordY, _rotationY);
 				}
 			}
 		}
@@ -174,18 +190,19 @@ public class TileEditor : MonoBehaviour
 
 	}
 
-	void PlaceTile(int x, int y)
+	void PlaceTile(int x, int y, float yRot)
 	{
 		_selectedTile = null;
 		_tileProperties[y, x].name = _selectedTileType;
 		_tileProperties[y, x].position = new Vector2DInt(x, y);
+		_tileProperties[y, x].yRotation = yRot;
 
 		// dont spawn any tile if it is empty
 		if (_selectedTileType == "empty") 
 			return;
 
 		// spawn new tile
-		_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, _tileFolder);
+		_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, Vector3.zero, _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
 		AddcolliderToSelectedTile();
 	}
 
@@ -201,7 +218,7 @@ public class TileEditor : MonoBehaviour
 		// instantiate tile and add collider
 		if(_currentEditMode != EDIT_MODE.DELETE)
 		{
-			_selectedTile = Instantiate(_tileDB.GetTile(index).view.mainGO, _tileFolder);
+			_selectedTile = Instantiate(_tileDB.GetTile(index).view.mainGO, Vector3.zero, _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
 			AddcolliderToSelectedTile();
 		}
 
@@ -278,7 +295,7 @@ public class TileEditor : MonoBehaviour
 		_tileProperties = new TileInfo[sizeY, sizeX];
 		for (int y = 0; y < sizeY; y++)
 			for (int x = 0; x < sizeX; x++)
-				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), "empty"); // set all tiles to start as deathtiles and set position according to coords
+				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), "empty", 0.0f); // set all tiles to start as deathtiles and set position according to coords
 	}
 
 	public void OnTileChanged(int index)
@@ -317,9 +334,9 @@ public class TileEditor : MonoBehaviour
 		for (int y = 0; y < _gridSize.y; y++)
 			for (int x = 0; x < _gridSize.x; x++)
 			{
-				PlaceTile(x, y);
-				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), _selectedTileType);
-				GameObject tile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, new Vector3(x,0,y), Quaternion.identity, _tileFolder);
+				PlaceTile(x, y, _rotationY);
+				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), _selectedTileType, 0.0f);
+				GameObject tile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, new Vector3(x,0,y), _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
 				tile.AddComponent<BoxCollider>();
 				tile.layer = 9;
 			}
@@ -342,6 +359,7 @@ public class TileEditor : MonoBehaviour
 				{
 					_tileProperties[y, x].position.BinarySave(writer);
 					writer.Write(_tileProperties[y, x].name);
+					writer.Write(_tileProperties[y, x].yRotation);
 				}
 
 			_promt.SetAndShow(string.Format("Level {0} Was successfully saved", levelName), () => print("Ok button pressed, seems to work"));
@@ -367,16 +385,21 @@ public class TileEditor : MonoBehaviour
 						Vector2DInt tilePosition = Vector2DInt.Zero;
 						tilePosition.BinaryLoad(reader);       // Read: Position
 						string typeName = reader.ReadString(); // Read: Tile type name  
+						float yRot = reader.ReadSingle();
 
 						_tileProperties[y, x].name = typeName;
 						_tileProperties[y, x].position = new Vector2DInt(x, y);
+						_tileProperties[y, x].yRotation = yRot;
 
 						// dont spawn any tile if it is empty
 						if (typeName == "empty")
 							continue;
 
+						Quaternion r = new Quaternion();
+						r = _tileDB.GetTile(typeName).view.mainGO.transform.rotation;
+
 						// spawn new tile
-						GameObject tile = Instantiate(_tileDB.GetTile(typeName).view.mainGO, new Vector3(x, 0, y), Quaternion.identity, _tileFolder);
+						GameObject tile = Instantiate(_tileDB.GetTile(typeName).view.mainGO, new Vector3(x, 0, y), r * Quaternion.Euler(0, yRot, 0), _tileFolder);
 						tile.AddComponent<BoxCollider>();
 						tile.layer = 9;
 					}
