@@ -69,12 +69,12 @@ public class Tile
         _tileDB = TileDatabase.instance;
     }
 
-    public Tile(Vector2DInt inPosition, string inTileName, Transform tilesFolder)
+    public Tile(Vector2DInt inPosition, string inTileName, float inYRotation, Transform tilesFolder)
     {
         model = _tileDB.GetTile(inTileName);
 
         data  = new Data(model.data, inPosition, this);
-        view = new View(model.view, inPosition, tilesFolder);
+        view = new View(model.view, inPosition, inYRotation, tilesFolder);
 
 		_sounds = new AudioSource[(int)TileSounds.Count];
 		CreateSounds();
@@ -126,7 +126,7 @@ public class Tile
 			_myTile.PlaySound(TileSounds.Break);
 
             if (currentHealth == 0)
-                tileMap.SetTile(position, new Tile(position, "empty", null));
+                tileMap.SetTile(position, new Tile(position, "empty", 0.0f, null));
         }
 
         public Tile GetRelativeTile(Vector2DInt inOffset) =>
@@ -137,12 +137,13 @@ public class Tile
     {
         public readonly GameObject mainGO;
 
-        public View(TileModel.View inViewModel, Vector2DInt inPosition, Transform tilesFolder)
+        public View(TileModel.View inViewModel, Vector2DInt inPosition, float inYrotation, Transform tilesFolder)
         {
             if (inViewModel.mainGO == null)
                 return;
 
             mainGO = Object.Instantiate(inViewModel.mainGO, tilesFolder);
+			mainGO.transform.rotation = mainGO.transform.rotation * Quaternion.Euler(new Vector3(0, inYrotation, 0));
             mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
         }
     }
