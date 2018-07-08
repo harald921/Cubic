@@ -370,11 +370,6 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.size
-      value: 7
-      objectReference: {fileID: 0}
     - target: {fileID: 4893764240191414, guid: 51ce67218695e5a4b8798b10455461b0, type: 2}
       propertyPath: m_LocalPosition.x
       value: 9.132564
@@ -405,68 +400,6 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4893764240191414, guid: 51ce67218695e5a4b8798b10455461b0, type: 2}
       propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: inTileEditor
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[5]._typeName
-      value: desert
-      objectReference: {fileID: 0}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[5]._data.walkable
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[5]._data.health
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[5]._data.landSound
-      value: 
-      objectReference: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[5]._view._mainGO
-      value: 
-      objectReference: {fileID: 1839585859258912, guid: 9a037bbafdecfbb41bd51be0a2f8a361,
-        type: 2}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[6]._typeName
-      value: quicksand
-      objectReference: {fileID: 0}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[6]._data.walkable
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[6]._data.health
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[6]._data.landSound
-      value: 
-      objectReference: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[6]._view._mainGO
-      value: 
-      objectReference: {fileID: 1891069801542920, guid: c986eb9c24cf9d84ebcbba88659b5958,
-        type: 2}
-    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
-        type: 2}
-      propertyPath: tilesToSerialize.Array.data[6]._data.deadly
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -3344,10 +3277,10 @@ RectTransform:
   m_Father: {fileID: 400960699}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.5}
-  m_SizeDelta: {x: -20, y: -13}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -4.3}
+  m_SizeDelta: {x: 140, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1656993019
 MonoBehaviour:
@@ -3580,10 +3513,10 @@ RectTransform:
   m_Father: {fileID: 755935879}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.5}
-  m_SizeDelta: {x: -20, y: -13}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -4.299946}
+  m_SizeDelta: {x: 140, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1739216070
 MonoBehaviour:
