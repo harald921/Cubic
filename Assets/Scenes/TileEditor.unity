@@ -370,6 +370,11 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.size
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 4893764240191414, guid: 51ce67218695e5a4b8798b10455461b0, type: 2}
       propertyPath: m_LocalPosition.x
       value: 9.132564
@@ -405,6 +410,63 @@ Prefab:
     - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
         type: 2}
       propertyPath: inTileEditor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[5]._typeName
+      value: desert
+      objectReference: {fileID: 0}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[5]._data.walkable
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[5]._data.health
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[5]._data.landSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[5]._view._mainGO
+      value: 
+      objectReference: {fileID: 1839585859258912, guid: 9a037bbafdecfbb41bd51be0a2f8a361,
+        type: 2}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[6]._typeName
+      value: quicksand
+      objectReference: {fileID: 0}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[6]._data.walkable
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[6]._data.health
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[6]._data.landSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[6]._view._mainGO
+      value: 
+      objectReference: {fileID: 1891069801542920, guid: c986eb9c24cf9d84ebcbba88659b5958,
+        type: 2}
+    - target: {fileID: 114066752224454210, guid: 51ce67218695e5a4b8798b10455461b0,
+        type: 2}
+      propertyPath: tilesToSerialize.Array.data[6]._data.deadly
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
