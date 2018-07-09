@@ -15,11 +15,8 @@ public class CollisionTracker : Photon.MonoBehaviour
 	List <CollisionData> _recentCollisions;
 
 	public void ManualStart()
-	{
-		if (PhotonNetwork.isMasterClient)
-		{
-			_recentCollisions = new List<CollisionData>();			
-		}
+	{		
+		_recentCollisions = new List<CollisionData>();					
 	}
 
 	public void AddCollision(int photonId, int tileX, int tileY)
@@ -33,6 +30,7 @@ public class CollisionTracker : Photon.MonoBehaviour
 	[PunRPC]
 	public void CheckServerCollision(int photonIdHit, int photonIdMine, int myTileX, int myTileY, int HitTileX, int hitTileY, int directionX, int directionY, int chargesLeft)
 	{
+		
 		Vector2DInt tile = new Vector2DInt(HitTileX, hitTileY);
 
 		for(int i =0; i < _recentCollisions.Count; i++)
@@ -43,6 +41,6 @@ public class CollisionTracker : Photon.MonoBehaviour
 		}
 
 		// if we get here it means no collision was found and the client cancelled his dash incorrectly, tell him to finish rest of dash
-		PhotonView.Find(photonIdMine).RPC("FinishCancelledDash", PhotonTargets.Others, myTileX, myTileY, directionX, directionY, chargesLeft);					
+		PhotonView.Find(photonIdMine).RPC("FinishCancelledDash", PhotonTargets.All, myTileX, myTileY, directionX, directionY, chargesLeft);					
 	}	
 }

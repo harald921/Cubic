@@ -69,9 +69,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		photonView.RPC("NetworkOnGettingDashed", PhotonTargets.All, inStartTile.x, inStartTile.y, inDirection.x, inDirection.y, inHitPower);
 	}
 
-	public void OnDashingOther(Vector2DInt inLastTile, Vector3 inRot)
+	public void OnDashingOther(Vector2DInt inLastTile, Quaternion inRot)
 	{
-		photonView.RPC("NetworkOnDashingOther", PhotonTargets.All, inLastTile.x, inLastTile.y, inRot.x, inRot.y, inRot.z);
+		photonView.RPC("NetworkOnDashingOther", PhotonTargets.All, inLastTile.x, inLastTile.y, inRot.x, inRot.y, inRot.z, inRot.w);
 	}
 
 	[PunRPC]
@@ -109,7 +109,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkOnDashingOther(int inFromX, int inFromY, float inRotX, float inRotY, float inRotZ)
+	void NetworkOnDashingOther(int inFromX, int inFromY, float inRotX, float inRotY, float inRotZ, float inRotW)
 	{
 		// kill all coroutines on this layer
 		Timing.KillCoroutines(gameObject.GetInstanceID());
@@ -123,7 +123,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// this should not have to be interpolated becuase everyone stops locally aswell
 		// used as safety if we only detects collision on server and not locally, should be very rare and be a small teleport if happens
 		transform.position = new Vector3(inFromX, 1, inFromY);
-		transform.localRotation = Quaternion.Euler(new Vector3(inRotX, inRotY, inRotZ));
+		transform.rotation = new Quaternion(inRotX, inRotY, inRotZ, inRotW);
 
 		// set last target rotation to current rotation(we never started lerping towards target)
 		_lastTargetRotation = transform.rotation;
@@ -280,6 +280,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			Quaternion fromRotation = transform.rotation;
 			Quaternion targetRotation = Quaternion.Euler(movementDirection * (90 * _model.dashRotationSpeed)) * _lastTargetRotation;
 
+			Quaternion thisLastTargetRotation = _lastTargetRotation;
+
 			_lastTargetRotation = targetRotation;
 
 
@@ -295,7 +297,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, inDirection, inDashStrength - i);
 
 					// send rpc that we hit other player and cancel all our current movement
-					OnDashingOther(currentTile.data.position, transform.localEulerAngles);
+					OnDashingOther(currentTile.data.position, thisLastTargetRotation);
 
 					yield break;
 				}

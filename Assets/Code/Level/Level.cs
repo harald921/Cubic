@@ -61,10 +61,8 @@ public class Level : Photon.MonoBehaviour
 
 	[PunRPC]
 	void NetworkStartGame()
-	{
-		if (PhotonNetwork.isMasterClient)
-			FindObjectOfType<CollisionTracker>().ManualStart();
-
+	{		
+		FindObjectOfType<CollisionTracker>().ManualStart();
 		ManualStart();
 	}
 }
