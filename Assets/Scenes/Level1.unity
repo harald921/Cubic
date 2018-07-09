@@ -482,11 +482,6 @@ Prefab:
       propertyPath: _modelView
       value: duplo
       objectReference: {fileID: 0}
-    - target: {fileID: 114720730347452064, guid: 76e810a2be3d3644692caefe08e624a3,
-        type: 2}
-      propertyPath: _mapToLoad
-      value: DesertLevel
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76e810a2be3d3644692caefe08e624a3, type: 2}
   m_IsPrefabParent: 0
