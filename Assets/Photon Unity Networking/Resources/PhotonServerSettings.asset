@@ -47,4 +47,6 @@ MonoBehaviour:
   - FinishCancelledDash
   - NetworkResetRound
   - NetworkStartGame
+  - UpdateNumPlayersInRoom
+  - ContinueToLevelselect
   DisableAutoOpenWizard: 1
