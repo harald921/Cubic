@@ -403,7 +403,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		if (PhotonNetwork.isMasterClient)
 		{
-			// should call some gamemanager here to track all deaths of players
+			Match.instance.OnPlayerDie(_character.playerID);
 		}			
 	}
 

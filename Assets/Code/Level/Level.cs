@@ -19,7 +19,7 @@ public class Level : Photon.MonoBehaviour
 		PlayerData pd = Match.instance.playerData;
 
 		_character = PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity, 0).GetComponent<Character>();
-		_character.Initialize(pd.character);
+		_character.Initialize(pd.character, pd.playerId);
 
 		tileMap = new TileMap(_mapToLoad, _tilesFolder);
 		

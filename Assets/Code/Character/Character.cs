@@ -14,6 +14,7 @@ public class Character : Photon.MonoBehaviour
     public CharacterModel model {get; private set;}
     public GameObject     view  {get; private set;} 
 	public bool isMasterClient  {get; private set;}
+	public int playerID         {get; private set;}
 
     public CharacterMovementComponent movementComponent {get; private set;}
     public CharacterFlagComponent     flagComponent     {get; private set;}
@@ -22,10 +23,10 @@ public class Character : Photon.MonoBehaviour
 
 	public event Action<Vector2DInt> OnCharacterSpawned;
 
-	public void Initialize(string inViewName)
+	public void Initialize(string inViewName, int inPlayerId)
     {
 		isMasterClient = PhotonNetwork.isMasterClient;
-		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName); // wont need be buffered later when level loading is synced
+		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName, inPlayerId); // wont need be buffered later when level loading is synced
 	}
 
 	public void Spawn(Vector2DInt inSpawnTile)
@@ -34,8 +35,10 @@ public class Character : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkInitialize(string inViewName)
+	void NetworkInitialize(string inViewName, int inPlayerId)
 	{
+		playerID = inPlayerId;
+
 		model = CharacterDatabase.instance.standardModel;
 		CharacterDatabase.ViewData vData = CharacterDatabase.instance.GetViewFromName(inViewName);
 
@@ -83,7 +86,7 @@ public class Character : Photon.MonoBehaviour
 	
 	void Update()
 	{
-		if (!photonView.isMine)
+		if (!photonView.isMine || !Match.instance.matchStarted)
 			return;
 
 		if (Input.GetButton(Constants.BUTTON_CHARGE))
