@@ -4,24 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon;
 
-public class PlayWithFriendsPage : Photon.MonoBehaviour
-{
-	[SerializeField] GameObject _content;
-	[SerializeField] GameObject _levelScreen;
-
+public class PlayWithFriendsPage : MenuPage
+{		
 	[SerializeField] Text _roomNameText;
 	[SerializeField] Text _joinRoomInput;
 	[SerializeField] Text _numJoinedPlayersText;
 
 	[SerializeField] Button _continueButton;
-
-	[SerializeField] LevelSelectPage _lvlselect;
-
-	void Awake()
-	{
-		_continueButton.interactable = false;	
-	}
-
+	
 	public void HostRoom()
 	{
 		RoomOptions roomOptions = new RoomOptions();
@@ -59,34 +49,37 @@ public class PlayWithFriendsPage : Photon.MonoBehaviour
 		GameObject playerData = new GameObject("PlayerData", typeof(PlayerData));
 		playerData.GetComponent<PlayerData>().playerId = PhotonNetwork.room.PlayerCount - 1;
 		DontDestroyOnLoad(playerData);
-
-		photonView.RPC("UpdateNumPlayersInRoom", PhotonTargets.All, PhotonNetwork.room.PlayerCount);
 	}
 
 	void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
 	{
-		photonView.RPC("UpdateNumPlayersInRoom", PhotonTargets.All, PhotonNetwork.room.PlayerCount);
+		// send notification if anyone disconnects
+	}
+	
+	[PunRPC]
+	void ContinueToLevelselect()
+	{
+		MainMenuSystem.instance.SetToPage("LevelSelectScreen");
 	}
 
-	[PunRPC]
-	void UpdateNumPlayersInRoom(int numPlayers)
+	public override void OnPageEnter()
 	{
+		_continueButton.interactable = false;
+	}
+
+	public override void UpdatePage()
+	{
+		if (PhotonNetwork.room == null)
+			return;
+
 		_numJoinedPlayersText.text = string.Format("{0}/4", PhotonNetwork.room.PlayerCount.ToString());
 
 		if (PhotonNetwork.isMasterClient && PhotonNetwork.room.PlayerCount > 1)
 			_continueButton.interactable = true;
 	}
 
-	[PunRPC]
-	void ContinueToLevelselect()
+	public override void OnPageExit()
 	{
-		_levelScreen.SetActive(true);
-		_content.SetActive(false);
-		_lvlselect.OnEnterPage();
+		
 	}
-
-
-
-	
-
 }

@@ -3,24 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LevelSelectPage : Photon.MonoBehaviour
+public class LevelSelectPage : MenuPage
 {
-
 	[SerializeField] Button[] _levelButtons;
+	
+	public void OnLevelSelected(string level)
+	{
+		photonView.RPC("SetLevelAndGoToCharacter", PhotonTargets.All, level);
+	}
 
-	[SerializeField] GameObject _characterScreen;
-	[SerializeField] GameObject _content;
-
-	public void OnEnterPage()
+	public override void OnPageEnter()
 	{
 		if (!PhotonNetwork.isMasterClient)
 			for (int i = 0; i < _levelButtons.Length; i++)
 				_levelButtons[i].interactable = false;
 	}
 
-	public void OnLevelSelected(string level)
-	{
-		photonView.RPC("SetLevelAndGoToCharacter", PhotonTargets.All, level);
+	public override void OnPageExit()
+	{		
+	}
+
+	public override void UpdatePage()
+	{		
 	}
 
 	[PunRPC]
@@ -28,7 +32,6 @@ public class LevelSelectPage : Photon.MonoBehaviour
 	{
 		FindObjectOfType<PlayerData>().level = level;
 
-		_content.SetActive(false);
-		_characterScreen.SetActive(true);
+		MainMenuSystem.instance.SetToPage("CharacterSelectScreen");
 	}
 }

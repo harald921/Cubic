@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CharacterSelectPage : Photon.MonoBehaviour
+public class CharacterSelectPage : MenuPage
 {
 	int _playersReady;
 
@@ -18,7 +18,19 @@ public class CharacterSelectPage : Photon.MonoBehaviour
 
 		photonView.RPC("AddPlayerReady", PhotonTargets.MasterClient);
 	}
-	
+
+	public override void OnPageEnter()
+	{		
+	}
+
+	public override void OnPageExit()
+	{		
+	}
+
+	public override void UpdatePage()
+	{		
+	}
+
 	[PunRPC]
 	void AddPlayerReady()
 	{

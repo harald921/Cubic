@@ -1,0 +1,56 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class MainMenuSystem : MonoBehaviour
+{
+	public static MainMenuSystem instance { get; private set; }
+
+	public static string startPage = "StartScreen";
+
+	[SerializeField] MenuPage[] _menuPages;
+
+	MenuPage _currentPage;
+
+	void Awake()
+	{
+		instance = this;
+
+		PhotonNetwork.sendRate = 64;
+		PhotonNetwork.sendRateOnSerialize = 64;
+
+		PhotonNetwork.automaticallySyncScene = true;
+
+		PhotonNetwork.ConnectUsingSettings(Constants.GAME_VERSION);
+
+		SetToPage(startPage);
+
+	}
+	
+	public void SetToPage(string pagename)
+	{
+		if (_currentPage != null)
+			_currentPage.OnPageExit();
+
+		for (int i =0; i < _menuPages.Length; i++)
+		{
+			if(_menuPages[i].pageName == pagename)
+			{				
+				_currentPage = _menuPages[i];
+				_currentPage.EnableDisableContent(true);
+				_currentPage.OnPageEnter();
+				continue;
+			}
+
+			_menuPages[i].EnableDisableContent(false);
+		}
+	}
+
+	void Update()
+	{
+		if (_currentPage == null)
+			return;
+
+		_currentPage.UpdatePage();
+	}
+}
