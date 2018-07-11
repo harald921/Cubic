@@ -106,6 +106,22 @@ public class TileMap
 		_tiles.Clear();
 		BinaryLoad();
 	}
+
+	public Vector2DInt GetSpawnPointFromPlayerId(int id)
+	{
+		Vector2DInt point;
+
+		if (id == 0)
+			point = new Vector2DInt(1, 1); // bottom left
+		else if (id == 1)
+			point = new Vector2DInt(1, _gridSize.y - 2); // top left
+		else if (id == 2)
+			point = new Vector2DInt(_gridSize.x - 2, _gridSize.y - 2); // top right
+		else
+			point = new Vector2DInt(_gridSize.x - 2, 1); // bottom right
+
+		return point;
+	}
 }
 
 

@@ -69,7 +69,7 @@ public class PlayerPage : MonoBehaviour
 			GUILayout.BeginHorizontal();
 			GUILayout.Width(100);
 			if (GUILayout.Button("Reset Round"))
-				Level.instance.ResetRound();
+				Match.instance.level.ResetRound();
 
 			GUILayout.EndHorizontal();
 		} 		

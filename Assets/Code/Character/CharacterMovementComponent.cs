@@ -36,7 +36,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		_character.OnCharacterSpawned += (Vector2DInt inSpawnTile) =>
 		{
-			currentTile = Level.instance.tileMap.GetTile(inSpawnTile);
+			currentTile = Match.instance.level.tileMap.GetTile(inSpawnTile);
 			currentTile.data.SetCharacter(_character);
 		};
 	}
@@ -155,7 +155,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		if (!currentTile.model.data.unbreakable)
 			currentTile.data.DamageTile();
 
-		TileMap tileMap = Level.instance.tileMap;
+		TileMap tileMap = Match.instance.level.tileMap;
 
 		Tile fromTile = tileMap.GetTile(inFromTile);
 		Tile targetTile = tileMap.GetTile(inToTile);
@@ -370,7 +370,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	{
 		// remove old reference and set to new
 		currentTile.data.RemovePlayer();                                      
-		currentTile = Level.instance.tileMap.GetTile(inTile);                 
+		currentTile = Match.instance.level.tileMap.GetTile(inTile);                 
 		currentTile.data.SetCharacter(_character);                            																																																																																																																																																																																																																																																																																																																																				   
 	}
 

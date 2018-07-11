@@ -90,7 +90,7 @@ public class Tile
         public readonly Vector2DInt position;
 
         static TileMap _tileMap;
-        TileMap tileMap => _tileMap ?? (_tileMap = Level.instance.tileMap);
+        TileMap tileMap => _tileMap ?? (_tileMap = Match.instance.level.tileMap);
 
         public int currentHealth { get; private set; } = 0;
 

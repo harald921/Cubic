@@ -6,7 +6,6 @@ using Photon;
 
 public class PlayWithFriendsPage : Photon.MonoBehaviour
 {
-
 	[SerializeField] GameObject _content;
 	[SerializeField] GameObject _levelScreen;
 
@@ -16,6 +15,7 @@ public class PlayWithFriendsPage : Photon.MonoBehaviour
 
 	[SerializeField] Button _continueButton;
 
+	[SerializeField] LevelSelectPage _lvlselect;
 
 	void Awake()
 	{
@@ -55,7 +55,11 @@ public class PlayWithFriendsPage : Photon.MonoBehaviour
 	{
 		if (!PhotonNetwork.isMasterClient)
 		   _roomNameText.text = PhotonNetwork.room.Name + " As Client";
-		
+
+		GameObject playerData = new GameObject("PlayerData", typeof(PlayerData));
+		playerData.GetComponent<PlayerData>().playerId = PhotonNetwork.room.PlayerCount - 1;
+		DontDestroyOnLoad(playerData);
+
 		photonView.RPC("UpdateNumPlayersInRoom", PhotonTargets.All, PhotonNetwork.room.PlayerCount);
 	}
 
@@ -78,6 +82,7 @@ public class PlayWithFriendsPage : Photon.MonoBehaviour
 	{
 		_levelScreen.SetActive(true);
 		_content.SetActive(false);
+		_lvlselect.OnEnterPage();
 	}
 
 

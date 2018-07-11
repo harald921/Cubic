@@ -49,4 +49,6 @@ MonoBehaviour:
   - NetworkStartGame
   - UpdateNumPlayersInRoom
   - ContinueToLevelselect
+  - SetLevelAndGoToCharacter
+  - AddPlayerReady
   DisableAutoOpenWizard: 1

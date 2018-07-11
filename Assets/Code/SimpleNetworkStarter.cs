@@ -35,7 +35,7 @@ public class SimpleNetworkStarter : Photon.MonoBehaviour
     {
         if (_debugMessages) Debug.Log("Connected to room");
 
-		Level.instance.ManualStart();
+		Match.instance.level.ManualStart();
 
 		if (PhotonNetwork.isMasterClient)
 			FindObjectOfType<CollisionTracker>().ManualStart();
