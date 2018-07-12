@@ -22,4 +22,5 @@ public static class Constants
 	// PhotonPlayer properties keys
 	public static int CHARACTER_NAME = 0;
 	public static int LEVEL_NAME = 1;
+	public static int SPAWN_ID = 2;
 }

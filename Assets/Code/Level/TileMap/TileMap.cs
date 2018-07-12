@@ -11,7 +11,7 @@ public class TileMap
 
 	Vector2DInt _gridSize;
 	Transform _tilesFolder;
-
+	
     public TileMap(string inMapName, Transform inTilesFolder)
     {
         name = inMapName;
@@ -107,7 +107,7 @@ public class TileMap
 		BinaryLoad();
 	}
 
-	public Vector2DInt GetSpawnPointFromPlayerId(int id)
+	public Vector2DInt GetSpawnPointFromSpawnID(int id)
 	{
 		Vector2DInt point;
 
@@ -122,6 +122,7 @@ public class TileMap
 
 		return point;
 	}
+
 }
 
 

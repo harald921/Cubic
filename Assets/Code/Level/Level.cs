@@ -13,14 +13,19 @@ public class Level : Photon.MonoBehaviour
 
     Character _character;
 
+	int _spawnID;
+
 	public void ManualStart()
 	{
 		_character = PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity, 0).GetComponent<Character>();
 		_character.Initialize(PhotonNetwork.player.CustomProperties[Constants.CHARACTER_NAME].ToString(), PhotonNetwork.player.ID);
 
 		tileMap = new TileMap(_mapToLoad, _tilesFolder);
+
+		_spawnID = (int)PhotonNetwork.player.CustomProperties[Constants.SPAWN_ID];
+
+		_character.Spawn(tileMap.GetSpawnPointFromSpawnID(_spawnID));
 		
-		_character.Spawn(tileMap.GetSpawnPointFromPlayerId(PhotonNetwork.player.ID - 1));
 	}
 		
 	public void ResetRound()
@@ -33,7 +38,7 @@ public class Level : Photon.MonoBehaviour
 	{
 		tileMap.ClearTileViews();
 		tileMap.ResetMap();		
-		_character.Spawn(tileMap.GetSpawnPointFromPlayerId(PhotonNetwork.player.ID - 1));
+		_character.Spawn(tileMap.GetSpawnPointFromSpawnID(_spawnID));
 	}
 
 	

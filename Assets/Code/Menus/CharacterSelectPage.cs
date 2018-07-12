@@ -24,6 +24,17 @@ public class CharacterSelectPage : MenuPage
 		photonView.RPC("AddPlayerReady", PhotonTargets.MasterClient);
 	}
 
+	[PunRPC]
+	void SetSpawnDataToPlayerID(int id, int spawnPoint)
+	{
+		if(PhotonNetwork.player.ID == id)
+		{
+			Hashtable p = PhotonNetwork.player.CustomProperties;
+			p.Add(Constants.SPAWN_ID, spawnPoint);
+			PhotonNetwork.player.SetCustomProperties(p);
+		}		
+	}
+
 	public override void OnPageEnter()
 	{		
 	}
@@ -41,7 +52,12 @@ public class CharacterSelectPage : MenuPage
 	{
 		_playersReady++;
 		if (_playersReady == PhotonNetwork.room.PlayerCount)
+		{
+			for (int i =0; i < PhotonNetwork.room.PlayerCount; i++)			
+				photonView.RPC("SetSpawnDataToPlayerID", PhotonTargets.All, PhotonNetwork.playerList[i].ID, i);
+			
 			PhotonNetwork.LoadLevel(PhotonNetwork.player.CustomProperties[Constants.LEVEL_NAME].ToString());
+		}
 
 	}
 
