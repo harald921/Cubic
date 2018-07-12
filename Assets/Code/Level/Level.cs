@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class Level : Photon.MonoBehaviour
 {
     
@@ -16,14 +15,12 @@ public class Level : Photon.MonoBehaviour
 
 	public void ManualStart()
 	{
-		PlayerData pd = Match.instance.playerData;
-
 		_character = PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity, 0).GetComponent<Character>();
-		_character.Initialize(pd.character, pd.playerId);
+		_character.Initialize(PhotonNetwork.player.CustomProperties[Constants.CHARACTER_NAME].ToString(), PhotonNetwork.player.ID);
 
 		tileMap = new TileMap(_mapToLoad, _tilesFolder);
 		
-		_character.Spawn(tileMap.GetSpawnPointFromPlayerId(pd.playerId));
+		_character.Spawn(tileMap.GetSpawnPointFromPlayerId(PhotonNetwork.player.ID - 1));
 	}
 		
 	public void ResetRound()
@@ -36,7 +33,7 @@ public class Level : Photon.MonoBehaviour
 	{
 		tileMap.ClearTileViews();
 		tileMap.ResetMap();		
-		_character.Spawn(tileMap.GetSpawnPointFromPlayerId(Match.instance.playerData.playerId));
+		_character.Spawn(tileMap.GetSpawnPointFromPlayerId(PhotonNetwork.player.ID - 1));
 	}
 
 	

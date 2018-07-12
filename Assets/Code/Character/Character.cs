@@ -60,10 +60,19 @@ public class Character : Photon.MonoBehaviour
 
 		GetOriginalColor();
 
+		if (photonView.isMine)
+			Match.instance.photonView.RPC("RegisterPlayer", PhotonTargets.AllViaServer, playerID, inViewName);
+
 #if DEBUG_TOOLS
 		if (photonView.isMine)
 			FindObjectOfType<PlayerPage>().Initialize(this);
 #endif
+	}
+
+	void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
+	{		
+		if(photonView.isMine)
+		   Match.instance.OnPlayerLeft(otherPlayer.ID);
 	}
 
 	[PunRPC]

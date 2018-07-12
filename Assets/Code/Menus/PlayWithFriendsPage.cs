@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Photon;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PlayWithFriendsPage : MenuPage
 {		
@@ -45,10 +45,8 @@ public class PlayWithFriendsPage : MenuPage
 	{
 		if (!PhotonNetwork.isMasterClient)
 		   _roomNameText.text = PhotonNetwork.room.Name + " As Client";
-
-		GameObject playerData = new GameObject("PlayerData", typeof(PlayerData));
-		playerData.GetComponent<PlayerData>().playerId = PhotonNetwork.room.PlayerCount - 1;
-		DontDestroyOnLoad(playerData);
+		
+		PhotonNetwork.player.SetCustomProperties(new Hashtable(2));
 	}
 
 	void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)

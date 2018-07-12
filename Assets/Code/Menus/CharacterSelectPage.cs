@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
+
 
 public class CharacterSelectPage : MenuPage
 {
@@ -13,8 +16,10 @@ public class CharacterSelectPage : MenuPage
 	{
 		for (int i = 0; i < _characterButtons.Length; i++)
 			_characterButtons[i].interactable = false;
-
-		FindObjectOfType<PlayerData>().character = name;
+		
+		Hashtable p = PhotonNetwork.player.CustomProperties;
+		p.Add(Constants.CHARACTER_NAME, name);
+		PhotonNetwork.player.SetCustomProperties(p);
 
 		photonView.RPC("AddPlayerReady", PhotonTargets.MasterClient);
 	}
@@ -36,7 +41,7 @@ public class CharacterSelectPage : MenuPage
 	{
 		_playersReady++;
 		if (_playersReady == PhotonNetwork.room.PlayerCount)
-			PhotonNetwork.LoadLevel(FindObjectOfType<PlayerData>().level);
+			PhotonNetwork.LoadLevel(PhotonNetwork.player.CustomProperties[Constants.LEVEL_NAME].ToString());
 
 	}
 

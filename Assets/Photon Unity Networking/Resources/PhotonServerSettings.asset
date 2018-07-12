@@ -54,4 +54,8 @@ MonoBehaviour:
   - OnPlayerDie
   - AllIsLoaded
   - NetworkStartNewRound
+  - DisablePlayerUI
+  - RegisterPlayer
+  - RegisterPlayerUI
+  - RoundWinner
   DisableAutoOpenWizard: 1

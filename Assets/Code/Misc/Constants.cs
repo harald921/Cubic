@@ -18,4 +18,8 @@ public static class Constants
 	public static string AXIS_HORIZONTAL = "Horizontal";
 	public static string AXIS_VERTICAL   = "Vertical";
 	public static string BUTTON_CHARGE   = "Charge";
+
+	// PhotonPlayer properties keys
+	public static int CHARACTER_NAME = 0;
+	public static int LEVEL_NAME = 1;
 }

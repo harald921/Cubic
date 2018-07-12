@@ -146,7 +146,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -157, y: -107}
+  m_AnchoredPosition: {x: -186, y: -122}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &194686307
@@ -468,7 +468,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -157, y: -158}
+  m_AnchoredPosition: {x: -186, y: -173}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &767494036
@@ -1179,12 +1179,24 @@ MonoBehaviour:
   _players:
   - content: {fileID: 2011690136}
     scoreText: {fileID: 1321184016}
+    userName: {fileID: 277935633}
+    ownerID: 0
+    taken: 0
   - content: {fileID: 25408905}
     scoreText: {fileID: 194686309}
+    userName: {fileID: 1121237143}
+    ownerID: 0
+    taken: 0
   - content: {fileID: 639446474}
     scoreText: {fileID: 815735576}
+    userName: {fileID: 853424457}
+    ownerID: 0
+    taken: 0
   - content: {fileID: 1306271444}
     scoreText: {fileID: 2071934879}
+    userName: {fileID: 1790954757}
+    ownerID: 0
+    taken: 0
 --- !u!1 &1243820242
 GameObject:
   m_ObjectHideFlags: 0
@@ -1307,7 +1319,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -157, y: -209}
+  m_AnchoredPosition: {x: -186, y: -224}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1321184014
@@ -1664,7 +1676,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -157, y: -60}
+  m_AnchoredPosition: {x: -186, y: -75}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &2018194039

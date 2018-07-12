@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class LevelSelectPage : MenuPage
 {
@@ -30,7 +31,9 @@ public class LevelSelectPage : MenuPage
 	[PunRPC]
 	void SetLevelAndGoToCharacter(string level)
 	{
-		FindObjectOfType<PlayerData>().level = level;
+		Hashtable p = PhotonNetwork.player.CustomProperties;
+		p.Add(Constants.LEVEL_NAME, level);
+		PhotonNetwork.player.SetCustomProperties(p);
 
 		MainMenuSystem.instance.SetToPage("CharacterSelectScreen");
 	}
