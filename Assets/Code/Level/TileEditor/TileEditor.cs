@@ -11,6 +11,8 @@ public class TileInfo
 	public Vector2DInt position;
 	public string name = "";
 	public float yRotation;
+	public float tintStrength = 1.0f;
+	public GameObject modelReference;
 
 	public TileInfo(Vector2DInt inPosition, string inName, float inYRotation)
 	{
@@ -43,6 +45,7 @@ public class TileEditor : MonoBehaviour
 	GameObject _grid;
 
 	float _rotationY = 0.0f;
+	float _colorStrength = 1.0f;
 
 	// tileinfo
 	TileInfo[,] _tileProperties;
@@ -55,14 +58,21 @@ public class TileEditor : MonoBehaviour
 
 	//UI
 	[Header("UI")]
-	[SerializeField] InputField _inputLoad;
-	[SerializeField] InputField _inputSave;
-	[SerializeField] Dropdown   _dropDownTiles;
-	[SerializeField] Text		_gridSizeText;
-	[SerializeField] Slider		_sliderSizeX;
-	[SerializeField] Slider		_sliderSizeY;
-	[SerializeField] Text       _editModeText;
+	[SerializeField] InputField   _inputLoad;
+	[SerializeField] InputField   _inputSave;
+	[SerializeField] Dropdown     _dropDownTiles;
+	[SerializeField] Text		  _gridSizeText;
+	[SerializeField] Slider		  _sliderSizeX;
+	[SerializeField] Slider		  _sliderSizeY;
+	[SerializeField] Text         _editModeText;
 	[SerializeField] MessagePromt _promt;	
+	[SerializeField] Slider       _tintMin;
+	[SerializeField] Slider       _tintMax;
+	[SerializeField] Text         _currentTint;
+	[SerializeField] Text         _currentMinTintText;
+	[SerializeField] Text         _currentMaxTintText;
+
+
 
 	void Start()
 	{
@@ -88,6 +98,9 @@ public class TileEditor : MonoBehaviour
 
 		// add collider and set layer of tile (need this to be able to select alredy placed tiles)
 		AddcolliderToSelectedTile();
+
+		_currentMinTintText.text = _tintMin.value.ToString("0.00");
+		_currentMaxTintText.text = _tintMax.value.ToString("0.00");
 	}
 
 	void Update()
@@ -142,6 +155,8 @@ public class TileEditor : MonoBehaviour
 					AddcolliderToSelectedTile();
 				}
 
+				TintCurrentTile();
+
 				if(Input.GetMouseButtonDown(3) || Input.GetKeyDown(KeyCode.R))
 				{
 					_rotationY += 90.0f;
@@ -190,12 +205,54 @@ public class TileEditor : MonoBehaviour
 
 	}
 
-	void PlaceTile(int x, int y, float yRot)
+	void TintCurrentTile()
+	{		
+		_colorStrength += Input.GetAxis("ScrollWheel");
+		_colorStrength = Mathf.Clamp(_colorStrength, _tintMin.value, _tintMax.value);
+		
+		_currentTint.text = _colorStrength.ToString("0.00");
+
+		TintTile(_selectedTile, _colorStrength);
+
+	}
+
+	void TintTile(GameObject tile, float strength)
 	{
-		_selectedTile = null;
+		Renderer renderer = tile.GetComponent<Renderer>();
+		if (renderer != null)
+			renderer.material.color = Color.white * strength;
+
+		for (int i = 0; i < tile.transform.childCount; i++)
+		{
+			renderer = tile.transform.GetChild(i).GetComponent<Renderer>();
+			if (renderer != null)
+				renderer.material.color = Color.white * strength;
+		}
+	}
+
+	public void RandomizeTintAll()
+	{
+		for (int y = 0; y < _gridSize.y; y++)
+			for (int x = 0; x < _gridSize.x; x++)
+			{
+				float strength = Random.Range(_tintMin.value, _tintMax.value);
+				if(_tileProperties[x, y].modelReference != null)
+				{
+					_tileProperties[x, y].tintStrength = strength;
+					TintTile(_tileProperties[x, y].modelReference, strength);
+				}
+			}
+	}
+
+	void PlaceTile(int x, int y, float yRot)
+	{	
 		_tileProperties[y, x].name = _selectedTileType;
 		_tileProperties[y, x].position = new Vector2DInt(x, y);
 		_tileProperties[y, x].yRotation = yRot;
+		_tileProperties[y, x].tintStrength = _colorStrength;
+		_tileProperties[y, x].modelReference = _selectedTile;
+
+		_selectedTile = null;
 
 		// dont spawn any tile if it is empty
 		if (_selectedTileType == "empty") 
@@ -303,6 +360,16 @@ public class TileEditor : MonoBehaviour
 		ChangeTile(index);
 	}
 
+	public void TintMinChanged(float v)
+	{
+		_currentMinTintText.text = v.ToString("0.00");
+	}
+
+	public void TintMaxChanged(float v)
+	{
+		_currentMaxTintText.text = v.ToString("0.00");
+	}
+
 	public void SaveLoadButtonPressed(bool save)
 	{
 		if (save)
@@ -334,11 +401,14 @@ public class TileEditor : MonoBehaviour
 		for (int y = 0; y < _gridSize.y; y++)
 			for (int x = 0; x < _gridSize.x; x++)
 			{
-				PlaceTile(x, y, _rotationY);
 				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), _selectedTileType, 0.0f);
-				GameObject tile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, new Vector3(x,0,y), _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
+				GameObject tile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, new Vector3(x, 0, y), _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
+				_tileProperties[y, x].tintStrength = _colorStrength;
+				_tileProperties[y, x].modelReference = tile;
 				tile.AddComponent<BoxCollider>();
 				tile.layer = 9;
+
+				TintTile(tile, _colorStrength);
 			}
 	}
 	
@@ -360,6 +430,7 @@ public class TileEditor : MonoBehaviour
 					_tileProperties[y, x].position.BinarySave(writer);
 					writer.Write(_tileProperties[y, x].name);
 					writer.Write(_tileProperties[y, x].yRotation);
+					writer.Write(_tileProperties[y, x].tintStrength);
 				}
 
 			_promt.SetAndShow(string.Format("Level {0} Was successfully saved", levelName), () => print("Ok button pressed, seems to work"));
@@ -386,10 +457,13 @@ public class TileEditor : MonoBehaviour
 						tilePosition.BinaryLoad(reader);       // Read: Position
 						string typeName = reader.ReadString(); // Read: Tile type name  
 						float yRot = reader.ReadSingle();
+						float tintStrength = reader.ReadSingle();
 
 						_tileProperties[y, x].name = typeName;
 						_tileProperties[y, x].position = new Vector2DInt(x, y);
 						_tileProperties[y, x].yRotation = yRot;
+						_tileProperties[y, x].tintStrength = tintStrength;
+
 
 						// dont spawn any tile if it is empty
 						if (typeName == "empty")
@@ -402,6 +476,9 @@ public class TileEditor : MonoBehaviour
 						GameObject tile = Instantiate(_tileDB.GetTile(typeName).view.mainGO, new Vector3(x, 0, y), r * Quaternion.Euler(0, yRot, 0), _tileFolder);
 						tile.AddComponent<BoxCollider>();
 						tile.layer = 9;
+
+						_tileProperties[y, x].modelReference = tile;
+						TintTile(tile, tintStrength);
 					}
 			}
 		}

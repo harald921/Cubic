@@ -65,14 +65,14 @@ public class Tile
 	AudioSource[] _sounds;
 
 
-    public Tile(Vector2DInt inPosition, string inTileName, float inYRotation, Transform tilesFolder)
+    public Tile(Vector2DInt inPosition, string inTileName, float inYRotation, float inTintStrength, Transform tilesFolder)
     {
 		_tileDB = TileDatabase.instance;
 
 		model = _tileDB.GetTile(inTileName);
 
         data  = new Data(model.data, inPosition, this);
-        view = new View(model.view, inPosition, inYRotation, tilesFolder);
+        view = new View(model.view, inPosition, inYRotation, inTintStrength, tilesFolder);
 
 		_sounds = new AudioSource[(int)TileSounds.Count];
 		CreateSounds();
@@ -121,7 +121,7 @@ public class Tile
 			_myTile.PlaySound(TileSounds.Break);
 
             if (currentHealth == 0)
-				Match.instance.level.tileMap.SetTile(position, new Tile(position, "empty", 0.0f, null));
+				Match.instance.level.tileMap.SetTile(position, new Tile(position, "empty", 0.0f, 0.0f, null));
         }
 
         public Tile GetRelativeTile(Vector2DInt inOffset) =>
@@ -132,7 +132,7 @@ public class Tile
     {
         public readonly GameObject mainGO;
 
-        public View(TileModel.View inViewModel, Vector2DInt inPosition, float inYrotation, Transform tilesFolder)
+        public View(TileModel.View inViewModel, Vector2DInt inPosition, float inYrotation, float inTintStrength, Transform tilesFolder)
         {
             if (inViewModel.mainGO == null)
                 return;
@@ -140,6 +140,8 @@ public class Tile
             mainGO = Object.Instantiate(inViewModel.mainGO, tilesFolder);
 			mainGO.transform.rotation = mainGO.transform.rotation * Quaternion.Euler(new Vector3(0, inYrotation, 0));
             mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
+
+			TintTile(mainGO, inTintStrength);
         }
     }
 
@@ -168,6 +170,20 @@ public class Tile
 
 		if(_sounds[(int)type] != null)
 		   _sounds[(int)type].Play();
+	}
+
+	public static void TintTile(GameObject tile, float strength)
+	{
+		Renderer renderer = tile.GetComponent<Renderer>();
+		if (renderer != null)
+			renderer.material.color = Color.white * strength;
+
+		for (int i = 0; i < tile.transform.childCount; i++)
+		{
+			renderer = tile.transform.GetChild(i).GetComponent<Renderer>();
+			if (renderer != null)
+				renderer.material.color = Color.white * strength;
+		}
 	}
 }
 
