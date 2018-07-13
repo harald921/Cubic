@@ -59,4 +59,5 @@ MonoBehaviour:
   - RegisterPlayerUI
   - RoundWinner
   - SetSpawnDataToPlayerID
+  - ShowWinner
   DisableAutoOpenWizard: 1

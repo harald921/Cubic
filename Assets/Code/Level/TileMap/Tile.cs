@@ -60,18 +60,16 @@ public class Tile
     public readonly Data data;
     readonly View view;
 
-    static TileDatabase _tileDB;
+    TileDatabase _tileDB;
 
 	AudioSource[] _sounds;
 
-    static Tile()
-    {
-        _tileDB = TileDatabase.instance;
-    }
 
     public Tile(Vector2DInt inPosition, string inTileName, float inYRotation, Transform tilesFolder)
     {
-        model = _tileDB.GetTile(inTileName);
+		_tileDB = TileDatabase.instance;
+
+		model = _tileDB.GetTile(inTileName);
 
         data  = new Data(model.data, inPosition, this);
         view = new View(model.view, inPosition, inYRotation, tilesFolder);
@@ -80,7 +78,7 @@ public class Tile
 		CreateSounds();
     }
 
-    public void Delete()
+	public void Delete()
     {
         Object.Destroy(view.mainGO, 1.0f); // hardcoded to same lenght as animation for now, dont like this too much
     }
@@ -88,9 +86,6 @@ public class Tile
     public class Data
     {
         public readonly Vector2DInt position;
-
-        static TileMap _tileMap;
-        TileMap tileMap => _tileMap ?? (_tileMap = Match.instance.level.tileMap);
 
         public int currentHealth { get; private set; } = 0;
 
@@ -103,7 +98,7 @@ public class Tile
             position = inPosition;
             currentHealth = inDataModel.health;
 			_myTile = myTile;
-        }
+        }		
 
         public void SetCharacter(Character inCharacter) =>
             _character = inCharacter;
@@ -126,11 +121,11 @@ public class Tile
 			_myTile.PlaySound(TileSounds.Break);
 
             if (currentHealth == 0)
-                tileMap.SetTile(position, new Tile(position, "empty", 0.0f, null));
+				Match.instance.level.tileMap.SetTile(position, new Tile(position, "empty", 0.0f, null));
         }
 
         public Tile GetRelativeTile(Vector2DInt inOffset) =>
-            tileMap.GetTile(position + inOffset);
+			Match.instance.level.tileMap.GetTile(position + inOffset);
     }
 
     public class View

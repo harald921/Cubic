@@ -7,7 +7,8 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 public class LevelSelectPage : MenuPage
 {
 	[SerializeField] Button[] _levelButtons;
-	
+	[SerializeField] Text _numJoinedPlayersText;
+
 	public void OnLevelSelected(string level)
 	{
 		photonView.RPC("SetLevelAndGoToCharacter", PhotonTargets.All, level);
@@ -25,7 +26,11 @@ public class LevelSelectPage : MenuPage
 	}
 
 	public override void UpdatePage()
-	{		
+	{
+		if (PhotonNetwork.room == null)
+			return;
+
+		_numJoinedPlayersText.text = string.Format("{0}/4", PhotonNetwork.room.PlayerCount.ToString());
 	}
 
 	[PunRPC]

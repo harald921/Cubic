@@ -112,6 +112,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ead05708d7cccfb4bb25ffa7236b46ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _scoreUI: {fileID: 0}
+  _counterUI: {fileID: 0}
+  _winnerUI: {fileID: 0}
 --- !u!114 &114425577266680056
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -126,7 +129,6 @@ MonoBehaviour:
   _characterPrefab: {fileID: 1300687396863330, guid: c968007a7fbe1f942a234aa54bc2f7e9,
     type: 2}
   _mapToLoad: DesertLevel
-  _modelView: duplo
   _tilesFolder: {fileID: 4427414244809238}
 --- !u!114 &114792443764372392
 MonoBehaviour:

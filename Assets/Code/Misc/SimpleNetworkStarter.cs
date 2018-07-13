@@ -1,14 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 // THIS CLASS IS USED TO START A GAME DIRECTLY FROM THE MAIN SCENE
 // EVERYONE WHO STARTS THE GAME FROM THIS SCENE WILL JOIN THE SAME ROOM AND GAME
 public class SimpleNetworkStarter : Photon.MonoBehaviour
 {
-    [SerializeField] bool _debugMessages = false;
+	[SerializeField] int _spawnPoint;
+	[SerializeField] string _character;
 	
-    void Awake()
+    void Start()
     {
         PhotonNetwork.sendRate = 64;
         PhotonNetwork.sendRateOnSerialize = 64;
@@ -24,24 +26,34 @@ public class SimpleNetworkStarter : Photon.MonoBehaviour
         JoinRoom();
 
     void JoinRoom() =>
-        PhotonNetwork.JoinOrCreateRoom("debugRoomName", new RoomOptions(), TypedLobby.Default);
-
-    void OnCreatedRoom()
-    {
-        if (_debugMessages) Debug.Log("New room created");		
-	}
+        PhotonNetwork.JoinOrCreateRoom("debugRoomName", new RoomOptions(), TypedLobby.Default);   
 
     void OnJoinedRoom()
     {
-        if (_debugMessages) Debug.Log("Connected to room");
+		PhotonNetwork.player.NickName = "DunderBög";
 
-		Match.instance.level.ManualStart();
+		PhotonNetwork.SetPlayerCustomProperties(new Hashtable(2));
+		Hashtable playerProps = PhotonNetwork.player.CustomProperties;
 
-		if (PhotonNetwork.isMasterClient)
-			FindObjectOfType<CollisionTracker>().ManualStart();
-    }
+		playerProps.Add(Constants.CHARACTER_NAME, _character);
+		playerProps.Add(Constants.SPAWN_ID, _spawnPoint);
+		
+		PhotonNetwork.player.SetCustomProperties(playerProps);
 
-    public static float CalculateNetDelta(double inTimestamp) =>
+		Match.instance.SimpleStart();
+
+
+
+	}
+
+	void OnPhotonPlayerPropertiesChanged(object[] playerAndUpdatedProps)
+	{
+		
+	}
+
+
+
+	public static float CalculateNetDelta(double inTimestamp) =>
         (float)(PhotonNetwork.time - inTimestamp);
 	
 }

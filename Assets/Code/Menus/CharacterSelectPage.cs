@@ -11,12 +11,15 @@ public class CharacterSelectPage : MenuPage
 	int _playersReady;
 
 	[SerializeField] Button[] _characterButtons;
+	[SerializeField] Text _numJoinedPlayersText;
 
 	public void OnCharacterSelected(string name)
 	{
 		for (int i = 0; i < _characterButtons.Length; i++)
 			_characterButtons[i].interactable = false;
-		
+
+		PhotonNetwork.player.NickName = name;
+
 		Hashtable p = PhotonNetwork.player.CustomProperties;
 		p.Add(Constants.CHARACTER_NAME, name);
 		PhotonNetwork.player.SetCustomProperties(p);
@@ -44,7 +47,11 @@ public class CharacterSelectPage : MenuPage
 	}
 
 	public override void UpdatePage()
-	{		
+	{
+		if (PhotonNetwork.room == null)
+			return;
+
+		_numJoinedPlayersText.text = string.Format("{0}/4", PhotonNetwork.room.PlayerCount.ToString());
 	}
 
 	[PunRPC]

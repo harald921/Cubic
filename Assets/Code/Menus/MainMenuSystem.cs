@@ -21,12 +21,14 @@ public class MainMenuSystem : MonoBehaviour
 
 		PhotonNetwork.automaticallySyncScene = true;
 
-		PhotonNetwork.ConnectUsingSettings(Constants.GAME_VERSION);
-
-		SetToPage(startPage);
-
+		PhotonNetwork.ConnectUsingSettings(Constants.GAME_VERSION);		
 	}
-	
+
+	void Start()
+	{
+		SetToPage(startPage);
+	}
+
 	public void SetToPage(string pagename)
 	{
 		if (_currentPage != null)

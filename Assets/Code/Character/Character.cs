@@ -8,13 +8,13 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterStateComponent))]
 [RequireComponent(typeof(CharacterSoundComponent))]
 public class Character : Photon.MonoBehaviour
-{
-    // Will be renamed to "Character" when it's fully transfered
-	public Color color          {get; private set;}
-    public CharacterModel model {get; private set;}
-    public GameObject     view  {get; private set;} 
-	public bool isMasterClient  {get; private set;}
-	public int playerID         {get; private set;}
+{	
+	public Color color           { get; private set; }
+	public CharacterModel model  { get; private set; }
+	public GameObject view       { get; private set; }
+	public bool isMasterClient   { get; private set; }
+	public int playerID          { get; private set; }
+	public string playerNickname { get; private set; }
 
     public CharacterMovementComponent movementComponent {get; private set;}
     public CharacterFlagComponent     flagComponent     {get; private set;}
@@ -23,10 +23,10 @@ public class Character : Photon.MonoBehaviour
 
 	public event Action<Vector2DInt> OnCharacterSpawned;
 
-	public void Initialize(string inViewName, int inPlayerId)
+	public void Initialize(string inViewName, int inPlayerId, string inNickName)
     {
 		isMasterClient = PhotonNetwork.isMasterClient;
-		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName, inPlayerId); // wont need be buffered later when level loading is synced
+		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName, inPlayerId, inNickName); // wont need be buffered later when level loading is synced
 	}
 
 	public void Spawn(Vector2DInt inSpawnTile)
@@ -35,9 +35,10 @@ public class Character : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkInitialize(string inViewName, int inPlayerId)
+	void NetworkInitialize(string inViewName, int inPlayerId, string inNickname)
 	{
-		playerID = inPlayerId;
+		playerID       = inPlayerId;
+		playerNickname = inNickname;
 
 		model = CharacterDatabase.instance.standardModel;
 		CharacterDatabase.ViewData vData = CharacterDatabase.instance.GetViewFromName(inViewName);
@@ -61,7 +62,7 @@ public class Character : Photon.MonoBehaviour
 		GetOriginalColor();
 
 		if (photonView.isMine)
-			Match.instance.photonView.RPC("RegisterPlayer", PhotonTargets.AllViaServer, playerID, inViewName);
+			Match.instance.photonView.RPC("RegisterPlayer", PhotonTargets.AllViaServer, playerID, playerNickname);
 
 #if DEBUG_TOOLS
 		if (photonView.isMine)
@@ -78,9 +79,9 @@ public class Character : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkSpawn(int inSpawnTileX, int inSpawnTileY)
 	{
+		movementComponent.ResetAll();
 		transform.position = new Vector3(inSpawnTileX, 1, inSpawnTileY);
-		OnCharacterSpawned?.Invoke(new Vector2DInt(inSpawnTileX, inSpawnTileY));
-		stateComponent.SetState(CharacterState.Idle);
+		OnCharacterSpawned?.Invoke(new Vector2DInt(inSpawnTileX, inSpawnTileY));		
 	}
 
 	void GetOriginalColor()

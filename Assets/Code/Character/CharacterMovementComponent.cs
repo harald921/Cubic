@@ -41,6 +41,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		};
 	}
 
+	void OnDestroy()
+	{
+		Timing.KillCoroutines(gameObject.GetInstanceID());
+	}
+
 	public void TryWalk(Vector2DInt inDirection)
 	{
 		if (_stateComponent.currentState != CharacterState.Idle || _flagComponent.GetFlag(CharacterFlag.Cooldown_Walk))
@@ -356,6 +361,14 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			transform.position += Vector3.down * _model.sinkSpeed * Time.deltaTime;
 			yield return Timing.WaitForOneFrame;
 		}
+	}
+
+	public void ResetAll()
+	{
+		Timing.KillCoroutines(gameObject.GetInstanceID());
+		_stateComponent.SetState(CharacterState.Idle);
+		transform.rotation = Quaternion.Euler(Vector3.zero);
+		_lastTargetRotation = transform.rotation;
 	}
 		
 	void StopMovementAndAddCooldowns()

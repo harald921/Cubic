@@ -12,6 +12,7 @@ public class Match : Photon.MonoBehaviour
 
 	[SerializeField] ScoreUI _scoreUI;
 	[SerializeField] StartCounterUI _counterUI;
+	[SerializeField] WinnerUI _winnerUI;
 
 	const int _numRoundsToWin = 3;
 
@@ -35,12 +36,20 @@ public class Match : Photon.MonoBehaviour
 	void Start()
 	{		
 		level = FindObjectOfType<Level>();
-
-		SetupMatch();
-
-		// check if we start from menu or the simple network starter firectly from level scen
+		
+		// check if we start from menu or the simple network starter directly from level scen
 		if (FindObjectOfType<SimpleNetworkStarter>() == null)
+		{
+			SetupMatch();
 			StartOnAllLoaded();
+		}
+	}
+
+	// only used directly from starting game from levelscene
+	public void SimpleStart()
+	{
+		SetupMatch();
+		NetworkStartGame(PhotonNetwork.time);
 	}
 
 	void OnDestroy()
@@ -82,7 +91,11 @@ public class Match : Photon.MonoBehaviour
 				numAlive++;
 				idLastAlive = p.Key;
 			}
-		
+
+		// if all players but 1 is disconnected just give the point to this player(match should be cancelled but kep this for now to avoid nullrefs)
+		if (PhotonNetwork.room.PlayerCount == 1)
+			idLastAlive = PhotonNetwork.playerList[0].ID;
+
 		// round over
 		if (numAlive <= 1)
 			RoundOver(idLastAlive);
@@ -102,8 +115,7 @@ public class Match : Photon.MonoBehaviour
 
 	void MatchOver(int winnerId)
 	{
-
-
+		photonView.RPC("ShowWinner", PhotonTargets.All, winnerId);
 	}
 
 	public void StartNewRound(int winner, int score)
@@ -114,8 +126,6 @@ public class Match : Photon.MonoBehaviour
 		// untag dead players
 		foreach (var p in _players)
 			p.Value.dead = false;
-
-		_winnerSet = false;
 
 		// do small delay before we reset to new round
 		Timing.RunCoroutine(_resetDelay(2, winner, score));		
@@ -148,6 +158,12 @@ public class Match : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
+	void ShowWinner(int id)
+	{
+		_winnerUI.ShowWinner(id);
+	}
+
+	[PunRPC]
 	void AllIsLoaded()
 	{
 		// tell everyone to start the match, send the timestamp so the countdown timer will be the same for all players no matter lag
@@ -176,6 +192,8 @@ public class Match : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkStartNewRound(int lastWinner, int newScore, double delta)
 	{
+		_winnerSet = false;
+
 		matchStarted = false;
 
 		// reset level(character resapwn is here aswell for now)

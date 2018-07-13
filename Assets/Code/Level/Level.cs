@@ -18,7 +18,7 @@ public class Level : Photon.MonoBehaviour
 	public void ManualStart()
 	{
 		_character = PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity, 0).GetComponent<Character>();
-		_character.Initialize(PhotonNetwork.player.CustomProperties[Constants.CHARACTER_NAME].ToString(), PhotonNetwork.player.ID);
+		_character.Initialize(PhotonNetwork.player.CustomProperties[Constants.CHARACTER_NAME].ToString(), PhotonNetwork.player.ID, PhotonNetwork.player.NickName);
 
 		tileMap = new TileMap(_mapToLoad, _tilesFolder);
 

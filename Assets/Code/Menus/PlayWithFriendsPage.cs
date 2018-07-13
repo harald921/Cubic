@@ -74,6 +74,9 @@ public class PlayWithFriendsPage : MenuPage
 
 		if (PhotonNetwork.isMasterClient && PhotonNetwork.room.PlayerCount > 1)
 			_continueButton.interactable = true;
+		else
+			_continueButton.interactable = false;
+
 	}
 
 	public override void OnPageExit()
