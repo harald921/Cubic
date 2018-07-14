@@ -26,7 +26,7 @@ public class TileVisualizer : MonoBehaviour
 			using (BinaryReader reader = new BinaryReader(stream))
 			{
 				int Y = reader.ReadInt32();        // Read: gridsize y
-				int X = reader.ReadInt32();        // Read: gridsize x
+				int X = reader.ReadInt32();        // Read: gridsize x								
 
 				for (int y = 0; y < Y; y++)
 					for (int x = 0; x < X; x++)
@@ -34,7 +34,9 @@ public class TileVisualizer : MonoBehaviour
 						Vector2DInt tilePosition = Vector2DInt.Zero;
 						tilePosition.BinaryLoad(reader);       // Read: Position
 						string typeName = reader.ReadString(); // Read: Tile type name  
-
+						float yRot = reader.ReadSingle();
+						float tintStrength = reader.ReadSingle();
+			
 						// dont spawn any tile if it is empty
 						if (typeName == "empty")
 							continue;
@@ -54,7 +56,10 @@ public class TileVisualizer : MonoBehaviour
 							continue;
 						}
 
-						GameObject tile = Instantiate(model, new Vector3(x, 0, y), Quaternion.identity, transform);
+						// spawn new tile
+						GameObject tile = Instantiate(model, new Vector3(x, 0, y), model.transform.rotation * Quaternion.Euler(0, yRot, 0), transform);
+
+						TintTile(tile, tintStrength);
 					}
 			}
 		}
@@ -134,5 +139,19 @@ public class TileVisualizer : MonoBehaviour
 
 		_lastX = _sizeX;
 		_lastY = _sizeY;
+	}
+
+	void TintTile(GameObject tile, float strength)
+	{
+		Renderer renderer = tile.GetComponent<Renderer>();
+		if (renderer != null)
+			renderer.material.color = Color.white * strength;
+
+		for (int i = 0; i < tile.transform.childCount; i++)
+		{
+			renderer = tile.transform.GetChild(i).GetComponent<Renderer>();
+			if (renderer != null)
+				renderer.material.color = Color.white * strength;
+		}
 	}
 }

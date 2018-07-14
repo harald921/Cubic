@@ -22,6 +22,9 @@ public class TileModel
 
 		public AudioClip landSound;
 		public AudioClip breakSound;
+
+		public GameObject landParticle;
+		public GameObject breakParticle;
     }
 
     [System.Serializable]
@@ -65,14 +68,14 @@ public class Tile
 	AudioSource[] _sounds;
 
 
-    public Tile(Vector2DInt inPosition, string inTileName, float inYRotation, float inTintStrength, Transform tilesFolder)
+    public Tile(Vector2DInt position, string tileName, float yRotation, float tintStrength, Transform tilesFolder)
     {
 		_tileDB = TileDatabase.instance;
 
-		model = _tileDB.GetTile(inTileName);
+		model = _tileDB.GetTile(tileName);
 
-        data  = new Data(model.data, inPosition, this);
-        view = new View(model.view, inPosition, inYRotation, inTintStrength, tilesFolder);
+        data  = new Data(model.data, position, this);
+        view = new View(model.view, position, yRotation, tintStrength, tilesFolder);
 
 		_sounds = new AudioSource[(int)TileSounds.Count];
 		CreateSounds();
@@ -81,68 +84,6 @@ public class Tile
 	public void Delete()
     {
         Object.Destroy(view.mainGO, 1.0f); // hardcoded to same lenght as animation for now, dont like this too much
-    }
-
-    public class Data
-    {
-        public readonly Vector2DInt position;
-
-        public int currentHealth { get; private set; } = 0;
-
-        Character _character;
-
-		Tile _myTile;
-
-        public Data(TileModel.Data inDataModel, Vector2DInt inPosition, Tile myTile)
-        {
-            position = inPosition;
-            currentHealth = inDataModel.health;
-			_myTile = myTile;
-        }		
-
-        public void SetCharacter(Character inCharacter) =>
-            _character = inCharacter;
-
-        public void RemovePlayer() =>
-            _character = null;
-
-		public bool IsOccupied() =>
-			_character != null;
-
-		public Character GetOccupyingPlayer() =>
-			_character;
-
-        public void DamageTile()
-        {
-            currentHealth--;
-
-			_myTile.view.mainGO.GetComponent<Animator>().SetInteger("health", currentHealth);
-
-			_myTile.PlaySound(TileSounds.Break);
-
-            if (currentHealth == 0)
-				Match.instance.level.tileMap.SetTile(position, new Tile(position, "empty", 0.0f, 0.0f, null));
-        }
-
-        public Tile GetRelativeTile(Vector2DInt inOffset) =>
-			Match.instance.level.tileMap.GetTile(position + inOffset);
-    }
-
-    public class View
-    {
-        public readonly GameObject mainGO;
-
-        public View(TileModel.View inViewModel, Vector2DInt inPosition, float inYrotation, float inTintStrength, Transform tilesFolder)
-        {
-            if (inViewModel.mainGO == null)
-                return;
-
-            mainGO = Object.Instantiate(inViewModel.mainGO, tilesFolder);
-			mainGO.transform.rotation = mainGO.transform.rotation * Quaternion.Euler(new Vector3(0, inYrotation, 0));
-            mainGO.transform.position = new Vector3(inPosition.x, 0, inPosition.y);
-
-			TintTile(mainGO, inTintStrength);
-        }
     }
 
 	void CreateSounds()
@@ -163,13 +104,24 @@ public class Tile
 		_sounds[(int)TileSounds.Break].clip = model.data.breakSound;
 	}
 
-	public void PlaySound(TileSounds type)
+	void PlaySound(TileSounds type)
 	{
 		if (view.mainGO == null)
 			return;
 
-		if(_sounds[(int)type] != null)
-		   _sounds[(int)type].Play();
+		if (_sounds[(int)type] != null)
+			_sounds[(int)type].Play();
+	}
+
+	public void OnPlayerLand()
+	{
+		PlaySound(TileSounds.Land);
+
+		if (model.data.landParticle != null)
+		{
+			GameObject p = Object.Instantiate(model.data.landParticle, new Vector3(data.position.x, 0, data.position.y), model.data.landParticle.transform.rotation);
+			Object.Destroy(p, 8);
+		}
 	}
 
 	public static void TintTile(GameObject tile, float strength)
@@ -185,6 +137,76 @@ public class Tile
 				renderer.material.color = Color.white * strength;
 		}
 	}
+
+	public class Data
+    {
+        public readonly Vector2DInt position;
+
+        public int currentHealth { get; private set; } = 0;
+
+        Character _character;
+
+		Tile _myTile;
+
+        public Data(TileModel.Data dataModel, Vector2DInt position, Tile myTile)
+        {
+            this.position = position;
+            currentHealth = dataModel.health;
+			_myTile = myTile;
+        }		
+
+        public void SetCharacter(Character character) =>
+            _character = character;
+
+        public void RemovePlayer() =>
+            _character = null;
+
+		public bool IsOccupied() =>
+			_character != null;
+
+		public Character GetOccupyingPlayer() =>
+			_character;
+
+        public void DamageTile()
+        {
+            currentHealth--;
+
+			_myTile.view.mainGO.GetComponent<Animator>().SetInteger("health", currentHealth);
+
+			_myTile.PlaySound(TileSounds.Break);
+
+			if (_myTile.model.data.breakParticle != null)
+			{
+				GameObject p = Object.Instantiate(_myTile.model.data.breakParticle, new Vector3(position.x, 0, position.y), _myTile.model.data.breakParticle.transform.rotation);
+				Object.Destroy(p, 8);
+			}
+
+            if (currentHealth == 0)
+				Match.instance.level.tileMap.SetTile(position, new Tile(position, "empty", 0.0f, 0.0f, null));
+        }
+
+        public Tile GetRelativeTile(Vector2DInt offset) =>
+			Match.instance.level.tileMap.GetTile(position + offset);
+    }
+
+    public class View
+    {
+        public readonly GameObject mainGO;
+
+        public View(TileModel.View viewModel, Vector2DInt position, float yRotation, float tintStrength, Transform tilesFolder)
+        {
+            if (viewModel.mainGO == null)
+                return;
+
+            mainGO = Object.Instantiate(viewModel.mainGO, tilesFolder);
+			mainGO.transform.rotation = mainGO.transform.rotation * Quaternion.Euler(new Vector3(0, yRotation, 0));
+            mainGO.transform.position = new Vector3(position.x, 0, position.y);
+
+			TintTile(mainGO, tintStrength);
+        }
+    }
+
+	
 }
 
 

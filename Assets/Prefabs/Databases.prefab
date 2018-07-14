@@ -119,6 +119,8 @@ MonoBehaviour:
       unbreakable: 0
       landSound: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
       breakSound: {fileID: 0}
+      landParticle: {fileID: 0}
+      breakParticle: {fileID: 0}
     _view:
       _mainGO: {fileID: 1960800530658806, guid: e7a1000ef3b8e2c4cb331049fea8113a,
         type: 2}
@@ -130,6 +132,8 @@ MonoBehaviour:
       unbreakable: 0
       landSound: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
       breakSound: {fileID: 0}
+      landParticle: {fileID: 0}
+      breakParticle: {fileID: 0}
     _view:
       _mainGO: {fileID: 1157504412975688, guid: f7a053546d39f2e48b2cf5086a986b21,
         type: 2}
@@ -141,6 +145,8 @@ MonoBehaviour:
       unbreakable: 1
       landSound: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
       breakSound: {fileID: 0}
+      landParticle: {fileID: 0}
+      breakParticle: {fileID: 0}
     _view:
       _mainGO: {fileID: 1960800530658806, guid: a817afb52fc188d4aa9950402ea509aa,
         type: 2}
@@ -152,6 +158,8 @@ MonoBehaviour:
       unbreakable: 1
       landSound: {fileID: 0}
       breakSound: {fileID: 0}
+      landParticle: {fileID: 0}
+      breakParticle: {fileID: 0}
     _view:
       _mainGO: {fileID: 0}
   - _typeName: bricks
@@ -162,6 +170,8 @@ MonoBehaviour:
       unbreakable: 0
       landSound: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
       breakSound: {fileID: 0}
+      landParticle: {fileID: 0}
+      breakParticle: {fileID: 0}
     _view:
       _mainGO: {fileID: 1126028828871418, guid: 8e0f46bfffbcb434a826a0c373d860ce,
         type: 2}
@@ -173,17 +183,24 @@ MonoBehaviour:
       unbreakable: 0
       landSound: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
       breakSound: {fileID: 0}
+      landParticle: {fileID: 1895057872444966, guid: 84bf0b0e1c89cba4eba76ec273baa2d3,
+        type: 2}
+      breakParticle: {fileID: 1070999266619262, guid: f6f2039916d90804c962c93ccbd71449,
+        type: 2}
     _view:
       _mainGO: {fileID: 1794138811444944, guid: 9a037bbafdecfbb41bd51be0a2f8a361,
         type: 2}
   - _typeName: quicksand
     _data:
       walkable: 1
-      health: 3
+      health: 0
       deadly: 1
-      unbreakable: 0
+      unbreakable: 1
       landSound: {fileID: 8300000, guid: 5aeba2356d28bc046b8e1411066ea6c6, type: 3}
       breakSound: {fileID: 0}
+      landParticle: {fileID: 1895057872444966, guid: 84bf0b0e1c89cba4eba76ec273baa2d3,
+        type: 2}
+      breakParticle: {fileID: 0}
     _view:
       _mainGO: {fileID: 1106391426825514, guid: c986eb9c24cf9d84ebcbba88659b5958,
         type: 2}
@@ -206,34 +223,46 @@ MonoBehaviour:
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
+    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
   - name: simon
     prefab: {fileID: 1744302026940898, guid: a60c486242858444eae0325ebac4cd42, type: 2}
     walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
+    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
   - name: duplo
     prefab: {fileID: 1613017766424994, guid: 3dd6cf30176f10e4d8ceb5cd689922c4, type: 2}
     walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
+    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
   - name: rubikscube
     prefab: {fileID: 1436183027928294, guid: 76ab9576951b8064d84c776c44075991, type: 2}
     walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
+    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
   - name: cheese
     prefab: {fileID: 1424603968093668, guid: 56fffd5fde203fd4589047921c52dee3, type: 2}
     walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
+    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
   _fallBackView:
     name: matti
     prefab: {fileID: 1201945228868484, guid: 9820109b85664c34c8619f8e17ac8698, type: 2}
     walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
-    deathSound: {fileID: 0}
+    deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
+    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}

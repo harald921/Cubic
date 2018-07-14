@@ -22,32 +22,32 @@ public class CharacterFlagComponent : MonoBehaviour
         }
     }
     
-    public bool GetFlag(CharacterFlag inFlag) => _flags[inFlag];
-    public void SetFlag(CharacterFlag inFlag, bool inValue)
+    public bool GetFlag(CharacterFlag flag) => _flags[flag];
+    public void SetFlag(CharacterFlag flag, bool value)
     {
         // Sets the flag directly
 
-        Timing.KillCoroutines(_durationHandles[inFlag]);
+        Timing.KillCoroutines(_durationHandles[flag]);
 
-        _flags[inFlag] = inValue;
+        _flags[flag] = value;
     }
 
-    public void SetFlag(CharacterFlag inFlag, bool inValue, float inDuration, SingletonBehavior inCollisionBehaviour)
+    public void SetFlag(CharacterFlag flag, bool value, float duration, SingletonBehavior collisionBehaviour)
     {
         // Sets the flag and inverts it after 'inDuration'
 
-        if (inDuration <= 0)
+        if (duration <= 0)
             throw new System.Exception("SetFlag parameter 'inDuration' cannot be zero or lower.");
 
-        _durationHandles[inFlag] = Timing.RunCoroutineSingleton(_FlagDuration(inFlag, inValue, inDuration), _durationHandles[inFlag], inCollisionBehaviour);
+        _durationHandles[flag] = Timing.RunCoroutineSingleton(_FlagDuration(flag, value, duration), _durationHandles[flag], collisionBehaviour);
     }
 
 
-    IEnumerator<float> _FlagDuration(CharacterFlag inFlag, bool inInitialState, float inDuration)
+    IEnumerator<float> _FlagDuration(CharacterFlag flag, bool initialState, float duration)
     {
-        _flags[inFlag] = inInitialState;
-        yield return Timing.WaitForSeconds(inDuration);
-        _flags[inFlag] = !inInitialState;
+        _flags[flag] = initialState;
+        yield return Timing.WaitForSeconds(duration);
+        _flags[flag] = !initialState;
     }
 }
 

@@ -7,7 +7,7 @@ using Photon;
 
 public class CharacterMovementComponent : Photon.MonoBehaviour
 {
-	public Tile currentTile { get; private set; }
+	public Tile currentTile       { get; private set; }
 	public int currentDashCharges { get; private set; }
 
 	Character _character;
@@ -46,13 +46,13 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 	}
 
-	public void TryWalk(Vector2DInt inDirection)
+	public void TryWalk(Vector2DInt direction)
 	{
 		if (_stateComponent.currentState != CharacterState.Idle || _flagComponent.GetFlag(CharacterFlag.Cooldown_Walk))
 			return;
 
 		// cant walk to tile if occupied by other player or if not walkable tile
-		Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
+		Tile targetTile = currentTile.data.GetRelativeTile(direction);
 		if (targetTile.data.IsOccupied() || !targetTile.model.data.walkable)
 			return;
 
@@ -69,20 +69,20 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		Timing.RunCoroutineSingleton(_Charge(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
-	public void OnGettingDashed(Vector2DInt inStartTile, Vector2DInt inDirection, int inHitPower)
+	public void OnGettingDashed(Vector2DInt startTile, Vector2DInt direction, int hitPower)
 	{
-		photonView.RPC("NetworkOnGettingDashed", PhotonTargets.All, inStartTile.x, inStartTile.y, inDirection.x, inDirection.y, inHitPower);
+		photonView.RPC("NetworkOnGettingDashed", PhotonTargets.All, startTile.x, startTile.y, direction.x, direction.y, hitPower);
 	}
 
-	public void OnDashingOther(Vector2DInt inLastTile, Quaternion inRot)
+	public void OnDashingOther(Vector2DInt lastTile, Quaternion rot, Vector2DInt targetTile)
 	{
-		photonView.RPC("NetworkOnDashingOther", PhotonTargets.All, inLastTile.x, inLastTile.y, inRot.x, inRot.y, inRot.z, inRot.w);
+		photonView.RPC("NetworkOnDashingOther", PhotonTargets.All, lastTile.x, lastTile.y, targetTile.x, targetTile.y, rot.x, rot.y, rot.z, rot.w);
 	}
 
 	[PunRPC]
-	void NetworkWalk(int inFromX, int inFromY, int inToX, int inToY)
+	void NetworkWalk(int fromX, int fromY, int toX, int toY)
 	{
-		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(inFromX, inFromY), new Vector2DInt(inToX, inToY)), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(fromX, fromY), new Vector2DInt(toX, toY)), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
 	[PunRPC]
@@ -93,42 +93,43 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkDash(int inFromX, int inFromY, int inDirectionX, int inDirectionY, int inDashCharges)
+	void NetworkDash(int fromX, int fromY, int directionX, int directionY, int dashCharges)
 	{
 		// set new current tile if desynced, should never happen becuase of chargetime before dash (maybe on quickdash?)
-		SetNewTileReferences(new Vector2DInt(inFromX, inFromY));
+		SetNewTileReferences(new Vector2DInt(fromX, fromY));
 
-		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(directionX, directionY), dashCharges), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
 	[PunRPC]
-	void NetworkOnGettingDashed(int inFromX, int inFromY, int inDirectionX, int inDirectionY, int numDashtiles)
+	void NetworkOnGettingDashed(int fromX, int fromY, int directionX, int directionY, int numDashtiles)
 	{
 		// kill all coroutines on this layer
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 
 		// set new current tile if desynced
-		SetNewTileReferences(new Vector2DInt(inFromX, inFromY));
+		SetNewTileReferences(new Vector2DInt(fromX, fromY));
 
-		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), numDashtiles, true), gameObject.GetInstanceID(), SingletonBehavior.Overwrite); // takes over the dashPower from the player that dashed into us
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(directionX, directionY), numDashtiles, true), gameObject.GetInstanceID(), SingletonBehavior.Overwrite); // takes over the dashPower from the player that dashed into us
 	}
 
 	[PunRPC]
-	void NetworkOnDashingOther(int inFromX, int inFromY, float inRotX, float inRotY, float inRotZ, float inRotW)
+	void NetworkOnDashingOther(int fromX, int fromY, int targetX, int targetY, float rotX, float rotY, float rotZ, float rotW)
 	{
 		// kill all coroutines on this layer
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 
-		// play hit sound
+		// play hit sound and spawn effect
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Punch);
+		CreateHitEffect(new Vector2DInt(fromX, fromY), new Vector2DInt(targetX, targetY));
 
 		// set new current tile if desynced
-		SetNewTileReferences(new Vector2DInt(inFromX, inFromY));
+		SetNewTileReferences(new Vector2DInt(fromX, fromY));
 
 		// this should not have to be interpolated becuase everyone stops locally aswell
 		// used as safety if we only detects collision on server and not locally, should be very rare and be a small teleport if happens
-		transform.position = new Vector3(inFromX, 1, inFromY);
-		transform.rotation = new Quaternion(inRotX, inRotY, inRotZ, inRotW);
+		transform.position = new Vector3(fromX, 1, fromY);
+		transform.rotation = new Quaternion(rotX, rotY, rotZ, rotW);
 
 		// set last target rotation to current rotation(we never started lerping towards target)
 		_lastTargetRotation = transform.rotation;
@@ -140,18 +141,18 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	public void FinishCancelledDash(int inFromX, int inFromY, int inDirectionX, int inDirectionY, int inDashCharges)
+	public void FinishCancelledDash(int fromX, int fromY, int directionX, int directionY, int dashCharges)
 	{
 		// kill all coroutines on this layer
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 
 		// set back tilereferences to the tile where we stopped
-		SetNewTileReferences(new Vector2DInt(inFromX, inFromY));
+		SetNewTileReferences(new Vector2DInt(fromX, fromY));
 
-		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(inDirectionX, inDirectionY), inDashCharges, true), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(directionX, directionY), dashCharges, true), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
-	IEnumerator<float> _Walk(Vector2DInt inFromTile, Vector2DInt inToTile)
+	IEnumerator<float> _Walk(Vector2DInt fromTilePos, Vector2DInt toTilePos)
 	{
 		_stateComponent.SetState(CharacterState.Walking);
 
@@ -162,8 +163,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		TileMap tileMap = Match.instance.level.tileMap;
 
-		Tile fromTile = tileMap.GetTile(inFromTile);
-		Tile targetTile = tileMap.GetTile(inToTile);
+		Tile fromTile = tileMap.GetTile(fromTilePos);
+		Tile targetTile = tileMap.GetTile(toTilePos);
 
 		if (targetTile == null)
 			throw new Exception("Tried to walk onto a tile that is null.");
@@ -210,7 +211,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		if (DeadlyTile())
 			yield break;
 
-		currentTile.PlaySound(Tile.TileSounds.Land);
+		currentTile.OnPlayerLand();
 
 		// reset state and add cooldown
 		_stateComponent.SetState(CharacterState.Idle);
@@ -250,7 +251,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		photonView.RPC("NetworkDash", PhotonTargets.All, currentPos.x, currentPos.y, _lastMoveDirection.x, _lastMoveDirection.y, currentDashCharges);
 	}
 
-	public IEnumerator<float> _Dash(Vector2DInt inDirection, int inDashStrength, bool fromCollision = false)
+	public IEnumerator<float> _Dash(Vector2DInt direction, int dashStrength, bool fromCollision = false)
 	{
 		_stateComponent.SetState(CharacterState.Dashing); // set state to dashing
 
@@ -261,11 +262,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		ChangeColor(_character.color, _character.view);
 
 		// loop over all dash charges
-		for (int i = 0; i < inDashStrength; i++)
+		for (int i = 0; i < dashStrength; i++)
 		{
 			// get next tile in dash path			
 			// current tile is corrected before coroutine if lagging so this should be safe
-			Tile targetTile = currentTile.data.GetRelativeTile(inDirection);
+			Tile targetTile = currentTile.data.GetRelativeTile(direction);
 			if (targetTile == null)
 				throw new Exception("Tried to dash onto a tile that is null.");
 
@@ -285,7 +286,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			Quaternion fromRotation = transform.rotation;
 			Quaternion targetRotation = Quaternion.Euler(movementDirection * (90 * _model.dashRotationSpeed)) * _lastTargetRotation;
 
-			Quaternion thisLastTargetRotation = _lastTargetRotation;
+			// if we will hit someone we need the target rotation we had last time becuase we wont start moving towards the future last target
+			Quaternion previousLastTargetRotation = _lastTargetRotation;
 
 			_lastTargetRotation = targetRotation;
 
@@ -299,10 +301,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 					_collisionTracker.AddCollision(playerToDash.photonView.viewID, targetTile.data.position.x, targetTile.data.position.y);
 
-					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, inDirection, inDashStrength - i);
+					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, direction, dashStrength - i);
 
 					// send rpc that we hit other player and cancel all our current movement
-					OnDashingOther(currentTile.data.position, thisLastTargetRotation);
+					OnDashingOther(currentTile.data.position, previousLastTargetRotation, targetTile.data.position);
 
 					yield break;
 				}
@@ -316,7 +318,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 												targetTile.data.GetOccupyingPlayer().photonView.viewID,
 												photonView.viewID, currentTile.data.position.x, currentTile.data.position.y,
 												targetTile.data.position.x, targetTile.data.position.y,
-												inDirection.x, inDirection.y, inDashStrength - i);
+												direction.x, direction.y, dashStrength - i);
 				yield break;
 			}
 
@@ -379,11 +381,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
 	}
 
-	void SetNewTileReferences(Vector2DInt inTile)
+	void SetNewTileReferences(Vector2DInt tile)
 	{
 		// remove old reference and set to new
 		currentTile.data.RemovePlayer();                                      
-		currentTile = Match.instance.level.tileMap.GetTile(inTile);                 
+		currentTile = Match.instance.level.tileMap.GetTile(tile);                 
 		currentTile.data.SetCharacter(_character);                            																																																																																																																																																																																																																																																																																																																																				   
 	}
 
@@ -414,10 +416,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// sink to bottom
 		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 
-		if (PhotonNetwork.isMasterClient)
-		{
-			Match.instance.OnPlayerDie(_character.playerID);
-		}			
+		if (PhotonNetwork.isMasterClient)		
+			Match.instance.OnPlayerDie(_character.playerID);					
 	}
 
 	void ChangeColor(Color color, GameObject view)
@@ -433,6 +433,17 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			if (meshRenderer)
 				meshRenderer.material.color = color;
 		}		
+	}
+
+	void CreateHitEffect(Vector2DInt a, Vector2DInt b)
+	{
+		if (_character.viewData.hitParticle == null)
+			return;
+
+		// spawn hit particle abit away from dahing player in the direction of player getting dashed
+		Vector3 spawnPosition = new Vector3(a.x, 1, a.y) + ( (new Vector3(b.x, 1, b.y) - new Vector3(a.x, 1, a.y)) * 2.0f);
+		GameObject p = Instantiate(_character.viewData.hitParticle, spawnPosition, _character.viewData.hitParticle.transform.rotation);
+		Destroy(p, 8);
 	}
 
 #if DEBUG_TOOLS

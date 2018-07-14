@@ -14,7 +14,7 @@ public class CharacterStateComponent : MonoBehaviour
     }
 
 
-    public void SetState(CharacterState inState) => currentState = inState;
+    public void SetState(CharacterState state) => currentState = state;
 }
 
 public enum CharacterState

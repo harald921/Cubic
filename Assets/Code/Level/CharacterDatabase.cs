@@ -28,6 +28,7 @@ public class CharacterDatabase : MonoBehaviour
 		public AudioClip dashSound;
 		public AudioClip hitSound;
 		public AudioClip deathSound;
+		public GameObject hitParticle;
 	}
 
 	void Awake()

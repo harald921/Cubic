@@ -9,12 +9,13 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterSoundComponent))]
 public class Character : Photon.MonoBehaviour
 {	
-	public Color color           { get; private set; }
-	public CharacterModel model  { get; private set; }
-	public GameObject view       { get; private set; }
-	public bool isMasterClient   { get; private set; }
-	public int playerID          { get; private set; }
-	public string playerNickname { get; private set; }
+	public Color color                         { get; private set; }
+	public CharacterModel model                { get; private set; }
+	public GameObject view                     { get; private set; }
+	public bool isMasterClient                 { get; private set; }
+	public int playerID                        { get; private set; }
+	public string playerNickname               { get; private set; }
+	public CharacterDatabase.ViewData viewData { get; private set; }
 
     public CharacterMovementComponent movementComponent {get; private set;}
     public CharacterFlagComponent     flagComponent     {get; private set;}
@@ -23,28 +24,28 @@ public class Character : Photon.MonoBehaviour
 
 	public event Action<Vector2DInt> OnCharacterSpawned;
 
-	public void Initialize(string inViewName, int inPlayerId, string inNickName)
+	public void Initialize(string viewName, int playerID, string nickname)
     {
 		isMasterClient = PhotonNetwork.isMasterClient;
-		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, inViewName, inPlayerId, inNickName); // wont need be buffered later when level loading is synced
+		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, viewName, playerID, nickname); // wont need be buffered later when level loading is synced
 	}
 
-	public void Spawn(Vector2DInt inSpawnTile)
+	public void Spawn(Vector2DInt spawnTile)
 	{
-		photonView.RPC("NetworkSpawn", PhotonTargets.AllBuffered, inSpawnTile.x, inSpawnTile.y); // wont need be buffered later when level loading is synced
+		photonView.RPC("NetworkSpawn", PhotonTargets.AllBuffered, spawnTile.x, spawnTile.y); // wont need be buffered later when level loading is synced
 	}
 
 	[PunRPC]
-	void NetworkInitialize(string inViewName, int inPlayerId, string inNickname)
+	void NetworkInitialize(string viewname, int playerID, string nickname)
 	{
-		playerID       = inPlayerId;
-		playerNickname = inNickname;
+		this.playerID       = playerID;
+		playerNickname = nickname;
 
-		model = CharacterDatabase.instance.standardModel;
-		CharacterDatabase.ViewData vData = CharacterDatabase.instance.GetViewFromName(inViewName);
+		model    = CharacterDatabase.instance.standardModel;
+		viewData = CharacterDatabase.instance.GetViewFromName(viewname);
 
 		// Setup the correct view, probably in a view component	
-		view = Instantiate(vData.prefab);
+		view = Instantiate(viewData.prefab);
 		view.transform.SetParent(transform, false);
 
 		// gat components
@@ -57,12 +58,12 @@ public class Character : Photon.MonoBehaviour
 		movementComponent.ManualAwake();
 		flagComponent.ManualAwake();
 		stateComponent.ManualAwake();
-		soundComponent.ManualAwake(vData, view.transform);
+		soundComponent.ManualAwake(viewData, view.transform);
 
 		GetOriginalColor();
 
 		if (photonView.isMine)
-			Match.instance.photonView.RPC("RegisterPlayer", PhotonTargets.AllViaServer, playerID, playerNickname);
+			Match.instance.photonView.RPC("RegisterPlayer", PhotonTargets.AllViaServer, this.playerID, playerNickname);
 
 #if DEBUG_TOOLS
 		if (photonView.isMine)
@@ -77,11 +78,11 @@ public class Character : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkSpawn(int inSpawnTileX, int inSpawnTileY)
+	void NetworkSpawn(int spawnTileX, int spawnTileY)
 	{
 		movementComponent.ResetAll();
-		transform.position = new Vector3(inSpawnTileX, 1, inSpawnTileY);
-		OnCharacterSpawned?.Invoke(new Vector2DInt(inSpawnTileX, inSpawnTileY));		
+		transform.position = new Vector3(spawnTileX, 1, spawnTileY);
+		OnCharacterSpawned?.Invoke(new Vector2DInt(spawnTileX, spawnTileY));		
 	}
 
 	void GetOriginalColor()

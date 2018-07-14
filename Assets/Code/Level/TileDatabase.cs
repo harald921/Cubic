@@ -31,12 +31,12 @@ public class TileDatabase : MonoBehaviour
     public int tileCount => 
         _tiles.Count;
 
-    public TileModel GetTile(string inTileName) =>
-        _tiles[inTileName.ToLower()];
+    public TileModel GetTile(string tileName) =>
+        _tiles[tileName.ToLower()];
 
-    public TileModel GetTile(int inID) =>
-        _tiles[_tileTypes[inID]];
+    public TileModel GetTile(int ID) =>
+        _tiles[_tileTypes[ID]];
 
-    public int GetTileTypeIndex(string inName) =>
-        _tileTypes.IndexOf(inName);
+    public int GetTileTypeIndex(string name) =>
+        _tileTypes.IndexOf(name);
 }

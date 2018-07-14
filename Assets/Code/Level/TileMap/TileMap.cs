@@ -12,19 +12,19 @@ public class TileMap
 	Vector2DInt _gridSize;
 	Transform _tilesFolder;
 	
-    public TileMap(string inMapName, Transform inTilesFolder)
+    public TileMap(string mapName, Transform tilesFolder)
     {
-        name = inMapName;
-		_tilesFolder = inTilesFolder;
+        name = mapName;
+		_tilesFolder = tilesFolder;
         BinaryLoad();
     }
 
 
-    public Tile GetTile(Vector2DInt inPosition) => _tiles[inPosition];
-    public void SetTile(Vector2DInt inPosition, Tile inTile)
+    public Tile GetTile(Vector2DInt position) => _tiles[position];
+    public void SetTile(Vector2DInt position, Tile tile)
     {
-        _tiles[inPosition].Delete();
-        _tiles[inPosition] = inTile;
+        _tiles[position].Delete();
+        _tiles[position] = tile;
     }
 
 	public Vector2DInt GetRandomTileCoords() =>	
