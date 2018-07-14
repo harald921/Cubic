@@ -121,7 +121,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		// play hit sound and spawn effect
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Punch);
-		CreateHitEffect(new Vector2DInt(fromX, fromY), new Vector2DInt(targetX, targetY));
+		_character.ParticleComponent.SpawnHitEffect(new Vector2DInt(fromX, fromY), new Vector2DInt(targetX, targetY));
 
 		// set new current tile if desynced
 		SetNewTileReferences(new Vector2DInt(fromX, fromY));
@@ -135,6 +135,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_lastTargetRotation = transform.rotation;
 
 		StopMovementAndAddCooldowns();
+		_character.ParticleComponent.EmitTrail(false);
 
 		// check if we got stopped on deadly tile
 		DeadlyTile();
@@ -256,8 +257,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_stateComponent.SetState(CharacterState.Dashing); // set state to dashing
 
 		// only play dash sound if this was a volentary dash
-		if(!fromCollision)
-		   _character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Dash);
+		if (!fromCollision)
+		{
+     		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Dash);
+			_character.ParticleComponent.EmitTrail(true);
+		}
 
 		ChangeColor(_character.color, _character.view);
 
@@ -314,6 +318,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			if (targetTile.data.IsOccupied())
 			{
 				StopMovementAndAddCooldowns();
+				_character.ParticleComponent.EmitTrail(false);
 				_collisionTracker.photonView.RPC("CheckServerCollision", PhotonTargets.MasterClient,
 												targetTile.data.GetOccupyingPlayer().photonView.viewID,
 												photonView.viewID, currentTile.data.position.x, currentTile.data.position.y,
@@ -353,6 +358,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		if (DeadlyTile())
 			yield break;
 
+		_character.ParticleComponent.EmitTrail(false);
 		StopMovementAndAddCooldowns();
 	}
 
@@ -412,6 +418,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_stateComponent.SetState(CharacterState.Dead);
 
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Death);
+		_character.ParticleComponent.EmitTrail(false);
 
 		// sink to bottom
 		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
@@ -433,17 +440,6 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			if (meshRenderer)
 				meshRenderer.material.color = color;
 		}		
-	}
-
-	void CreateHitEffect(Vector2DInt a, Vector2DInt b)
-	{
-		if (_character.viewData.hitParticle == null)
-			return;
-
-		// spawn hit particle abit away from dahing player in the direction of player getting dashed
-		Vector3 spawnPosition = new Vector3(a.x, 1, a.y) + ( (new Vector3(b.x, 1, b.y) - new Vector3(a.x, 1, a.y)) * 2.0f);
-		GameObject p = Instantiate(_character.viewData.hitParticle, spawnPosition, _character.viewData.hitParticle.transform.rotation);
-		Destroy(p, 8);
 	}
 
 #if DEBUG_TOOLS

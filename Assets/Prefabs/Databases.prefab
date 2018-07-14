@@ -223,7 +223,9 @@ MonoBehaviour:
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
-    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+    hitParticle: {fileID: 198242875643500960, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
+    trailParticle: {fileID: 198766545261693686, guid: 2c3c552477372574f9720fd7389f1251,
       type: 2}
   - name: simon
     prefab: {fileID: 1744302026940898, guid: a60c486242858444eae0325ebac4cd42, type: 2}
@@ -231,7 +233,9 @@ MonoBehaviour:
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
-    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+    hitParticle: {fileID: 198242875643500960, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
+    trailParticle: {fileID: 198766545261693686, guid: 2c3c552477372574f9720fd7389f1251,
       type: 2}
   - name: duplo
     prefab: {fileID: 1613017766424994, guid: 3dd6cf30176f10e4d8ceb5cd689922c4, type: 2}
@@ -239,7 +243,9 @@ MonoBehaviour:
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
-    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+    hitParticle: {fileID: 198242875643500960, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
+    trailParticle: {fileID: 198766545261693686, guid: 2c3c552477372574f9720fd7389f1251,
       type: 2}
   - name: rubikscube
     prefab: {fileID: 1436183027928294, guid: 76ab9576951b8064d84c776c44075991, type: 2}
@@ -247,7 +253,9 @@ MonoBehaviour:
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
-    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+    hitParticle: {fileID: 198242875643500960, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
+    trailParticle: {fileID: 198766545261693686, guid: 2c3c552477372574f9720fd7389f1251,
       type: 2}
   - name: cheese
     prefab: {fileID: 1424603968093668, guid: 56fffd5fde203fd4589047921c52dee3, type: 2}
@@ -255,7 +263,9 @@ MonoBehaviour:
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
-    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+    hitParticle: {fileID: 198242875643500960, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
+    trailParticle: {fileID: 198766545261693686, guid: 2c3c552477372574f9720fd7389f1251,
       type: 2}
   _fallBackView:
     name: matti
@@ -264,5 +274,7 @@ MonoBehaviour:
     dashSound: {fileID: 8300000, guid: 6b4bdcd31b14b404ca707e4255795507, type: 3}
     hitSound: {fileID: 8300000, guid: ff599b04c20bdcd43a6d37844305cc6f, type: 3}
     deathSound: {fileID: 8300000, guid: 63656c2c08e98db4ba320a7f7cf0f7b4, type: 3}
-    hitParticle: {fileID: 1934314573640156, guid: 51953c835d3defd4984df602bfbca740,
+    hitParticle: {fileID: 198242875643500960, guid: 51953c835d3defd4984df602bfbca740,
+      type: 2}
+    trailParticle: {fileID: 198766545261693686, guid: 2c3c552477372574f9720fd7389f1251,
       type: 2}

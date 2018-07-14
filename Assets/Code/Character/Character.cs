@@ -7,6 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterFlagComponent))]
 [RequireComponent(typeof(CharacterStateComponent))]
 [RequireComponent(typeof(CharacterSoundComponent))]
+[RequireComponent(typeof(CharacterParticlesComponent))]
 public class Character : Photon.MonoBehaviour
 {	
 	public Color color                         { get; private set; }
@@ -17,10 +18,11 @@ public class Character : Photon.MonoBehaviour
 	public string playerNickname               { get; private set; }
 	public CharacterDatabase.ViewData viewData { get; private set; }
 
-    public CharacterMovementComponent movementComponent {get; private set;}
-    public CharacterFlagComponent     flagComponent     {get; private set;}
-    public CharacterStateComponent    stateComponent    {get; private set;}
-	public CharacterSoundComponent    soundComponent    {get; private set;}
+    public CharacterMovementComponent  movementComponent {get; private set;}
+    public CharacterFlagComponent      flagComponent     {get; private set;}
+    public CharacterStateComponent     stateComponent    {get; private set;}
+	public CharacterSoundComponent     soundComponent    {get; private set;}
+	public CharacterParticlesComponent ParticleComponent {get; private set;}
 
 	public event Action<Vector2DInt> OnCharacterSpawned;
 
@@ -53,12 +55,14 @@ public class Character : Photon.MonoBehaviour
 		flagComponent     = GetComponent<CharacterFlagComponent>();
 		stateComponent    = GetComponent<CharacterStateComponent>();
 		soundComponent    = GetComponent<CharacterSoundComponent>();
+		ParticleComponent = GetComponent<CharacterParticlesComponent>();
 
 		// initialize components
 		movementComponent.ManualAwake();
 		flagComponent.ManualAwake();
 		stateComponent.ManualAwake();
 		soundComponent.ManualAwake(viewData, view.transform);
+		ParticleComponent.ManualAwake(viewData, view.transform);
 
 		GetOriginalColor();
 
