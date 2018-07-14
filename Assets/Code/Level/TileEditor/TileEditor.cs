@@ -244,6 +244,20 @@ public class TileEditor : MonoBehaviour
 			}
 	}
 
+	public void RandomizeRotationAll()
+	{
+		for (int y = 0; y < _gridSize.y; y++)
+			for (int x = 0; x < _gridSize.x; x++)
+			{
+				int rotation = Random.Range(0, 4);
+				if (_tileProperties[x, y].modelReference != null)
+				{
+					_tileProperties[x, y].yRotation = (rotation * 90);
+					_tileProperties[x, y].modelReference.transform.rotation = Quaternion.Euler(Vector3.up * (rotation * 90));
+				}
+			}
+	}
+
 	void PlaceTile(int x, int y, float yRot)
 	{	
 		_tileProperties[y, x].name = _selectedTileType;
