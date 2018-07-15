@@ -9,6 +9,8 @@ public class CharacterParticlesComponent : MonoBehaviour
 	ParticleSystem _trail;
 	ParticleSystem _hit;
 
+	Vector3 _dashForward;
+
 	public void ManualAwake(CharacterDatabase.ViewData data, Transform parent)
 	{
 		_data = data;
@@ -24,13 +26,20 @@ public class CharacterParticlesComponent : MonoBehaviour
 		_trail.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 	}
 
-	public void EmitTrail(bool emit)
+	public void EmitTrail(bool emit, Vector3 dashForward)
 	{
 		if (_data.trailParticle == null)
 			return;
 
 		if (emit)
+		{
+			if (_data.trailForwardAsDashDirection)
+			{
+				_dashForward = dashForward;
+				_trail.transform.forward = _dashForward;
+			}
 			_trail.Play(true);
+		}
 		else
 			_trail.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 	}
@@ -46,4 +55,11 @@ public class CharacterParticlesComponent : MonoBehaviour
 		Destroy(p, 8);
 	}
 
+	void LateUpdate()
+	{
+		if (_trail.isEmitting && _data.trailForwardAsDashDirection)
+		{
+			_trail.transform.forward = _dashForward;
+		}	
+	}
 }

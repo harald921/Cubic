@@ -28,7 +28,12 @@ public class TileDatabase : MonoBehaviour
 		_tiles.Add(edgeModel.typeName.ToLower(), edgeModel);
     }
 
-    public int tileCount => 
+	void OnDestroy()
+	{
+		instance = null;	
+	}
+
+	public int tileCount => 
         _tiles.Count;
 
     public TileModel GetTile(string tileName) =>

@@ -24,12 +24,18 @@ public class CharacterDatabase : MonoBehaviour
 	{
 		public string name;
 		public GameObject prefab;
+
+		[Header("SOUNDS"), Space(2)]
 		public AudioClip walkSound;
 		public AudioClip dashSound;
 		public AudioClip hitSound;
 		public AudioClip deathSound;
+
+		[Header("PARTICLES"), Space(2)]
 		public ParticleSystem hitParticle;
 		public ParticleSystem trailParticle;
+		[Tooltip("will always set the forward of trails transform to the direction of the player dash")]
+		public bool trailForwardAsDashDirection;
 
 	}
 
@@ -37,6 +43,11 @@ public class CharacterDatabase : MonoBehaviour
 	{
 		for (int i =0; i < _characterModelViews.Length; i++)		
 			_characterViews.Add(_characterModelViews[i].name, _characterModelViews[i]);		
+	}
+
+	void OnDestroy()
+	{
+		_instance = null;
 	}
 
 	public ViewData GetViewFromName(string name)

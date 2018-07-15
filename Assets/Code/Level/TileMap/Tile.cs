@@ -15,14 +15,17 @@ public class TileModel
     [System.Serializable]
     public struct Data           // Hmpf, cannot be readonly due to Unity's serialization system...
     {
+		[Header("BASIC SETTINGS"),Space(3)]
         public bool walkable;    // Can a player ever enter this tile?
         public int  health;      // How many times can a player step on this tile?
         public bool deadly;      // Will a player die if it steps on this tile?
         public bool unbreakable; // tile cant break 
 
+		[Header("SOUNDS"), Space(3)]
 		public AudioClip landSound;
 		public AudioClip breakSound;
 
+		[Header("PARTICLES"), Space(3)]
 		public GameObject landParticle;
 		public GameObject breakParticle;
     }

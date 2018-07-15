@@ -135,7 +135,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_lastTargetRotation = transform.rotation;
 
 		StopMovementAndAddCooldowns();
-		_character.ParticleComponent.EmitTrail(false);
+		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 
 		// check if we got stopped on deadly tile
 		DeadlyTile();
@@ -259,8 +259,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// only play dash sound if this was a volentary dash
 		if (!fromCollision)
 		{
-     		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Dash);
-			_character.ParticleComponent.EmitTrail(true);
+			Vector2DInt currentPos = currentTile.data.position;
+			Vector2DInt targetPos  = currentTile.data.GetRelativeTile(direction).data.position;
+
+			_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Dash);
+			_character.ParticleComponent.EmitTrail(true, (new Vector3(targetPos.x, 1, targetPos.y) - new Vector3(currentPos.x, 1, currentPos.y)).normalized);
 		}
 
 		ChangeColor(_character.color, _character.view);
@@ -318,7 +321,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			if (targetTile.data.IsOccupied())
 			{
 				StopMovementAndAddCooldowns();
-				_character.ParticleComponent.EmitTrail(false);
+				_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 				_collisionTracker.photonView.RPC("CheckServerCollision", PhotonTargets.MasterClient,
 												targetTile.data.GetOccupyingPlayer().photonView.viewID,
 												photonView.viewID, currentTile.data.position.x, currentTile.data.position.y,
@@ -358,7 +361,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		if (DeadlyTile())
 			yield break;
 
-		_character.ParticleComponent.EmitTrail(false);
+		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 		StopMovementAndAddCooldowns();
 	}
 
@@ -418,7 +421,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_stateComponent.SetState(CharacterState.Dead);
 
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Death);
-		_character.ParticleComponent.EmitTrail(false);
+		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 
 		// sink to bottom
 		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
