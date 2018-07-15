@@ -92,7 +92,7 @@ public class Match : Photon.MonoBehaviour
 				idLastAlive = p.Key;
 			}
 
-		// if all players but 1 is disconnected just give the point to this player(match should be cancelled but kep this for now to avoid nullrefs)
+		// if all players but 1 is disconnected just give the point to this player(match should be cancelled but keep this for now to avoid nullrefs)
 		if (PhotonNetwork.room.PlayerCount == 1)
 			idLastAlive = PhotonNetwork.playerList[0].ID;
 

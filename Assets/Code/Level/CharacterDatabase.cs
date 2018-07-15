@@ -30,13 +30,14 @@ public class CharacterDatabase : MonoBehaviour
 		public AudioClip dashSound;
 		public AudioClip hitSound;
 		public AudioClip deathSound;
+		public AudioClip chargeSound;
 
 		[Header("PARTICLES"), Space(2)]
 		public ParticleSystem hitParticle;
 		public ParticleSystem trailParticle;
 		[Tooltip("will always set the forward of trails transform to the direction of the player dash")]
 		public bool trailForwardAsDashDirection;
-
+		public ParticleSystem chargeupParticle;
 	}
 
 	void Awake()

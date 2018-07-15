@@ -89,6 +89,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	void NetworkCharge()
 	{
 		_stateComponent.SetState(CharacterState.Charging);
+		_character.ParticleComponent.EmitCharge(true);
+		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Charge);
 		ChangeColor(Color.red, _character.view); // temp for feedback when charging
 	}
 
@@ -223,6 +225,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	{
 		_stateComponent.SetState(CharacterState.Charging);
 
+		_character.ParticleComponent.EmitCharge(true);
+		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Charge);
 		ChangeColor(Color.red, _character.view);		
 
 		float chargeAmount = _model.dashMinCharge;
@@ -267,6 +271,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		}
 
 		ChangeColor(_character.color, _character.view);
+		_character.ParticleComponent.EmitCharge(false);
+		_character.soundComponent.StopSound(CharacterSoundComponent.CharacterSound.Charge);
 
 		// loop over all dash charges
 		for (int i = 0; i < dashStrength; i++)

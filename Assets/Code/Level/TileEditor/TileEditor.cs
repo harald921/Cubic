@@ -4,8 +4,6 @@ using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
 
-
-
 public class TileInfo
 {
 	public Vector2DInt position;
@@ -71,8 +69,6 @@ public class TileEditor : MonoBehaviour
 	[SerializeField] Text         _currentTint;
 	[SerializeField] Text         _currentMinTintText;
 	[SerializeField] Text         _currentMaxTintText;
-
-
 
 	void Start()
 	{

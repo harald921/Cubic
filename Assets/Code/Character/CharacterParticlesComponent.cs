@@ -8,6 +8,7 @@ public class CharacterParticlesComponent : MonoBehaviour
 
 	ParticleSystem _trail;
 	ParticleSystem _hit;
+	ParticleSystem _charge;
 
 	Vector3 _dashForward;
 
@@ -42,6 +43,27 @@ public class CharacterParticlesComponent : MonoBehaviour
 		}
 		else
 			_trail.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+	}
+
+	public void EmitCharge(bool emit)
+	{
+		if (_data.chargeupParticle == null)
+			return;		
+
+		if (emit)
+		{
+			if(_charge == null)
+			   _charge = Instantiate(_data.chargeupParticle, transform.position, _data.chargeupParticle.transform.rotation);
+		}
+		else
+		{
+			if (_charge == null)
+				return;
+
+			_charge.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+			Destroy(_charge, 8);
+			_charge = null;
+		}
 	}
 
 	public void SpawnHitEffect(Vector2DInt a, Vector2DInt b)
