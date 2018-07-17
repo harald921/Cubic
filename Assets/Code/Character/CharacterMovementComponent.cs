@@ -384,6 +384,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	{
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 		_stateComponent.SetState(CharacterState.Idle);
+		
 		transform.rotation = Quaternion.Euler(Vector3.zero);
 		_lastTargetRotation = transform.rotation;
 	}

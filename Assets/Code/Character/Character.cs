@@ -85,6 +85,8 @@ public class Character : Photon.MonoBehaviour
 	void NetworkSpawn(int spawnTileX, int spawnTileY)
 	{
 		movementComponent.ResetAll();
+		ParticleComponent.StopAll();
+		soundComponent.StopSound(CharacterSoundComponent.CharacterSound.Charge);
 		transform.position = new Vector3(spawnTileX, 1, spawnTileY);
 		OnCharacterSpawned?.Invoke(new Vector2DInt(spawnTileX, spawnTileY));		
 	}

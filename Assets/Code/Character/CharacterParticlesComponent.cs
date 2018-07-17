@@ -29,7 +29,7 @@ public class CharacterParticlesComponent : MonoBehaviour
 
 	public void EmitTrail(bool emit, Vector3 dashForward)
 	{
-		if (_data.trailParticle == null)
+		if (_trail == null)
 			return;
 
 		if (emit)
@@ -83,5 +83,23 @@ public class CharacterParticlesComponent : MonoBehaviour
 		{
 			_trail.transform.forward = _dashForward;
 		}	
+	}
+
+	public void StopAll()
+	{
+		if (_charge != null)
+		{
+			_charge.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+			Destroy(_charge, 8);
+			_charge = null;
+		}
+
+		if (_trail != null)
+		{
+			_trail.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+		}
+
+
+
 	}
 }
