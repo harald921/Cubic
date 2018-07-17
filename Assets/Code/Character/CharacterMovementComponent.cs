@@ -16,7 +16,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	CharacterStateComponent _stateComponent;
 	CharacterFlagComponent _flagComponent;
 
-	Vector2DInt _lastMoveDirection = Vector2DInt.Up;
+	public Vector2DInt _lastMoveDirection = Vector2DInt.Up;
 
 	CollisionTracker _collisionTracker;
 
@@ -140,7 +140,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 
 		// check if we got stopped on deadly tile
-		DeadlyTile();
+		if(PhotonNetwork.isMasterClient)
+		   DeadlyTile();
 	}
 
 	[PunRPC]
@@ -154,7 +155,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(directionX, directionY), dashCharges, true), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
-
+	
 	IEnumerator<float> _Walk(Vector2DInt fromTilePos, Vector2DInt toTilePos)
 	{
 		_stateComponent.SetState(CharacterState.Walking);
@@ -211,7 +212,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		}
 
 		// check if we ended up on deadly tile
-		if (DeadlyTile())
+		if (PhotonNetwork.isMasterClient && DeadlyTile())
 			yield break;
 
 		currentTile.OnPlayerLand();
@@ -364,7 +365,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		}
 
 		// check if we ended up on deadly tile
-		if (DeadlyTile())
+		if (PhotonNetwork.isMasterClient && DeadlyTile())
 			yield break;
 
 		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
@@ -408,20 +409,22 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	bool DeadlyTile()
 	{
 		if (currentTile.model.data.deadly)
-			Die();
+			photonView.RPC("Die", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y); 
 
 		return currentTile.model.data.deadly;
 	}
 
 	bool DeadlyEdge()
 	{
+		// if outside map when dashing kill locally(only used in dash)
 		if (currentTile.model.typeName == Constants.EDGE_TYPE)
-			Die();
+			Die(currentTile.data.position.x, currentTile.data.position.y);
 
 		return currentTile.model.typeName == Constants.EDGE_TYPE;
 	}
 
-	void Die()
+	[PunRPC]
+	void Die(int tileX, int tileY)
 	{
 		// remove reference and set state
 		currentTile.data.RemovePlayer();
@@ -429,6 +432,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Death);
 		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
+
+		transform.position = new Vector3(tileX, 1, tileY);
 
 		// sink to bottom
 		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
@@ -455,7 +460,13 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 #if DEBUG_TOOLS
 	public void InfiniteDash()
 	{
-		photonView.RPC("NetworkDash", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y, _lastMoveDirection.x, _lastMoveDirection.y, 100);
+		Character[] c = FindObjectsOfType<Character>();
+
+		foreach(Character p in c)
+		{
+			CharacterMovementComponent m = p.GetComponent<CharacterMovementComponent>();
+			p.GetComponent<PhotonView>().RPC("NetworkDash", PhotonTargets.All, m.currentTile.data.position.x, m.currentTile.data.position.y, m._lastMoveDirection.x, m._lastMoveDirection.y, 100);
+		}		
 	}
 #endif
 

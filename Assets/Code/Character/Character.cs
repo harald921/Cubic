@@ -122,7 +122,7 @@ public class Character : Photon.MonoBehaviour
 
 #if DEBUG_TOOLS
 
-		if (Input.GetKeyDown(KeyCode.P))
+		if (PhotonNetwork.isMasterClient && Input.GetKeyDown(KeyCode.P))
 			movementComponent.InfiniteDash();
 
 		if (Input.GetKeyDown(KeyCode.L))

@@ -60,4 +60,5 @@ MonoBehaviour:
   - RoundWinner
   - SetSpawnDataToPlayerID
   - ShowWinner
+  - Die
   DisableAutoOpenWizard: 1
