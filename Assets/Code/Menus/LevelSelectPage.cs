@@ -9,6 +9,7 @@ public class LevelSelectPage : MenuPage
 	[SerializeField] Button[] _levelButtons;
 	[SerializeField] Text _numJoinedPlayersText;
 
+	// called from button on server only (this will be changed to a nominate system where everyone gets to pick 1 level and then a random of all picked levels will be chosen)
 	public void OnLevelSelected(string level)
 	{
 		photonView.RPC("SetLevelAndGoToCharacter", PhotonTargets.All, level);
@@ -36,6 +37,7 @@ public class LevelSelectPage : MenuPage
 	[PunRPC]
 	void SetLevelAndGoToCharacter(string level)
 	{
+		// set witch scene to be loaded
 		Hashtable p = PhotonNetwork.player.CustomProperties;
 		p.Add(Constants.LEVEL_NAME, level);
 		PhotonNetwork.player.SetCustomProperties(p);

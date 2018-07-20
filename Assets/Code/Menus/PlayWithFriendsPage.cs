@@ -14,6 +14,7 @@ public class PlayWithFriendsPage : MenuPage
 	
 	public void HostRoom()
 	{
+		// create a private room that can only be joined from invite
 		RoomOptions roomOptions = new RoomOptions();
 		roomOptions.IsVisible = false;
 		roomOptions.MaxPlayers = 4;
@@ -24,12 +25,14 @@ public class PlayWithFriendsPage : MenuPage
 		PhotonNetwork.CreateRoom(roomName, roomOptions, TypedLobby.Default);
 	}
 
+	// called from button
 	public void JoinRoom()
 	{
 		if (!PhotonNetwork.isMasterClient)
 		   PhotonNetwork.JoinRoom(_joinRoomInput.text);
 	}
 
+	// called from button on server
 	public void GoToLevelSelect()
 	{
 		PhotonNetwork.room.IsOpen = false;
@@ -46,7 +49,8 @@ public class PlayWithFriendsPage : MenuPage
 		if (!PhotonNetwork.isMasterClient)
 		   _roomNameText.text = PhotonNetwork.room.Name + " As Client";
 		
-		PhotonNetwork.player.SetCustomProperties(new Hashtable(3));
+		// create empty hashtable of size 3
+		PhotonNetwork.player.SetCustomProperties(new Hashtable(3));				
 	}
 
 	void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
@@ -72,6 +76,7 @@ public class PlayWithFriendsPage : MenuPage
 
 		_numJoinedPlayersText.text = string.Format("{0}/4", PhotonNetwork.room.PlayerCount.ToString());
 
+		// when more then two players in room the host can chose to continue to next screen
 		if (PhotonNetwork.isMasterClient && PhotonNetwork.room.PlayerCount > 1)
 			_continueButton.interactable = true;
 		else

@@ -21,7 +21,8 @@ public class MainMenuSystem : MonoBehaviour
 
 		PhotonNetwork.automaticallySyncScene = true;
 
-		PhotonNetwork.ConnectUsingSettings(Constants.GAME_VERSION);		
+		PhotonNetwork.ConnectUsingSettings(Constants.GAME_VERSION);
+		
 	}
 
 	void Start()

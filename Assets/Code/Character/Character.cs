@@ -40,7 +40,7 @@ public class Character : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkInitialize(string viewname, int playerID, string nickname)
 	{
-		this.playerID       = playerID;
+		this.playerID  = playerID;
 		playerNickname = nickname;
 
 		model    = CharacterDatabase.instance.standardModel;

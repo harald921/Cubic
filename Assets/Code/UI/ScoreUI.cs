@@ -30,6 +30,7 @@ public class ScoreUI : MonoBehaviour
 
 	public void RegisterPlayer(int playerID, string name)
 	{
+		// loop over all 4 UI spots and use the first that is not taken
 		for(int i =0; i < _numPlayers; i++)
 		{
 			if (!_players[i].taken)
