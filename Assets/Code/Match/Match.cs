@@ -14,23 +14,16 @@ public class Match : Photon.MonoBehaviour
 	[SerializeField] StartCounterUI _counterUI;
 	[SerializeField] WinnerUI _winnerUI;
 
-	const int _numRoundsToWin = 3;
-
-	public class PlayerTracker
-	{
-		public int score;
-		public bool dead;
-		public bool disconnected;
-	}
-
-	Dictionary<int,PlayerTracker> _players;
-
+	IGameMode _currentGameMode;
+	
 	int _numPlayers;
-	bool _winnerSet;
-
+	
 	void Awake()
 	{
-		instance = this;		
+		instance = this;
+
+		// only have one gamemode for now
+		_currentGameMode = GetComponent<GameModeLastMan>();
 	}
 
 	void Start()
@@ -61,7 +54,8 @@ public class Match : Photon.MonoBehaviour
 	{
 		// init data structures
 		_numPlayers = PhotonNetwork.room.PlayerCount;
-		_players = new Dictionary<int, PlayerTracker>();
+
+		_currentGameMode.OnSetup(_numPlayers);
 
 		// tell the ui how many players we are
 		_scoreUI.Setup(_numPlayers);
@@ -70,65 +64,27 @@ public class Match : Photon.MonoBehaviour
 	void StartOnAllLoaded()
 	{
 		// this rpc will execute when all players are loaded in the scene
+		// the masterclient will then send a message with timestamp to all clients to start the countdown
 		if (PhotonNetwork.isMasterClient)
 			photonView.RPC("AllIsLoaded", PhotonTargets.MasterClient);
 	}
 
-	public void OnPlayerDie(int playerId)
+	// called from character
+	public void OnPlayerDie(int playerId, int viewID)
 	{
-		if (_winnerSet) // if last player dies after winning we dont want to do nothing
-			return;
-
-		_players[playerId].dead = true;
-		
-		int numAlive = 0;
-		int idLastAlive = 0;
-
-		// get how many players is left alive
-		foreach(var p in _players)		
-			if(!p.Value.dead && !p.Value.disconnected)
-			{
-				numAlive++;
-				idLastAlive = p.Key;
-			}
-
-		// if all players but 1 is disconnected just give the point to this player(match should be cancelled but keep this for now to avoid nullrefs)
-		if (PhotonNetwork.room.PlayerCount == 1)
-			idLastAlive = PhotonNetwork.playerList[0].ID;
-
-		// round over
-		if (numAlive <= 1)
-			RoundOver(idLastAlive);
+		_currentGameMode.OnPlayerDie(playerId, viewID);
 	}
 	
-	void RoundOver(int winnerId)
+	// called from gamemode
+	public void OnRoundOver(int winnerId, int score)
 	{
-		_winnerSet = true;
-
-		// increment score and check if the match is over or if we should start next round
-		_players[winnerId].score++;
-		if (_players[winnerId].score == _numRoundsToWin)
-			MatchOver(winnerId);
-		else
-			StartNewRound(winnerId, _players[winnerId].score);
+		_scoreUI.UpdateScore(winnerId, score);
 	}
-
-	void MatchOver(int winnerId)
-	{
-		photonView.RPC("ShowWinner", PhotonTargets.All, winnerId);
-	}
-
-	public void StartNewRound(int winner, int score)
-	{
-		// tell all clients who won, the clients need to keep track of score in case of server migration
-		photonView.RPC("RoundWinner", PhotonTargets.Others, winner);
-
-		// untag dead players
-		foreach (var p in _players)
-			p.Value.dead = false;
-
+	
+	public void SetCoundownToRoundRestart(float delay)
+	{				
 		// do small delay before we reset to new round
-		Timing.RunCoroutine(_resetDelay(2, winner, score));		
+		Timing.RunCoroutine(_resetDelay(delay));		
 	}
 	
 	// callback from when countdown is done
@@ -138,27 +94,15 @@ public class Match : Photon.MonoBehaviour
 		matchStarted = true;
 	}
 
-	IEnumerator<float> _resetDelay(float delay, int winner, int score)
-	{
-		float timer = 0;
-		while(timer < delay)
-		{
-			timer += Time.deltaTime;
-			yield return Timing.WaitForOneFrame;
-		}
-
-		photonView.RPC("NetworkStartNewRound", PhotonTargets.All, winner, score, PhotonNetwork.time);
-	}
-
 	// callback from character when someone disconnects, called locally on all clients
 	public void OnPlayerLeft(int id)
-	{		
-		_players[id].disconnected = true;
+	{
+		_currentGameMode.OnPlayerLeft(id);
 		_scoreUI.DisableUIOfDisconnectedPlayer(id);
 	}
 
 	[PunRPC]
-	void ShowWinner(int id)
+	void NetworkMatchOver(int id)
 	{
 		_winnerUI.ShowWinner(id);
 	}
@@ -182,25 +126,18 @@ public class Match : Photon.MonoBehaviour
 		// start countdown
 		_counterUI.StartCount(delta);
 	}
-
+	
 	[PunRPC]
-	void RoundWinner(int id)
-	{
-		_players[id].score++;
-	}
-
-	[PunRPC]
-	void NetworkStartNewRound(int lastWinner, int newScore, double delta)
-	{
-		_winnerSet = false;
-
+	void NetworkStartNewRound(double delta)
+	{		
 		matchStarted = false;
+
+		_currentGameMode.OnRoundRestarted();
 
 		// reset level(character resapwn is here aswell for now)
 		level.ResetRound();
 
 		// update score ui and restart timer
-		_scoreUI.UpdateScore(lastWinner, newScore);
 		_counterUI.StartCount(delta);
 	}
 
@@ -208,7 +145,19 @@ public class Match : Photon.MonoBehaviour
 	void RegisterPlayer(int id, string name)
 	{
 		// register a player by id for scorekepping and ui
-		_players.Add(id, new PlayerTracker());
+		_currentGameMode.OnPlayerRegistred(id);
 		_scoreUI.RegisterPlayer(id, name);
+	}
+
+	IEnumerator<float> _resetDelay(float delay)
+	{
+		float timer = 0;
+		while (timer < delay)
+		{
+			timer += Time.deltaTime;
+			yield return Timing.WaitForOneFrame;
+		}
+
+		photonView.RPC("NetworkStartNewRound", PhotonTargets.All, PhotonNetwork.time);
 	}
 }

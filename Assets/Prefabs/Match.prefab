@@ -20,6 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4284169262861586}
   - component: {fileID: 114240948812881822}
+  - component: {fileID: 114553533816123834}
   - component: {fileID: 114850442708484112}
   m_Layer: 0
   m_Name: Match
@@ -130,6 +131,17 @@ MonoBehaviour:
     type: 2}
   _mapToLoad: DesertLevel
   _tilesFolder: {fileID: 4427414244809238}
+--- !u!114 &114553533816123834
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1258560744273270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3688c2b349619ba458caef7caa320c4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114792443764372392
 MonoBehaviour:
   m_ObjectHideFlags: 1

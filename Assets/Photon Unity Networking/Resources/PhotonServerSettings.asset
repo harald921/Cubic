@@ -61,4 +61,9 @@ MonoBehaviour:
   - SetSpawnDataToPlayerID
   - ShowWinner
   - Die
+  - SetSpawnPointFromPlayerID
+  - NetworkMatchOver
+  - NetworkRoundOver
+  - NetworkBreakTile
+  - SyncTransform
   DisableAutoOpenWizard: 1

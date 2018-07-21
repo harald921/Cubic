@@ -22,6 +22,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 	Quaternion _lastTargetRotation; // used to keep track of the rotation the player last was targeting when getting interupted by getting hit
 
+	CoroutineHandle _correctHandle;
+
 	public void ManualAwake()
 	{
 		_character = GetComponent<Character>();
@@ -82,12 +84,18 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkWalk(int fromX, int fromY, int toX, int toY)
 	{
+		if (_stateComponent.currentState == CharacterState.Dead)
+			return;
+
 		Timing.RunCoroutineSingleton(_Walk(new Vector2DInt(fromX, fromY), new Vector2DInt(toX, toY)), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
 
 	[PunRPC]
 	void NetworkCharge()
 	{
+		if (_stateComponent.currentState == CharacterState.Dead)
+			return;
+
 		_stateComponent.SetState(CharacterState.Charging);
 		_character.ParticleComponent.EmitCharge(true);
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Charge);
@@ -97,6 +105,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkDash(int fromX, int fromY, int directionX, int directionY, int dashCharges)
 	{
+		if (_stateComponent.currentState == CharacterState.Dead)
+			return;
+
 		// set new current tile if desynced, should never happen becuase of chargetime before dash (maybe on quickdash?)
 		SetNewTileReferences(new Vector2DInt(fromX, fromY));
 
@@ -106,6 +117,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkOnGettingDashed(int fromX, int fromY, int directionX, int directionY, int numDashtiles)
 	{
+		if (_stateComponent.currentState == CharacterState.Dead)
+			return;
+
 		// kill all coroutines on this layer
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 
@@ -118,6 +132,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkOnDashingOther(int fromX, int fromY, int targetX, int targetY, float rotX, float rotY, float rotZ, float rotW)
 	{
+		if (_stateComponent.currentState == CharacterState.Dead)
+			return;
+
 		// kill all coroutines on this layer
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 
@@ -128,17 +145,14 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// set new current tile if desynced
 		SetNewTileReferences(new Vector2DInt(fromX, fromY));
 
-		// this should not have to be interpolated becuase everyone stops locally aswell
-		// used as safety if we only detects collision on server and not locally, should be very rare and be a small teleport if happens
-		transform.position = new Vector3(fromX, 1, fromY);
-		transform.rotation = new Quaternion(rotX, rotY, rotZ, rotW);
+		Timing.RunCoroutineSingleton(_Correct(transform.position, new Vector3(fromX, 1, fromY), transform.rotation, new Quaternion(rotX, rotY, rotZ, rotW), _character.model.walkCooldown), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 
 		// set last target rotation to current rotation(we never started lerping towards target)
-		_lastTargetRotation = transform.rotation;
+		_lastTargetRotation = new Quaternion(rotX, rotY, rotZ, rotW);
 
 		StopMovementAndAddCooldowns();
 		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
-
+		
 		// check if we got stopped on deadly tile
 		if(PhotonNetwork.isMasterClient)
 		   DeadlyTile();
@@ -147,6 +161,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	[PunRPC]
 	public void FinishCancelledDash(int fromX, int fromY, int directionX, int directionY, int dashCharges)
 	{
+		if (_stateComponent.currentState == CharacterState.Dead)
+			return;
+
 		// kill all coroutines on this layer
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 
@@ -162,8 +179,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Walk);
 
-		if (!currentTile.model.data.unbreakable)
-			currentTile.data.DamageTile();
+		if (PhotonNetwork.isMasterClient && !currentTile.model.data.unbreakable)
+			photonView.RPC("NetworkBreakTile", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y);
 
 		TileMap tileMap = Match.instance.level.tileMap;
 
@@ -174,11 +191,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			throw new Exception("Tried to walk onto a tile that is null.");
 
 		// Calculate lerp positions
-		Vector3 fromPosition = new Vector3(fromTile.data.position.x, 1, fromTile.data.position.y);
+		Vector3 fromPosition = new Vector3(transform.position.x, 1, transform.position.z);
 		Vector3 targetPosition = new Vector3(targetTile.data.position.x, 1, targetTile.data.position.y);
 
 		// Calculate lerp rotations
-		Vector3 movementDirection = (targetPosition - fromPosition).normalized;
+		Vector3 movementDirection = (targetPosition - new Vector3(fromTile.data.position.x, 1, fromTile.data.position.y)).normalized;
 		Vector3 movementDirectionRight = new Vector3(movementDirection.z, movementDirection.y, -movementDirection.x);
 
 		// do lerp from where we are even if desynced(will catch up)
@@ -328,6 +345,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			if (targetTile.data.IsOccupied())
 			{
 				StopMovementAndAddCooldowns();
+				_lastTargetRotation = previousLastTargetRotation;
+
 				_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 				_collisionTracker.photonView.RPC("CheckServerCollision", PhotonTargets.MasterClient,
 												targetTile.data.GetOccupyingPlayer().photonView.viewID,
@@ -338,8 +357,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			}
 
 			// hurt tile if it is destructible
-			if (!currentTile.model.data.unbreakable)
-				currentTile.data.DamageTile();
+			if (PhotonNetwork.isMasterClient && !currentTile.model.data.unbreakable)
+				photonView.RPC("NetworkBreakTile", PhotonTargets.All , currentTile.data.position.x, currentTile.data.position.y);
 
 			// Update tile player references NOTE: this is done right when a player starts moving to avoid players being able to move to the same tile (gives the same teleport bug as in the original game when being dashed in middle of movement, maybe can be solved with interpolation to look ok?) or we have to solve this in other way
 			currentTile.data.RemovePlayer();
@@ -439,7 +458,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 
 		if (PhotonNetwork.isMasterClient)		
-			Match.instance.OnPlayerDie(_character.playerID);					
+			Match.instance.OnPlayerDie(_character.playerID, photonView.viewID);					
 	}
 
 	void ChangeColor(Color color, GameObject view)
@@ -455,6 +474,33 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			if (meshRenderer)
 				meshRenderer.material.color = color;
 		}		
+	}
+
+	[PunRPC]
+	void NetworkBreakTile(int x, int y)
+	{
+		Match.instance.level.tileMap.GetTile(new Vector2DInt(x, y)).data.DamageTile();
+	}
+
+	[PunRPC]
+	void SyncTransform(int px, int py, float rx, float ry, float rz, float rw)
+	{
+		transform.position = new Vector3(px, 1, py);
+		transform.rotation = new Quaternion(rx, ry, rz, rw);		
+	}
+
+	public IEnumerator<float> _Correct(Vector3 from, Vector3 to, Quaternion fromRot, Quaternion toRot, float time)
+	{
+		float fraction = 0;
+		float timer = 0;
+		while (fraction < 1)
+		{
+			timer += Time.deltaTime;
+			fraction = Mathf.InverseLerp(0, time, timer);
+			transform.position = Vector3.Lerp(from, to, fraction);
+			transform.rotation = Quaternion.Lerp(fromRot, toRot, fraction);
+			yield return Timing.WaitForOneFrame;
+		}
 	}
 
 #if DEBUG_TOOLS

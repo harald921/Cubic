@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: StandardCharacterModel
   m_EditorClassIdentifier: 
   walkSpeed: 4
-  walkCooldown: 0.15
+  walkCooldown: 0.2
   dashSpeed: 12
   dashCooldown: 0.5
   dashMinCharge: 2
