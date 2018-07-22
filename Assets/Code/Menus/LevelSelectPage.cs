@@ -26,6 +26,10 @@ public class LevelSelectPage : MenuPage
 	{		
 	}
 
+	public override void OnPlayerLeftRoom(PhotonPlayer player)
+	{
+	}
+
 	public override void UpdatePage()
 	{
 		if (PhotonNetwork.room == null)

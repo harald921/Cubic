@@ -11,6 +11,7 @@ public abstract class MenuPage : Photon.MonoBehaviour
 	public abstract void OnPageEnter();
 	public abstract void UpdatePage();
 	public abstract void OnPageExit();
+	public abstract void OnPlayerLeftRoom(PhotonPlayer player);
 
 	void Awake()
 	{

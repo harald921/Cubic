@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MainMenuSystem : MonoBehaviour
+public class MainMenuSystem : Photon.MonoBehaviour
 {
 	public static MainMenuSystem instance { get; private set; }
 
@@ -16,6 +16,7 @@ public class MainMenuSystem : MonoBehaviour
 	{
 		instance = this;
 
+		// network initialization wont be here later on
 		PhotonNetwork.sendRate = 64;
 		PhotonNetwork.sendRateOnSerialize = 64;
 
@@ -55,5 +56,11 @@ public class MainMenuSystem : MonoBehaviour
 			return;
 
 		_currentPage.UpdatePage();
+	}
+
+	void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
+	{
+		if (_currentPage != null)
+			_currentPage.OnPlayerLeftRoom(otherPlayer);
 	}
 }

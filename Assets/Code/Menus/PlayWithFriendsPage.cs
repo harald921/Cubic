@@ -52,11 +52,6 @@ public class PlayWithFriendsPage : MenuPage
 		// create empty hashtable of size 4
 		PhotonNetwork.player.SetCustomProperties(new Hashtable(4));				
 	}
-
-	void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
-	{
-		// send notification if anyone disconnects
-	}
 	
 	[PunRPC]
 	void ContinueToLevelselect()
@@ -85,6 +80,11 @@ public class PlayWithFriendsPage : MenuPage
 	}
 
 	public override void OnPageExit()
+	{
+		
+	}
+
+	public override void OnPlayerLeftRoom(PhotonPlayer player)
 	{
 		
 	}

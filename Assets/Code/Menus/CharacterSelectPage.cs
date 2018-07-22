@@ -216,5 +216,8 @@ public class CharacterSelectPage : MenuPage
 
 	}
 
-	
+	public override void OnPlayerLeftRoom(PhotonPlayer player)
+	{
+		
+	}
 }
