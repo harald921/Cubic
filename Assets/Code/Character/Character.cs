@@ -103,7 +103,7 @@ public class Character : Photon.MonoBehaviour
 	
 	void Update()
 	{
-		if (!photonView.isMine || !Match.instance.matchStarted)
+		if (!photonView.isMine || !Match.instance.matchStarted || stateComponent.currentState == CharacterState.Frozen)
 			return;
 
 		if (Input.GetButton(Constants.BUTTON_CHARGE))

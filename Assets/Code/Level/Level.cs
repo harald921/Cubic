@@ -41,5 +41,14 @@ public class Level : Photon.MonoBehaviour
 		_character.Spawn(tileMap.GetSpawnPointFromSpawnID(_spawnID));
 	}
 
-	
+	public void BreakTile(int x, int y)
+	{
+		photonView.RPC("NetworkBreakTile", PhotonTargets.All, x, y);
+	}
+
+	[PunRPC]
+	void NetworkBreakTile(int x, int y)
+	{
+		tileMap.GetTile(new Vector2DInt(x, y)).data.DamageTile();
+	}
 }

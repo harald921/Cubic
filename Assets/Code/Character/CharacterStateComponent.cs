@@ -24,6 +24,7 @@ public enum CharacterState
     Charging,
     Dashing,
     Dashed,
+	Frozen,
 
     Dead,
 }

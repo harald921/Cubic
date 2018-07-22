@@ -21,9 +21,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	CollisionTracker _collisionTracker;
 
 	Quaternion _lastTargetRotation; // used to keep track of the rotation the player last was targeting when getting interupted by getting hit
-
-	CoroutineHandle _correctHandle;
-
+	
 	public void ManualAwake()
 	{
 		_character = GetComponent<Character>();
@@ -48,6 +46,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		Timing.KillCoroutines(gameObject.GetInstanceID());
 	}
 
+	#region LOCAL FUNCTION CALLS
 	public void TryWalk(Vector2DInt direction)
 	{
 		if (_stateComponent.currentState != CharacterState.Idle || _flagComponent.GetFlag(CharacterFlag.Cooldown_Walk))
@@ -81,6 +80,46 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		photonView.RPC("NetworkOnDashingOther", PhotonTargets.All, lastTile.x, lastTile.y, targetTile.x, targetTile.y, rot.x, rot.y, rot.z, rot.w);
 	}
 
+	public void ResetAll()
+	{
+		Timing.KillCoroutines(gameObject.GetInstanceID());
+		_stateComponent.SetState(CharacterState.Idle);
+
+		transform.rotation = Quaternion.Euler(Vector3.zero);
+		_lastTargetRotation = transform.rotation;
+	}
+
+	void StopMovementAndAddCooldowns()
+	{
+		// reset state and add cooldowns
+		_stateComponent.SetState(CharacterState.Idle);
+		_flagComponent.SetFlag(CharacterFlag.Cooldown_Walk, true, _model.walkCooldown, SingletonBehavior.Overwrite);
+		_flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
+	}
+
+	void SetNewTileReferences(Vector2DInt tile)
+	{
+		// remove old reference and set to new
+		currentTile.data.RemovePlayer();
+		currentTile = Match.instance.level.tileMap.GetTile(tile);
+		currentTile.data.SetCharacter(_character);
+	}
+
+	bool DeadlyTile()
+	{
+		if (currentTile.model.data.deadly)
+			photonView.RPC("Die", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y);
+
+		return currentTile.model.data.deadly;
+	}
+
+	bool DeadlyEdge()
+	{
+		return currentTile.model.typeName == Constants.EDGE_TYPE;
+	}
+	#endregion
+
+	#region NETWORK FUNCTION CALLS
 	[PunRPC]
 	void NetworkWalk(int fromX, int fromY, int toX, int toY)
 	{
@@ -97,9 +136,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			return;
 
 		_stateComponent.SetState(CharacterState.Charging);
+
+		// start feedback
 		_character.ParticleComponent.EmitCharge(true);
-		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Charge);
-		ChangeColor(Color.red, _character.view); // temp for feedback when charging
+		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Charge);		
 	}
 
 	[PunRPC]
@@ -108,7 +148,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		if (_stateComponent.currentState == CharacterState.Dead)
 			return;
 
-		// set new current tile if desynced, should never happen becuase of chargetime before dash (maybe on quickdash?)
+		// set new current tile if desynced
 		SetNewTileReferences(new Vector2DInt(fromX, fromY));
 
 		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(directionX, directionY), dashCharges), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
@@ -145,15 +185,19 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// set new current tile if desynced
 		SetNewTileReferences(new Vector2DInt(fromX, fromY));
 
+		// lerp desync during cooldown
 		Timing.RunCoroutineSingleton(_Correct(transform.position, new Vector3(fromX, 1, fromY), transform.rotation, new Quaternion(rotX, rotY, rotZ, rotW), _character.model.walkCooldown), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 
 		// set last target rotation to current rotation(we never started lerping towards target)
 		_lastTargetRotation = new Quaternion(rotX, rotY, rotZ, rotW);
 
-		StopMovementAndAddCooldowns();
+		// stop trail emitter
 		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 		
-		// check if we got stopped on deadly tile
+		// add cooldowns
+		StopMovementAndAddCooldowns();
+
+		// check if we got stopped on deadly tile(only server handles deathchecks)
 		if(PhotonNetwork.isMasterClient)
 		   DeadlyTile();
 	}
@@ -172,46 +216,76 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		Timing.RunCoroutineSingleton(_Dash(new Vector2DInt(directionX, directionY), dashCharges, true), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
 	}
-	
+
+	[PunRPC]
+	void Die(int tileX, int tileY)
+	{
+		// remove reference and set state
+		currentTile.data.RemovePlayer();
+		_stateComponent.SetState(CharacterState.Dead);
+
+		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Death);
+		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
+
+		transform.position = new Vector3(tileX, 1, tileY);
+
+		// sink to bottom
+		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+
+		if (PhotonNetwork.isMasterClient)
+			Match.instance.OnPlayerDie(_character.playerID, photonView.viewID);
+	}	
+
+	[PunRPC]
+	void SyncTransform(int px, int py, float rx, float ry, float rz, float rw)
+	{
+		transform.position = new Vector3(px, 1, py);
+		transform.rotation = new Quaternion(rx, ry, rz, rw);
+	}
+	#endregion
+
+	#region MOVEMENT ROUTINES
 	IEnumerator<float> _Walk(Vector2DInt fromTilePos, Vector2DInt toTilePos)
 	{
 		_stateComponent.SetState(CharacterState.Walking);
 
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Walk);
 
+		// only handle tilebreaks on server
 		if (PhotonNetwork.isMasterClient && !currentTile.model.data.unbreakable)
-			photonView.RPC("NetworkBreakTile", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y);
+			Match.instance.level.BreakTile(currentTile.data.position.x, currentTile.data.position.y);
 
 		TileMap tileMap = Match.instance.level.tileMap;
 
+		// get references to tiles
 		Tile fromTile = tileMap.GetTile(fromTilePos);
-		Tile targetTile = tileMap.GetTile(toTilePos);
-
-		if (targetTile == null)
-			throw new Exception("Tried to walk onto a tile that is null.");
+		Tile targetTile = tileMap.GetTile(toTilePos);		
 
 		// Calculate lerp positions
-		Vector3 fromPosition = new Vector3(transform.position.x, 1, transform.position.z);
+		// lerp from current position (will catch up if laging)
+		Vector3 fromPosition   = new Vector3(transform.position.x, 1, transform.position.z);
 		Vector3 targetPosition = new Vector3(targetTile.data.position.x, 1, targetTile.data.position.y);
 
 		// Calculate lerp rotations
+		// get the movement direction based on vector between starttile and endtile
+		// flip x and z to get the correct rotation in worldspace
 		Vector3 movementDirection = (targetPosition - new Vector3(fromTile.data.position.x, 1, fromTile.data.position.y)).normalized;
 		Vector3 movementDirectionRight = new Vector3(movementDirection.z, movementDirection.y, -movementDirection.x);
 
-		// do lerp from where we are even if desynced(will catch up)
+		// do lerp from current rotation if desynced(will catch up)
 		// target is calculated using the target rotation we had during last movement if we are lagging behind
+		// this prevents crooked target rotations
 		Quaternion fromRotation = transform.rotation;
 		Quaternion targetRotation = Quaternion.Euler(movementDirectionRight * 90) * _lastTargetRotation;
 
+		// save our target rotation so we can use this as fromrotation if we would get interupted by dash and not have time to finish the lerp
 		_lastTargetRotation = targetRotation;
 
 		// Save last move direction if we would do dash and not give any direction during chargeup
 		_lastMoveDirection = new Vector2DInt((int)movementDirection.x, (int)movementDirection.z);
 
 		// Update tile player references NOTE: this is done right when a player starts moving to avoid players being able to move to the same tile (lerping is used when getting hit when not physiclly att target tile)
-		currentTile.data.RemovePlayer();
-		targetTile.data.SetCharacter(_character);
-		currentTile = targetTile;
+		SetNewTileReferences(targetTile.data.position);
 
 		// do the movement itself
 		float movementProgress = 0;
@@ -228,7 +302,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			yield return Timing.WaitForOneFrame;
 		}
 
-		// check if we ended up on deadly tile
+		// check if we ended up on deadly tile (only server handle deathchecks)
 		if (PhotonNetwork.isMasterClient && DeadlyTile())
 			yield break;
 
@@ -243,9 +317,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	{
 		_stateComponent.SetState(CharacterState.Charging);
 
+		// start sound and charge particles
 		_character.ParticleComponent.EmitCharge(true);
-		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Charge);
-		ChangeColor(Color.red, _character.view);		
+		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Charge);	
 
 		float chargeAmount = _model.dashMinCharge;
 
@@ -288,7 +362,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			_character.ParticleComponent.EmitTrail(true, (new Vector3(targetPos.x, 1, targetPos.y) - new Vector3(currentPos.x, 1, currentPos.y)).normalized);
 		}
 
-		ChangeColor(_character.color, _character.view);
+		// stop feedback from charge
 		_character.ParticleComponent.EmitCharge(false);
 		_character.soundComponent.StopSound(CharacterSoundComponent.CharacterSound.Charge);
 
@@ -296,23 +370,23 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		for (int i = 0; i < dashStrength; i++)
 		{
 			// get next tile in dash path			
-			// current tile is corrected before coroutine if lagging so this should be safe
-			Tile targetTile = currentTile.data.GetRelativeTile(direction);
-			if (targetTile == null)
-				throw new Exception("Tried to dash onto a tile that is null.");
+			// current tile is corrected before coroutine if lagging so this is safe
+			Tile targetTile = currentTile.data.GetRelativeTile(direction);			
 
 			// abort dash if running into non walkable tile
 			if (!targetTile.model.data.walkable)
 				yield break;
 
 			// Calculate lerp positions
-			Vector3 fromPosition = transform.position; // interpolate from current position to avoid teleporting if lagging
+			Vector3 fromPosition   = transform.position; // interpolate from current position to avoid teleporting if lagging
 			Vector3 targetPosition = new Vector3(targetTile.data.position.x, 1, targetTile.data.position.y);
 
+			// use the position of current tile instead of position of player to calculate rotation, otherwise we can get crooked rotation if laging
 			Vector3 currentTilePos = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
+
 			// Calculate lerp rotations
 			// note: use last target rotation as base if we was in middle of movement when this dash started from getting hit from other player
-			// this will make the rotation that was left from last movement to be caught up
+			// this will make the rotation that was left from last movement to be added to this rotation and will be caught up
 			Vector3 movementDirection = (targetPosition - currentTilePos).normalized;
 			Quaternion fromRotation = transform.rotation;
 			Quaternion targetRotation = Quaternion.Euler(movementDirection * (90 * _model.dashRotationSpeed)) * _lastTargetRotation;
@@ -330,8 +404,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 					// get occupying player and tell it to send an rpc that it got dashed
 					Character playerToDash = targetTile.data.GetOccupyingPlayer();
 
+					// save the collision on server so the clients can check that they did not stop their dash locally incorrectly 
 					_collisionTracker.AddCollision(playerToDash.photonView.viewID, targetTile.data.position.x, targetTile.data.position.y);
 
+					// tell all clients who got hit
 					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, direction, dashStrength - i);
 
 					// send rpc that we hit other player and cancel all our current movement
@@ -341,29 +417,36 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				}
 			}
 
-			// stop locally aswell and dubblecheck so we stopped on server aswell, if not the server will restart our dashroutine with the charges that was left
+			// stop locally aswell and dubblecheck so we had collision on server, if not the server will restart our dashroutine with the charges that was left
 			if (targetTile.data.IsOccupied())
 			{
+				// add cooldowns and reset last target rotation becuase we never started interpolation
 				StopMovementAndAddCooldowns();
 				_lastTargetRotation = previousLastTargetRotation;
 
+				// stop trailParticle
 				_character.ParticleComponent.EmitTrail(false, Vector3.zero);
+
 				_collisionTracker.photonView.RPC("CheckServerCollision", PhotonTargets.MasterClient,
 												targetTile.data.GetOccupyingPlayer().photonView.viewID,
 												photonView.viewID, currentTile.data.position.x, currentTile.data.position.y,
 												targetTile.data.position.x, targetTile.data.position.y,
 												direction.x, direction.y, dashStrength - i);
+
+				// stop and frezze character while waiting for server to register collision
+				// this becomes pretty noticable over 150 ping,
+				// but is better then keping free movement and be interpolated back when getting corrected by server
+				_character.stateComponent.SetState(CharacterState.Frozen);
+
 				yield break;
 			}
 
-			// hurt tile if it is destructible
+			// hurt tile if it is destructible(only do break detection on server)
 			if (PhotonNetwork.isMasterClient && !currentTile.model.data.unbreakable)
-				photonView.RPC("NetworkBreakTile", PhotonTargets.All , currentTile.data.position.x, currentTile.data.position.y);
+				Match.instance.level.BreakTile(currentTile.data.position.x, currentTile.data.position.y);
 
-			// Update tile player references NOTE: this is done right when a player starts moving to avoid players being able to move to the same tile (gives the same teleport bug as in the original game when being dashed in middle of movement, maybe can be solved with interpolation to look ok?) or we have to solve this in other way
-			currentTile.data.RemovePlayer();
-			targetTile.data.SetCharacter(_character);
-			currentTile = targetTile;
+			// Update tile player references 
+			SetNewTileReferences(targetTile.data.position);
 
 			// do the movement itself
 			float movementProgress = 0;
@@ -378,19 +461,31 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				yield return Timing.WaitForOneFrame;
 			}
 
-			// check for edgetile after every tile dashed
+			// check if we exited the map after every tile
+			// stop movement and flag dead locally and only handle death on server
+			// will be corrected by server if say a collision happened on server but not locally that would have prevented us from exiting map
 			if (DeadlyEdge())
+			{
+				if (PhotonNetwork.isMasterClient)
+					photonView.RPC("Die", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y);
+				else
+					_stateComponent.SetState(CharacterState.Frozen);
+
 				yield break;
+			}
 		}
 
 		// check if we ended up on deadly tile
+		// only server handle death detection
 		if (PhotonNetwork.isMasterClient && DeadlyTile())
 			yield break;
 
+		// add cooldowns and stop feedback
 		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 		StopMovementAndAddCooldowns();
 	}
 
+	// temp storage here, will add a deathcomponent later to handle different types of deaths
 	public IEnumerator<float> _sink()
 	{
 		while(_stateComponent.currentState == CharacterState.Dead)
@@ -399,96 +494,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			yield return Timing.WaitForOneFrame;
 		}
 	}
-
-	public void ResetAll()
-	{
-		Timing.KillCoroutines(gameObject.GetInstanceID());
-		_stateComponent.SetState(CharacterState.Idle);
-		
-		transform.rotation = Quaternion.Euler(Vector3.zero);
-		_lastTargetRotation = transform.rotation;
-	}
-		
-	void StopMovementAndAddCooldowns()
-	{
-		// reset state and add cooldowns
-		_stateComponent.SetState(CharacterState.Idle);
-		_flagComponent.SetFlag(CharacterFlag.Cooldown_Walk, true, _model.walkCooldown, SingletonBehavior.Overwrite);
-		_flagComponent.SetFlag(CharacterFlag.Cooldown_Dash, true, _model.dashCooldown, SingletonBehavior.Overwrite);
-	}
-
-	void SetNewTileReferences(Vector2DInt tile)
-	{
-		// remove old reference and set to new
-		currentTile.data.RemovePlayer();                                      
-		currentTile = Match.instance.level.tileMap.GetTile(tile);                 
-		currentTile.data.SetCharacter(_character);                            																																																																																																																																																																																																																																																																																																																																				   
-	}
-
-	bool DeadlyTile()
-	{
-		if (currentTile.model.data.deadly)
-			photonView.RPC("Die", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y); 
-
-		return currentTile.model.data.deadly;
-	}
-
-	bool DeadlyEdge()
-	{
-		// if outside map when dashing kill locally(only used in dash)
-		if (currentTile.model.typeName == Constants.EDGE_TYPE)
-			Die(currentTile.data.position.x, currentTile.data.position.y);
-
-		return currentTile.model.typeName == Constants.EDGE_TYPE;
-	}
-
-	[PunRPC]
-	void Die(int tileX, int tileY)
-	{
-		// remove reference and set state
-		currentTile.data.RemovePlayer();
-		_stateComponent.SetState(CharacterState.Dead);
-
-		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Death);
-		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
-
-		transform.position = new Vector3(tileX, 1, tileY);
-
-		// sink to bottom
-		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
-
-		if (PhotonNetwork.isMasterClient)		
-			Match.instance.OnPlayerDie(_character.playerID, photonView.viewID);					
-	}
-
-	void ChangeColor(Color color, GameObject view)
-	{
-		// loops over and change color of all meshes of a gameobject
-		Renderer r = view.GetComponent<Renderer>();
-		if (r != null)
-			r.material.color = color;
-		
-		for (int i = 0; i < view.transform.childCount; i++)
-		{
-			Renderer meshRenderer = view.transform.GetChild(i).GetComponent<Renderer>();
-			if (meshRenderer)
-				meshRenderer.material.color = color;
-		}		
-	}
-
-	[PunRPC]
-	void NetworkBreakTile(int x, int y)
-	{
-		Match.instance.level.tileMap.GetTile(new Vector2DInt(x, y)).data.DamageTile();
-	}
-
-	[PunRPC]
-	void SyncTransform(int px, int py, float rx, float ry, float rz, float rw)
-	{
-		transform.position = new Vector3(px, 1, py);
-		transform.rotation = new Quaternion(rx, ry, rz, rw);		
-	}
-
+	
 	public IEnumerator<float> _Correct(Vector3 from, Vector3 to, Quaternion fromRot, Quaternion toRot, float time)
 	{
 		float fraction = 0;
@@ -502,7 +508,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			yield return Timing.WaitForOneFrame;
 		}
 	}
+	#endregion
 
+	#region DEBUG CALLS
 #if DEBUG_TOOLS
 	public void InfiniteDash()
 	{
@@ -515,5 +523,5 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		}		
 	}
 #endif
-
+	#endregion
 }
