@@ -9,8 +9,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterSoundComponent))]
 [RequireComponent(typeof(CharacterParticlesComponent))]
 public class Character : Photon.MonoBehaviour
-{	
-	public Color color                         { get; private set; }
+{		
 	public CharacterModel model                { get; private set; }
 	public GameObject view                     { get; private set; }
 	public bool isMasterClient                 { get; private set; }
@@ -26,10 +25,10 @@ public class Character : Photon.MonoBehaviour
 
 	public event Action<Vector2DInt> OnCharacterSpawned;
 
-	public void Initialize(string viewName, int playerID, string nickname)
+	public void Initialize(string viewName, int playerID, string nickname, int skinID)
     {
 		isMasterClient = PhotonNetwork.isMasterClient;
-		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, viewName, playerID, nickname); // wont need be buffered later when level loading is synced
+		photonView.RPC("NetworkInitialize", PhotonTargets.AllBuffered, viewName, playerID, nickname, skinID); // wont need be buffered later when level loading is synced
 	}
 
 	public void Spawn(Vector2DInt spawnTile)
@@ -38,7 +37,7 @@ public class Character : Photon.MonoBehaviour
 	}
 
 	[PunRPC]
-	void NetworkInitialize(string viewname, int playerID, string nickname)
+	void NetworkInitialize(string viewname, int playerID, string nickname, int skinID)
 	{
 		this.playerID  = playerID;
 		playerNickname = nickname;
@@ -49,6 +48,7 @@ public class Character : Photon.MonoBehaviour
 		// Setup the correct view, probably in a view component	
 		view = Instantiate(viewData.prefab);
 		view.transform.SetParent(transform, false);
+		SetSkin(skinID);
 
 		// gat components
 		movementComponent = GetComponent<CharacterMovementComponent>();
@@ -62,9 +62,7 @@ public class Character : Photon.MonoBehaviour
 		flagComponent.ManualAwake();
 		stateComponent.ManualAwake();
 		soundComponent.ManualAwake(viewData, view.transform);
-		ParticleComponent.ManualAwake(viewData, view.transform);
-
-		GetOriginalColor();
+		ParticleComponent.ManualAwake(viewData, view.transform);		
 
 		if (photonView.isMine)
 			Match.instance.photonView.RPC("RegisterPlayer", PhotonTargets.AllViaServer, this.playerID, playerNickname);
@@ -81,6 +79,20 @@ public class Character : Photon.MonoBehaviour
 		   Match.instance.OnPlayerLeft(otherPlayer.ID);
 	}
 
+	void SetSkin(int skinID)
+	{
+		Renderer renderer = view.GetComponent<Renderer>();
+		if (renderer != null)
+			renderer.material = viewData.materials[skinID];
+
+		for (int i = 0; i < view.transform.childCount; i++)
+		{
+			renderer = view.transform.GetChild(i).GetComponent<Renderer>();
+			if (renderer != null)
+				renderer.material = viewData.materials[skinID];
+		}
+	}
+
 	[PunRPC]
 	void NetworkSpawn(int spawnTileX, int spawnTileY)
 	{
@@ -90,17 +102,7 @@ public class Character : Photon.MonoBehaviour
 		transform.position = new Vector3(spawnTileX, 1, spawnTileY);
 		OnCharacterSpawned?.Invoke(new Vector2DInt(spawnTileX, spawnTileY));		
 	}
-
-	void GetOriginalColor()
-	{
-		// temp way of getting original material color, wont be used later at all
-		Renderer r = view.GetComponent<Renderer>();
-		if (r == null)
-			r = view.transform.GetChild(0).GetComponent<Renderer>();
-
-		color = r.material.color;
-	}
-	
+		
 	void Update()
 	{
 		if (!photonView.isMine || !Match.instance.matchStarted || stateComponent.currentState == CharacterState.Frozen)

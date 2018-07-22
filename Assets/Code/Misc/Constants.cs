@@ -23,4 +23,5 @@ public static class Constants
 	public static int CHARACTER_NAME = 0;
 	public static int LEVEL_NAME = 1;
 	public static int SPAWN_ID = 2;
+	public static int SKIN_ID = 3;
 }

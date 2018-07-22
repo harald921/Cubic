@@ -38,6 +38,9 @@ public class CharacterDatabase : MonoBehaviour
 		[Tooltip("will always set the forward of trails transform to the direction of the player dash")]
 		public bool trailForwardAsDashDirection;
 		public ParticleSystem chargeupParticle;
+
+		[Header("SKINS"), Space(2)]
+		public Material[] materials;
 	}
 
 	void Awake()
@@ -58,5 +61,10 @@ public class CharacterDatabase : MonoBehaviour
 		else
 			return _fallBackView;
 		
+	}
+
+	public ViewData GetFirstView()
+	{
+		return _characterModelViews[0];
 	}
 }

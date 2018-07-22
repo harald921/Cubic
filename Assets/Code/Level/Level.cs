@@ -17,15 +17,18 @@ public class Level : Photon.MonoBehaviour
 
 	public void ManualStart()
 	{
+		// get player properties saved in photonplayer
+		string characterName = PhotonNetwork.player.CustomProperties[Constants.CHARACTER_NAME].ToString();
+		int skinID           = (int)PhotonNetwork.player.CustomProperties[Constants.SKIN_ID];
+
 		_character = PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity, 0).GetComponent<Character>();
-		_character.Initialize(PhotonNetwork.player.CustomProperties[Constants.CHARACTER_NAME].ToString(), PhotonNetwork.player.ID, PhotonNetwork.player.NickName);
+		_character.Initialize(characterName, PhotonNetwork.player.ID, PhotonNetwork.player.NickName, skinID);
 
 		tileMap = new TileMap(_mapToLoad, _tilesFolder);
 
 		_spawnID = (int)PhotonNetwork.player.CustomProperties[Constants.SPAWN_ID];
 
-		_character.Spawn(tileMap.GetSpawnPointFromSpawnID(_spawnID));
-		
+		_character.Spawn(tileMap.GetSpawnPointFromSpawnID(_spawnID));		
 	}
 		
 	public void ResetRound()

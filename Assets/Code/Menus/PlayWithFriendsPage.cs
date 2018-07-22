@@ -49,8 +49,8 @@ public class PlayWithFriendsPage : MenuPage
 		if (!PhotonNetwork.isMasterClient)
 		   _roomNameText.text = PhotonNetwork.room.Name + " As Client";
 		
-		// create empty hashtable of size 3
-		PhotonNetwork.player.SetCustomProperties(new Hashtable(3));				
+		// create empty hashtable of size 4
+		PhotonNetwork.player.SetCustomProperties(new Hashtable(4));				
 	}
 
 	void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)

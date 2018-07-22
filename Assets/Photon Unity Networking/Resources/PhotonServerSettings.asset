@@ -66,4 +66,7 @@ MonoBehaviour:
   - NetworkRoundOver
   - NetworkBreakTile
   - SyncTransform
+  - ClaimUIBox
+  - SetReadyUI
+  - UpdatePlayerUI
   DisableAutoOpenWizard: 1
