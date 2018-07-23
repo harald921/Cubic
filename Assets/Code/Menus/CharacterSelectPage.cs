@@ -9,24 +9,15 @@ using System;
 
 public class CharacterSelectPage : MenuPage
 {
-	[Serializable]
-	public struct PlayerInfo
-	{
-		public GameObject content;
-		public Text characterName;
-		public Text nickName;
-		public Image checkMark;
-
-		[HideInInspector] public int ownerID;
-		[HideInInspector] public bool taken;
-	}
-
 	[Header("UI REFERENCES"), Space(2)]
+	[SerializeField] MenuPlayerInfoUI _playerInfo;
 	[SerializeField] Button[] _characterButtons;
 	[SerializeField] Button _readyButton;
-	[SerializeField] PlayerInfo[] _players;
 	[SerializeField] RectTransform _dotsParent;
 	[SerializeField] Image _dotPrefab;
+	[SerializeField] MessagePromt _promt;
+	[SerializeField] Button _leftarrow;
+	[SerializeField] Button _rightArrow;
 
 	[Header("3D MODEL SETTINGS"),Space(2)]
 	[SerializeField] Transform _modelTransform;
@@ -53,15 +44,12 @@ public class CharacterSelectPage : MenuPage
 		_numSkins = _currentView.materials.Length;
 		UpdateSkinDots();
 
-		photonView.RPC("UpdatePlayerUI", PhotonTargets.All, PhotonNetwork.player.ID, name);
+		_playerInfo.photonView.RPC("UpdatePlayerUI", PhotonTargets.All, PhotonNetwork.player.ID, name);
 	}
 
 	public void OnReady()
 	{
-		for (int i = 0; i < _characterButtons.Length; i++)
-			_characterButtons[i].interactable = false;
-
-		_readyButton.interactable = false;
+		ChangeAllButtonsState(false);
 
 		// set nickname to the name of the character for now (this will store the steam nick later instead)
 		PhotonNetwork.player.NickName = _currentView.name;
@@ -73,7 +61,7 @@ public class CharacterSelectPage : MenuPage
 		PhotonNetwork.player.SetCustomProperties(p);
 
 		// tell server that we are selected and ready
-		photonView.RPC("SetReadyUI", PhotonTargets.All, PhotonNetwork.player.ID);
+		_playerInfo.photonView.RPC("SetReadyUI", PhotonTargets.All, PhotonNetwork.player.ID, true);
 		photonView.RPC("AddPlayerReady", PhotonTargets.MasterClient);
 	}
 
@@ -139,57 +127,20 @@ public class CharacterSelectPage : MenuPage
 		}		
 	}
 
-	[PunRPC]
-	void ClaimUIBox(int ID, string nickName, string CharacterName)
-	{
-		for(int i =0; i < 4; i++)		
-			if (!_players[i].taken)
-			{
-				_players[i].content.SetActive(true);
-				_players[i].ownerID = ID;
-				_players[i].taken = true;
-				_players[i].nickName.text = nickName;
-				_players[i].characterName.text = CharacterName;
-				return;
-			}		
-	}
-
-	[PunRPC]
-	void UpdatePlayerUI(int ID, string characterName)
-	{
-		for (int i = 0; i < 4; i++)		
-			if (_players[i].ownerID == ID)
-			{
-				_players[i].characterName.text = characterName;
-				return;
-			}		
-	}
-
-	[PunRPC]
-	void SetReadyUI(int ID)
-	{
-		for (int i = 0; i < 4; i++)		
-			if (_players[i].ownerID == ID)
-			{
-				_players[i].checkMark.color = Color.white;
-				return;
-			}		
-	}
-
 	public override void OnPageEnter()
 	{
 		_currentView = CharacterDatabase.instance.GetFirstView();
 		_currentViewObject = Instantiate(_currentView.prefab, _modelTransform);
 
+		_playersReady = 0;
 		_currentSkin = 0;
 		_numSkins = _currentView.materials.Length;
 		UpdateSkinDots();
-
-		photonView.RPC("ClaimUIBox", PhotonTargets.AllViaServer, PhotonNetwork.player.ID, "SteamNick", _currentView.name);
 	}
 
 	public override void OnPageExit()
-	{		
+	{
+		ChangeAllButtonsState(true);
 	}
 
 	public override void UpdatePage()
@@ -213,11 +164,42 @@ public class CharacterSelectPage : MenuPage
 			
 			PhotonNetwork.LoadLevel(PhotonNetwork.player.CustomProperties[Constants.LEVEL_NAME].ToString());
 		}
-
 	}
 
 	public override void OnPlayerLeftRoom(PhotonPlayer player)
 	{
-		
+		_playerInfo.DisableUIOfPlayer(player.ID);
+		if (PhotonNetwork.room.PlayerCount == 1)
+			_promt.SetAndShow("All other players have left the room!!\n\n Returning to menu!!!",
+				() => {
+					_playerInfo.DisableUIOfPlayer(PhotonNetwork.player.ID);
+					if (_currentViewObject != null)
+						Destroy(_currentViewObject);
+
+					PhotonNetwork.RemovePlayerCustomProperties(null);
+					PhotonNetwork.LeaveRoom();
+					MainMenuSystem.instance.SetToPage("StartScreen");
+				});
+	}
+
+	public void LeaveRoom()
+	{
+		if (_currentViewObject != null)
+			Destroy(_currentViewObject);
+
+		PhotonNetwork.RemovePlayerCustomProperties(null);
+		_playerInfo.DisableAllPlayerUI();
+		PhotonNetwork.LeaveRoom();
+		MainMenuSystem.instance.SetToPage("StartScreen");
+	}
+
+	void ChangeAllButtonsState(bool enable)
+	{
+		for (int i = 0; i < _characterButtons.Length; i++)
+			_characterButtons[i].interactable = enable;
+
+		_readyButton.interactable = enable;
+		_leftarrow.interactable   = enable;
+		_rightArrow.interactable  = enable;
 	}
 }

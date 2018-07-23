@@ -69,4 +69,5 @@ MonoBehaviour:
   - ClaimUIBox
   - SetReadyUI
   - UpdatePlayerUI
+  - DisableUIOfPlayer
   DisableAutoOpenWizard: 1

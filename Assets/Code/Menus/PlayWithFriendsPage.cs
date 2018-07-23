@@ -5,10 +5,11 @@ using UnityEngine.UI;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PlayWithFriendsPage : MenuPage
-{		
+{
+	[SerializeField] MenuPlayerInfoUI _playerInfo;
+
 	[SerializeField] Text _roomNameText;
 	[SerializeField] Text _joinRoomInput;
-	[SerializeField] Text _numJoinedPlayersText;
 
 	[SerializeField] Button _continueButton;
 	
@@ -50,7 +51,9 @@ public class PlayWithFriendsPage : MenuPage
 		   _roomNameText.text = PhotonNetwork.room.Name + " As Client";
 		
 		// create empty hashtable of size 4
-		PhotonNetwork.player.SetCustomProperties(new Hashtable(4));				
+		PhotonNetwork.player.SetCustomProperties(new Hashtable(4));
+
+		_playerInfo.photonView.RPC("ClaimUIBox", PhotonTargets.AllBufferedViaServer, PhotonNetwork.player.ID, "SteamNick", "??????????");
 	}
 	
 	[PunRPC]
@@ -69,8 +72,6 @@ public class PlayWithFriendsPage : MenuPage
 		if (PhotonNetwork.room == null)
 			return;
 
-		_numJoinedPlayersText.text = string.Format("{0}/4", PhotonNetwork.room.PlayerCount.ToString());
-
 		// when more then two players in room the host can chose to continue to next screen
 		if (PhotonNetwork.isMasterClient && PhotonNetwork.room.PlayerCount > 1)
 			_continueButton.interactable = true;
@@ -81,11 +82,26 @@ public class PlayWithFriendsPage : MenuPage
 
 	public override void OnPageExit()
 	{
-		
+		_roomNameText.text = "Not Connected";
 	}
 
 	public override void OnPlayerLeftRoom(PhotonPlayer player)
 	{
-		
+		_playerInfo.DisableUIOfPlayer(player.ID);
+	}
+
+	public void LeaveRoom()
+	{
+		// if yet not in room just return to main menu
+		if(PhotonNetwork.room == null)
+		{
+			MainMenuSystem.instance.SetToPage("StartScreen");
+			return;
+		}
+
+		// if connected to room, unclaim UI and leave room before we return to main menu
+		_playerInfo.DisableAllPlayerUI();
+		PhotonNetwork.LeaveRoom();
+		MainMenuSystem.instance.SetToPage("StartScreen");
 	}
 }

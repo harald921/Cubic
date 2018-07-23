@@ -16,6 +16,9 @@ public class MainMenuSystem : Photon.MonoBehaviour
 	{
 		instance = this;
 
+		if (PhotonNetwork.connected)
+			return;
+
 		// network initialization wont be here later on
 		PhotonNetwork.sendRate = 64;
 		PhotonNetwork.sendRateOnSerialize = 64;
@@ -63,4 +66,5 @@ public class MainMenuSystem : Photon.MonoBehaviour
 		if (_currentPage != null)
 			_currentPage.OnPlayerLeftRoom(otherPlayer);
 	}
+
 }

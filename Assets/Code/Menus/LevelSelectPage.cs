@@ -6,8 +6,9 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class LevelSelectPage : MenuPage
 {
+	[SerializeField] MenuPlayerInfoUI _playerInfo;
+	[SerializeField] MessagePromt _promt;
 	[SerializeField] Button[] _levelButtons;
-	[SerializeField] Text _numJoinedPlayersText;
 
 	// called from button on server only (this will be changed to a nominate system where everyone gets to pick 1 level and then a random of all picked levels will be chosen)
 	public void OnLevelSelected(string level)
@@ -18,24 +19,30 @@ public class LevelSelectPage : MenuPage
 	public override void OnPageEnter()
 	{
 		if (!PhotonNetwork.isMasterClient)
-			for (int i = 0; i < _levelButtons.Length; i++)
-				_levelButtons[i].interactable = false;
+			ChangeAllButtonsState(false);
 	}
 
 	public override void OnPageExit()
-	{		
+	{
+		ChangeAllButtonsState(true);
 	}
 
 	public override void OnPlayerLeftRoom(PhotonPlayer player)
 	{
+		_playerInfo.DisableUIOfPlayer(player.ID);
+		if (PhotonNetwork.room.PlayerCount == 1)
+			_promt.SetAndShow("All other players have left the room!!\n\n Returning to menu!!!",
+				() => {
+					PhotonNetwork.RemovePlayerCustomProperties(null);
+					_playerInfo.DisableUIOfPlayer(PhotonNetwork.player.ID);
+					PhotonNetwork.LeaveRoom();
+					MainMenuSystem.instance.SetToPage("StartScreen");
+				});
 	}
 
 	public override void UpdatePage()
 	{
-		if (PhotonNetwork.room == null)
-			return;
-
-		_numJoinedPlayersText.text = string.Format("{0}/4", PhotonNetwork.room.PlayerCount.ToString());
+		
 	}
 
 	[PunRPC]
@@ -47,5 +54,19 @@ public class LevelSelectPage : MenuPage
 		PhotonNetwork.player.SetCustomProperties(p);
 
 		MainMenuSystem.instance.SetToPage("CharacterSelectScreen");
+	}
+
+	public void LeaveRoom()
+	{
+		PhotonNetwork.RemovePlayerCustomProperties(null);
+		_playerInfo.DisableAllPlayerUI();
+		PhotonNetwork.LeaveRoom();
+		MainMenuSystem.instance.SetToPage("StartScreen");
+	}
+
+	void ChangeAllButtonsState(bool enable)
+	{
+		for (int i = 0; i < _levelButtons.Length; i++)
+			_levelButtons[i].interactable = enable;
 	}
 }
