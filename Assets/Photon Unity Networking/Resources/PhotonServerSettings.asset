@@ -70,4 +70,5 @@ MonoBehaviour:
   - SetReadyUI
   - UpdatePlayerUI
   - DisableUIOfPlayer
+  - StartCountdown
   DisableAutoOpenWizard: 1

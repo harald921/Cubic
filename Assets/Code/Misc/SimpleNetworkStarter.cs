@@ -37,6 +37,7 @@ public class SimpleNetworkStarter : Photon.MonoBehaviour
 
 		playerProps.Add(Constants.CHARACTER_NAME, _character);
 		playerProps.Add(Constants.SPAWN_ID, _spawnPoint);
+		playerProps.Add(Constants.SKIN_ID, 0);
 		
 		PhotonNetwork.player.SetCustomProperties(playerProps);
 

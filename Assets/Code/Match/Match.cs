@@ -124,7 +124,7 @@ public class Match : Photon.MonoBehaviour
 		level.ManualStart();
 
 		// start countdown
-		_counterUI.StartCount(delta);
+		_counterUI.StartCount(delta, 3, () => OnCounterZero());
 	}
 	
 	[PunRPC]
@@ -138,7 +138,7 @@ public class Match : Photon.MonoBehaviour
 		level.ResetRound();
 
 		// update score ui and restart timer
-		_counterUI.StartCount(delta);
+		_counterUI.StartCount(delta, 3, () => OnCounterZero());
 	}
 
 	[PunRPC]

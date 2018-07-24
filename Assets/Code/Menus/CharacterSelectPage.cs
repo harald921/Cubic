@@ -18,6 +18,7 @@ public class CharacterSelectPage : MenuPage
 	[SerializeField] MessagePromt _promt;
 	[SerializeField] Button _leftarrow;
 	[SerializeField] Button _rightArrow;
+	[SerializeField] StartCounterUI _counter;
 
 	[Header("3D MODEL SETTINGS"),Space(2)]
 	[SerializeField] Transform _modelTransform;
@@ -30,6 +31,7 @@ public class CharacterSelectPage : MenuPage
 	Vector3 _rotation;
 	int _numSkins;
 	int _currentSkin;
+	bool _imReady;
 
 	public void OnCharacterSelected(string name)
 	{
@@ -49,7 +51,11 @@ public class CharacterSelectPage : MenuPage
 
 	public void OnReady()
 	{
+		if (_imReady)
+			return;
+
 		ChangeAllButtonsState(false);
+		_imReady = true;
 
 		// set nickname to the name of the character for now (this will store the steam nick later instead)
 		PhotonNetwork.player.NickName = _currentView.name;
@@ -132,10 +138,15 @@ public class CharacterSelectPage : MenuPage
 		_currentView = CharacterDatabase.instance.GetFirstView();
 		_currentViewObject = Instantiate(_currentView.prefab, _modelTransform);
 
+		_playerInfo.photonView.RPC("UpdatePlayerUI", PhotonTargets.All, PhotonNetwork.player.ID, _currentView.name);
+
 		_playersReady = 0;
 		_currentSkin = 0;
 		_numSkins = _currentView.materials.Length;
 		UpdateSkinDots();
+
+		if (PhotonNetwork.isMasterClient)
+			photonView.RPC("StartCountdown", PhotonTargets.All, PhotonNetwork.time);
 	}
 
 	public override void OnPageExit()
@@ -166,6 +177,12 @@ public class CharacterSelectPage : MenuPage
 		}
 	}
 
+	[PunRPC]
+	void StartCountdown(double delta)
+	{
+		_counter.StartCount(delta, 20, () => OnReady());
+	}
+
 	public override void OnPlayerLeftRoom(PhotonPlayer player)
 	{
 		_playerInfo.DisableUIOfPlayer(player.ID);
@@ -176,6 +193,7 @@ public class CharacterSelectPage : MenuPage
 					if (_currentViewObject != null)
 						Destroy(_currentViewObject);
 
+					_counter.CancelCount();
 					PhotonNetwork.RemovePlayerCustomProperties(null);
 					PhotonNetwork.LeaveRoom();
 					MainMenuSystem.instance.SetToPage("StartScreen");
@@ -187,6 +205,7 @@ public class CharacterSelectPage : MenuPage
 		if (_currentViewObject != null)
 			Destroy(_currentViewObject);
 
+		_counter.CancelCount();
 		PhotonNetwork.RemovePlayerCustomProperties(null);
 		_playerInfo.DisableAllPlayerUI();
 		PhotonNetwork.LeaveRoom();
