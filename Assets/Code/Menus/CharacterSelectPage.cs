@@ -21,11 +21,11 @@ public class CharacterSelectPage : MenuPage
 	[SerializeField] StartCounterUI _counter;
 
 	[Header("3D MODEL SETTINGS"),Space(2)]
-	[SerializeField] Transform _modelTransform;
+	[SerializeField] Transform[] _modelTransforms;
 	[SerializeField] float _rotationSpeed = 1.0f;
 
 	CharacterDatabase.ViewData _currentView;
-	GameObject _currentViewObject;
+	GameObject[] _currentViewObject = new GameObject[4];
 
 	int _playersReady;
 	Vector3 _rotation;
@@ -35,13 +35,11 @@ public class CharacterSelectPage : MenuPage
 
 	public void OnCharacterSelected(string name)
 	{
-		// destroy old character preview model
-		if (_currentViewObject)
-			Destroy(_currentViewObject);
-
 		// get the view from the name of selcted character
 		_currentView = CharacterDatabase.instance.GetViewFromName(name);
-		_currentViewObject = Instantiate(_currentView.prefab, _modelTransform);
+
+		// tell everyone to update the 3d model
+		photonView.RPC("Update3DModel", PhotonTargets.All, PhotonNetwork.player.ID, name);
 
 		// always start with skin 0 on new character
 		_currentSkin = 0;
@@ -96,23 +94,16 @@ public class CharacterSelectPage : MenuPage
 
 		_dotsParent.transform.GetChild(_currentSkin).GetComponent<Image>().color = Color.green;
 
-		Renderer renderer = _currentViewObject.GetComponent<Renderer>();
-		if (renderer != null)
-			renderer.material = _currentView.materials[_currentSkin];
-
-		for (int i = 0; i < _currentViewObject.transform.childCount; i++)
-		{
-			renderer = _currentViewObject.transform.GetChild(i).GetComponent<Renderer>();
-			if (renderer != null)
-				renderer.material = _currentView.materials[_currentSkin];
-		}
+		photonView.RPC("Update3DModelMaterial", PhotonTargets.All, PhotonNetwork.player.ID, _currentView.name, _currentSkin);
 	}
 
 	void UpdateSkinDots()
 	{
+		// remove old dots
 		for (int i = 0; i < _dotsParent.transform.childCount; i++)
 			Destroy(_dotsParent.GetChild(i).gameObject);
 
+		// create new dots based on number of skins of current character
 		float xPosition = 0;
 		for(int i = 0; i < _numSkins; i++)
 		{
@@ -130,17 +121,54 @@ public class CharacterSelectPage : MenuPage
 		// is this my PlayerID
 		if(PhotonNetwork.player.ID == id)
 		{
+			_counter.CancelCount();
+
 			Hashtable p = PhotonNetwork.player.CustomProperties;
 			p.Add(Constants.SPAWN_ID, spawnPoint);
 			PhotonNetwork.player.SetCustomProperties(p);
 		}		
 	}
 
+	[PunRPC]
+	void Update3DModel(int ID, string character)
+	{
+		// update the 3d model of the player with this ID
+		int index = _playerInfo.GetModelTransformIndexFromID(ID);
+
+		// destroy old character preview model
+		if (_currentViewObject[index])
+			Destroy(_currentViewObject[index]);
+	
+		_currentViewObject[index] = Instantiate(CharacterDatabase.instance.GetViewFromName(character).prefab, _modelTransforms[index]);
+	}
+
+	[PunRPC]
+	void Update3DModelMaterial(int ID, string character, int skinID)
+	{
+		// get witch model the player with this ID owns
+		int index     = _playerInfo.GetModelTransformIndexFromID(ID);
+
+		// get skin from character name and skinID
+		Material skin = CharacterDatabase.instance.GetViewFromName(character).materials[skinID];
+
+		// set material on all renderers on model
+		Renderer renderer = _currentViewObject[index].GetComponent<Renderer>();
+		if (renderer != null)
+			renderer.material = skin;
+
+		for (int i = 0; i < _currentViewObject[index].transform.childCount; i++)
+		{
+			renderer = _currentViewObject[index].transform.GetChild(i).GetComponent<Renderer>();
+			if (renderer != null)
+				renderer.material = skin;
+		}
+	}
+
 	public override void OnPageEnter()
 	{
 		// get the view of first model in character database
 		_currentView = CharacterDatabase.instance.GetFirstView();
-		_currentViewObject = Instantiate(_currentView.prefab, _modelTransform);
+		photonView.RPC("Update3DModel", PhotonTargets.All, PhotonNetwork.player.ID, _currentView.name);
 
 		// tell everyone to update this players UI Box
 		_playerInfo.photonView.RPC("UpdatePlayerUI", PhotonTargets.All, PhotonNetwork.player.ID, _currentView.name);
@@ -163,8 +191,12 @@ public class CharacterSelectPage : MenuPage
 	public override void UpdatePage()
 	{
 		_rotation += Vector3.up * _rotationSpeed * Time.deltaTime;
-		if (_currentViewObject != null)
-			_currentViewObject.transform.rotation = Quaternion.Euler(_rotation);		
+
+		for(int i =0; i < 4; i++)
+		{
+			if (_currentViewObject[i] != null)
+				_currentViewObject[i].transform.rotation = Quaternion.Euler(_rotation);
+		}				
 	}
 
 	[PunRPC]
@@ -186,14 +218,20 @@ public class CharacterSelectPage : MenuPage
 	[PunRPC]
 	void StartCountdown(double delta)
 	{
-		_counter.StartCount(delta, 20, () => OnReady());
+		_counter.StartCount(delta, 100, () => OnReady());
 	}
 
 	public override void OnPlayerLeftRoom(PhotonPlayer player)
 	{
+		int index = _playerInfo.GetModelTransformIndexFromID(player.ID);
+
 		// remove the UI of left player
 		_playerInfo.DisableUIOfPlayer(player.ID);
 
+		// remove 3d model of left player
+		if (_currentViewObject[index] != null)
+			Destroy(_currentViewObject[index]);
+		
 		// if we are last player left in room, show message and disconnect last player
 		if (PhotonNetwork.room.PlayerCount == 1)
 		{
@@ -208,8 +246,11 @@ public class CharacterSelectPage : MenuPage
 	public void LeaveRoom()
 	{
 		// destroy 3d model
-		if (_currentViewObject != null)
-			Destroy(_currentViewObject);
+		for (int i = 0; i < 4; i++)
+		{
+			if (_currentViewObject[i] != null)
+				Destroy(_currentViewObject[i]);									
+		}
 
 		// remove all UI of players in room
 		_counter.CancelCount();

@@ -9,13 +9,13 @@ public class MenuPlayerInfoUI : Photon.MonoBehaviour
 	[Serializable]
 	public struct PlayerInfo
 	{
-		public GameObject content;
-		public Text characterName;
+		public GameObject content;		
 		public Text nickName;
 		public Image checkMark;
 
 		[HideInInspector] public int ownerID;
 		[HideInInspector] public bool taken;
+		[HideInInspector] public int index;
 	}
 
 	[SerializeField] PlayerInfo[] _players;
@@ -29,8 +29,8 @@ public class MenuPlayerInfoUI : Photon.MonoBehaviour
 				_players[i].content.SetActive(true);
 				_players[i].ownerID = ID;
 				_players[i].taken = true;
-				_players[i].nickName.text = nickName;
-				_players[i].characterName.text = CharacterName;
+				_players[i].nickName.text = nickName;				
+				_players[i].index = i;
 				return;
 			}
 	}
@@ -44,8 +44,7 @@ public class MenuPlayerInfoUI : Photon.MonoBehaviour
 				_players[i].content.SetActive(false);
 				_players[i].ownerID = -99;
 				_players[i].taken = false;
-				_players[i].nickName.text = "";
-				_players[i].characterName.text = "";
+				_players[i].nickName.text = "";				
 				_players[i].checkMark.color = new Color(1, 1, 1, 0.1f);
 				return;
 			}
@@ -57,7 +56,7 @@ public class MenuPlayerInfoUI : Photon.MonoBehaviour
 		for (int i = 0; i < 4; i++)
 			if (_players[i].ownerID == ID)
 			{
-				_players[i].characterName.text = characterName;
+				// will probably uppdate a 2d icon here later
 				return;
 			}
 	}
@@ -80,10 +79,18 @@ public class MenuPlayerInfoUI : Photon.MonoBehaviour
 			_players[i].content.SetActive(false);
 			_players[i].ownerID = -99;
 			_players[i].taken = false;
-			_players[i].nickName.text = "";
-			_players[i].characterName.text = "";
+			_players[i].nickName.text = "";			
 			_players[i].checkMark.color = new Color(1, 1, 1, 0.1f);
 		}
+	}
+
+	public int GetModelTransformIndexFromID(int ID)
+	{
+		for (int i = 0; i < 4; i++)
+			if (_players[i].ownerID == ID)
+				return i;
+
+		return 0;
 	}
 
 }

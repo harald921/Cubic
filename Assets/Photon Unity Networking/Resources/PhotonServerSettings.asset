@@ -71,4 +71,6 @@ MonoBehaviour:
   - UpdatePlayerUI
   - DisableUIOfPlayer
   - StartCountdown
+  - Update3DModel
+  - Update3DModelMaterial
   DisableAutoOpenWizard: 1
