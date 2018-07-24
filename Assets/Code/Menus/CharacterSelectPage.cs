@@ -35,17 +35,20 @@ public class CharacterSelectPage : MenuPage
 
 	public void OnCharacterSelected(string name)
 	{
+		// destroy old character preview model
 		if (_currentViewObject)
 			Destroy(_currentViewObject);
 
+		// get the view from the name of selcted character
 		_currentView = CharacterDatabase.instance.GetViewFromName(name);
-
 		_currentViewObject = Instantiate(_currentView.prefab, _modelTransform);
 
+		// always start with skin 0 on new character
 		_currentSkin = 0;
 		_numSkins = _currentView.materials.Length;
 		UpdateSkinDots();
 
+		// tell everyone to update this players UI Box
 		_playerInfo.photonView.RPC("UpdatePlayerUI", PhotonTargets.All, PhotonNetwork.player.ID, name);
 	}
 
@@ -54,8 +57,8 @@ public class CharacterSelectPage : MenuPage
 		if (_imReady)
 			return;
 
-		ChangeAllButtonsState(false);
 		_imReady = true;
+		ChangeAllButtonsState(false);
 
 		// set nickname to the name of the character for now (this will store the steam nick later instead)
 		PhotonNetwork.player.NickName = _currentView.name;
@@ -135,16 +138,18 @@ public class CharacterSelectPage : MenuPage
 
 	public override void OnPageEnter()
 	{
+		// get the view of first model in character database
 		_currentView = CharacterDatabase.instance.GetFirstView();
 		_currentViewObject = Instantiate(_currentView.prefab, _modelTransform);
 
+		// tell everyone to update this players UI Box
 		_playerInfo.photonView.RPC("UpdatePlayerUI", PhotonTargets.All, PhotonNetwork.player.ID, _currentView.name);
 
-		_playersReady = 0;
-		_currentSkin = 0;
+		// get how many skins this character have and update dots
 		_numSkins = _currentView.materials.Length;
 		UpdateSkinDots();
 
+		// if masterclient tell averyone to start countdown timer
 		if (PhotonNetwork.isMasterClient)
 			photonView.RPC("StartCountdown", PhotonTargets.All, PhotonNetwork.time);
 	}
@@ -152,6 +157,7 @@ public class CharacterSelectPage : MenuPage
 	public override void OnPageExit()
 	{
 		ChangeAllButtonsState(true);
+		_imReady = false;
 	}
 
 	public override void UpdatePage()
@@ -185,30 +191,39 @@ public class CharacterSelectPage : MenuPage
 
 	public override void OnPlayerLeftRoom(PhotonPlayer player)
 	{
+		// remove the UI of left player
 		_playerInfo.DisableUIOfPlayer(player.ID);
-		if (PhotonNetwork.room.PlayerCount == 1)
-			_promt.SetAndShow("All other players have left the room!!\n\n Returning to menu!!!",
-				() => {
-					_playerInfo.DisableUIOfPlayer(PhotonNetwork.player.ID);
-					if (_currentViewObject != null)
-						Destroy(_currentViewObject);
 
-					_counter.CancelCount();
-					PhotonNetwork.RemovePlayerCustomProperties(null);
-					PhotonNetwork.LeaveRoom();
-					MainMenuSystem.instance.SetToPage("StartScreen");
-				});
+		// if we are last player left in room, show message and disconnect last player
+		if (PhotonNetwork.room.PlayerCount == 1)
+		{
+			// stop counter right away, 
+			_counter.CancelCount();
+
+			// show the promt and call leaveroom when ok is pressed
+			_promt.SetAndShow("All other players have left the room!!\n\n Returning to menu!!!", () => LeaveRoom());				
+		}			
 	}
 
 	public void LeaveRoom()
 	{
+		// destroy 3d model
 		if (_currentViewObject != null)
 			Destroy(_currentViewObject);
 
+		// remove all UI of players in room
 		_counter.CancelCount();
-		PhotonNetwork.RemovePlayerCustomProperties(null);
 		_playerInfo.DisableAllPlayerUI();
+
+		// reset page properties
+		_playersReady = 0;
+		_currentSkin = 0;
+
+		// reset custom properties and leave room
+		PhotonNetwork.RemovePlayerCustomProperties(null);
 		PhotonNetwork.LeaveRoom();
+
+		// set back to main page
 		MainMenuSystem.instance.SetToPage("StartScreen");
 	}
 
