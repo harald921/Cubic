@@ -281,6 +281,7 @@ MonoBehaviour:
       type: 2}
     materials:
     - {fileID: 2100000, guid: 98ebfcc49d0001c48ab7bc5edb16aa3f, type: 2}
+    - {fileID: 2100000, guid: 7613c81f25038aa418fa3a0685b0e2b2, type: 2}
   - name: cheese
     prefab: {fileID: 1424603968093668, guid: 56fffd5fde203fd4589047921c52dee3, type: 2}
     walkSound: {fileID: 8300000, guid: 095fb456ce50a0045805adfe29e8b6a8, type: 3}
@@ -315,9 +316,6 @@ MonoBehaviour:
     chargeupParticle: {fileID: 198810938518164326, guid: caf01595d7889854d9593fea106e2b5a,
       type: 2}
     materials:
-    - {fileID: 2100000, guid: 47fb906a80cb73144986188946183e5f, type: 2}
-    - {fileID: 2100000, guid: 47fb906a80cb73144986188946183e5f, type: 2}
-    - {fileID: 2100000, guid: 47fb906a80cb73144986188946183e5f, type: 2}
     - {fileID: 2100000, guid: 47fb906a80cb73144986188946183e5f, type: 2}
   _fallBackView:
     name: matti
