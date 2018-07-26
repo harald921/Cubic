@@ -7,8 +7,12 @@ public class MainMenuSystem : Photon.MonoBehaviour
 	public static MainMenuSystem instance { get; private set; }
 
 	public static string startPage = "StartScreen";
+	public static bool reclaimPlayerUI;
+
+	[SerializeField] MenuPlayerInfoUI _playerInfo;
 
 	[SerializeField] MenuPage[] _menuPages;
+
 
 	MenuPage _currentPage;
 
@@ -31,6 +35,9 @@ public class MainMenuSystem : Photon.MonoBehaviour
 
 	void Start()
 	{
+		if(reclaimPlayerUI)
+			_playerInfo.photonView.RPC("ClaimUIBox", PhotonTargets.AllBufferedViaServer, PhotonNetwork.player.ID, "SteamNick", "??????????");
+
 		SetToPage(startPage);
 	}
 

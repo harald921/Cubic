@@ -73,4 +73,5 @@ MonoBehaviour:
   - StartCountdown
   - Update3DModel
   - Update3DModelMaterial
+  - CheckAllReady
   DisableAutoOpenWizard: 1

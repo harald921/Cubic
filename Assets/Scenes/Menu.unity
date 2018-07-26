@@ -2580,6 +2580,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 746ca81615f26ce4eab285c061881f5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerInfo: {fileID: 2138981392}
   _menuPages:
   - {fileID: 63571394}
   - {fileID: 2118001617}

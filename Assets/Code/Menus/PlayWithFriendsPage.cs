@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PlayWithFriendsPage : MenuPage
 {
@@ -19,6 +18,7 @@ public class PlayWithFriendsPage : MenuPage
 		RoomOptions roomOptions = new RoomOptions();
 		roomOptions.IsVisible = false;
 		roomOptions.MaxPlayers = 4;
+		
 
 		// generate a random name, if we let photon create a name for us its about 100 characters long, works untill we intergrate steam
 		string roomName = Random.Range(1000, 50000).ToString();
@@ -49,10 +49,7 @@ public class PlayWithFriendsPage : MenuPage
 	{
 		if (!PhotonNetwork.isMasterClient)
 		   _roomNameText.text = PhotonNetwork.room.Name + " As Client";
-		
-		// create empty hashtable of size 4
-		PhotonNetwork.player.SetCustomProperties(new Hashtable(4));
-
+				
 		_playerInfo.photonView.RPC("ClaimUIBox", PhotonTargets.AllBufferedViaServer, PhotonNetwork.player.ID, "SteamNick", "??????????");
 	}
 	

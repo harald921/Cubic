@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System;
 
 
@@ -26,8 +25,7 @@ public class CharacterSelectPage : MenuPage
 
 	CharacterDatabase.ViewData _currentView;
 	GameObject[] _currentViewObject = new GameObject[4];
-
-	int _playersReady;
+	
 	Vector3 _rotation;
 	int _numSkins;
 	int _currentSkin;
@@ -61,15 +59,13 @@ public class CharacterSelectPage : MenuPage
 		// set nickname to the name of the character for now (this will store the steam nick later instead)
 		PhotonNetwork.player.NickName = _currentView.name;
 
-		// set character chosen so we can spawn it when the game starts
-		Hashtable p = PhotonNetwork.player.CustomProperties;
-		p.Add(Constants.CHARACTER_NAME, _currentView.name);
-		p.Add(Constants.SKIN_ID, _currentSkin);
-		PhotonNetwork.player.SetCustomProperties(p);
+		// set character chosen so we can spawn it when the game starts		
+		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.CHARACTER_NAME, _currentView.name);
+		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.SKIN_ID, _currentSkin);
+		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.PLAYER_READY, true);
 
 		// tell server that we are selected and ready
-		_playerInfo.photonView.RPC("SetReadyUI", PhotonTargets.All, PhotonNetwork.player.ID, true);
-		photonView.RPC("AddPlayerReady", PhotonTargets.MasterClient);
+		_playerInfo.photonView.RPC("SetReadyUI", PhotonTargets.All, PhotonNetwork.player.ID, true);		
 	}
 
 	public void OnChangeSkin(bool increment)
@@ -121,11 +117,8 @@ public class CharacterSelectPage : MenuPage
 		// is this my PlayerID
 		if(PhotonNetwork.player.ID == id)
 		{
-			_counter.CancelCount();
-
-			Hashtable p = PhotonNetwork.player.CustomProperties;
-			p.Add(Constants.SPAWN_ID, spawnPoint);
-			PhotonNetwork.player.SetCustomProperties(p);
+			_counter.CancelCount();			
+			PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.SPAWN_ID, spawnPoint);
 		}		
 	}
 
@@ -180,12 +173,15 @@ public class CharacterSelectPage : MenuPage
 		// if masterclient tell averyone to start countdown timer
 		if (PhotonNetwork.isMasterClient)
 			photonView.RPC("StartCountdown", PhotonTargets.All, PhotonNetwork.time);
+
+		InvokeRepeating("CheckAllReady", 0, 5);		
 	}
 
 	public override void OnPageExit()
 	{
 		ChangeAllButtonsState(true);
 		_imReady = false;
+		CancelInvoke("CheckAllReady");
 	}
 
 	public override void UpdatePage()
@@ -198,18 +194,24 @@ public class CharacterSelectPage : MenuPage
 				_currentViewObject[i].transform.rotation = Quaternion.Euler(_rotation);
 		}				
 	}
-
-	[PunRPC]
-	void AddPlayerReady()
+	
+	void CheckAllReady()
 	{
-		_playersReady++;
-		if (_playersReady == PhotonNetwork.room.PlayerCount)
+		if (!PhotonNetwork.isMasterClient || PhotonNetwork.room.PlayerCount < 2)
+			return;
+		
+		int playersReady = 0;
+		foreach(PhotonPlayer p in PhotonNetwork.playerList)			
+			if (p.CustomProperties.ContainsKey(Constants.PLAYER_READY) && (bool)p.CustomProperties[Constants.PLAYER_READY])
+				playersReady++;			
+		
+		if (playersReady == PhotonNetwork.room.PlayerCount)
 		{
-			// loop over all players in room and give them a spawnpoint based on order in list
-			// send an rpc to all players with the PlayerID and they will check if the PlayerID correspond to thier own, and if so they will set thier spawnpoint
-			// this can not be done locally becuase the elements in photonnetwork.PlayerList can be in different order on every client
+			// loop over all players in room and give them a spawnpoint based on order in list			
 			for (int i =0; i < PhotonNetwork.room.PlayerCount; i++)			
-				photonView.RPC("SetSpawnPointFromPlayerID", PhotonTargets.All, PhotonNetwork.playerList[i].ID, i);
+				PhotonHelpers.SetPlayerProperty(PhotonNetwork.playerList[i], Constants.SPAWN_ID, i);
+
+			CancelInvoke("CheckAllReady");
 			
 			PhotonNetwork.LoadLevel(PhotonNetwork.player.CustomProperties[Constants.LEVEL_NAME].ToString());
 		}
@@ -240,7 +242,7 @@ public class CharacterSelectPage : MenuPage
 
 			// show the promt and call leaveroom when ok is pressed
 			_promt.SetAndShow("All other players have left the room!!\n\n Returning to menu!!!", () => LeaveRoom());				
-		}			
+		}		
 	}
 
 	public void LeaveRoom()
@@ -256,8 +258,7 @@ public class CharacterSelectPage : MenuPage
 		_counter.CancelCount();
 		_playerInfo.DisableAllPlayerUI();
 
-		// reset page properties
-		_playersReady = 0;
+		// reset page properties		
 		_currentSkin = 0;
 
 		// reset custom properties and leave room

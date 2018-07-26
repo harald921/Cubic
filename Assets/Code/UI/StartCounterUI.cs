@@ -33,6 +33,8 @@ public class StartCounterUI : MonoBehaviour
 		while(timer > 0)
 		{
 			timer -= Time.deltaTime;
+			if (_counterText == null)
+				yield break;
 
 			_counterText.text = timer.ToString("0");
 
