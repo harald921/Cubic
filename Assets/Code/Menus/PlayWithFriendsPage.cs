@@ -19,9 +19,8 @@ public class PlayWithFriendsPage : MenuPage
 		roomOptions.IsVisible = false;
 		roomOptions.MaxPlayers = 4;
 		
-
 		// generate a random name, if we let photon create a name for us its about 100 characters long, works untill we intergrate steam
-		string roomName = Random.Range(1000, 50000).ToString();
+		string roomName = Random.Range(100, 9000).ToString();
 
 		PhotonNetwork.CreateRoom(roomName, roomOptions, TypedLobby.Default);
 	}
@@ -62,6 +61,9 @@ public class PlayWithFriendsPage : MenuPage
 	public override void OnPageEnter()
 	{
 		_continueButton.interactable = false;
+
+		// move all player UI boxes to the prefered positions of this page
+		_playerInfo.SetPlayerUIByScreen(MenuScreen.Connect);
 	}
 
 	public override void UpdatePage()

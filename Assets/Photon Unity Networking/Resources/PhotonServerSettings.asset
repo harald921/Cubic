@@ -74,4 +74,5 @@ MonoBehaviour:
   - Update3DModel
   - Update3DModelMaterial
   - CheckAllReady
+  - LevelToPlay
   DisableAutoOpenWizard: 1

@@ -13,7 +13,6 @@ public class CharacterStateComponent : MonoBehaviour
         _character = GetComponent<Character>();
     }
 
-
     public void SetState(CharacterState state) => currentState = state;
 }
 

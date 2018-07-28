@@ -25,4 +25,5 @@ public static class Constants
 	public static string SPAWN_ID = "2";
 	public static string SKIN_ID = "3";
 	public static string PLAYER_READY = "4";
+	public static string NOMINATED_LEVEL = "5";
 }

@@ -10,7 +10,6 @@ public class CharacterFlagComponent : MonoBehaviour
     Dictionary<CharacterFlag, bool> _flags = new Dictionary<CharacterFlag, bool>(); // Can be replaced with bit enum when I am not lazy
     Dictionary<CharacterFlag, CoroutineHandle> _durationHandles = new Dictionary<CharacterFlag, CoroutineHandle>();
 
-
     public void ManualAwake()
     {
         _character = GetComponent<Character>();

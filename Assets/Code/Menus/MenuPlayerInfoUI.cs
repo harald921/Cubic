@@ -4,6 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
+public enum MenuScreen
+{
+	Connect,
+	LevelSelect,
+	CharacterSelect,
+}
+	
+
 public class MenuPlayerInfoUI : Photon.MonoBehaviour
 {
 	[Serializable]
@@ -19,6 +27,20 @@ public class MenuPlayerInfoUI : Photon.MonoBehaviour
 	}
 
 	[SerializeField] PlayerInfo[] _players;
+
+	[Header("SPECIFIC SCREEN TRANSFORM POINTS")]
+	[SerializeField] Transform[] _connectScreen;
+	[SerializeField] Transform[] _levelSelectScreen;
+	[SerializeField] Transform[] _characterSelectScreen;
+
+	Transform[][] _screenTransforms = new Transform[3][];
+
+	void Awake()
+	{
+		_screenTransforms[0] = _connectScreen;
+		_screenTransforms[1] = _levelSelectScreen;
+		_screenTransforms[2] = _characterSelectScreen;
+	}
 
 	[PunRPC]
 	void ClaimUIBox(int ID, string nickName, string CharacterName)
@@ -67,7 +89,7 @@ public class MenuPlayerInfoUI : Photon.MonoBehaviour
 		for (int i = 0; i < 4; i++)
 			if (_players[i].ownerID == ID)
 			{
-				_players[i].checkMark.color = Color.white;
+				_players[i].checkMark.color = active ? Color.white : new Color(1, 1, 1, 0.1f);
 				return;
 			}
 	}
@@ -88,9 +110,15 @@ public class MenuPlayerInfoUI : Photon.MonoBehaviour
 	{
 		for (int i = 0; i < 4; i++)
 			if (_players[i].ownerID == ID)
-				return i;
+				return _players[i].index;
 
 		return 0;
+	}
+
+	public void SetPlayerUIByScreen(MenuScreen screen)
+	{
+		for(int i =0; i < 4; i++)		
+			_players[i].content.transform.position = _screenTransforms[(int)screen][i].position;		
 	}
 
 }

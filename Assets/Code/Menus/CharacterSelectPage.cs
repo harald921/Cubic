@@ -64,7 +64,7 @@ public class CharacterSelectPage : MenuPage
 		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.SKIN_ID, _currentSkin);
 		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.PLAYER_READY, true);
 
-		// tell server that we are selected and ready
+		// tell everyone to set that this player is ready in thier UI
 		_playerInfo.photonView.RPC("SetReadyUI", PhotonTargets.All, PhotonNetwork.player.ID, true);		
 	}
 
@@ -109,18 +109,7 @@ public class CharacterSelectPage : MenuPage
 			if (i == 0)
 			   dot.GetComponent<Image>().color = Color.green;
 		}	
-	}
-
-	[PunRPC]
-	void SetSpawnPointFromPlayerID(int id, int spawnPoint)
-	{
-		// is this my PlayerID
-		if(PhotonNetwork.player.ID == id)
-		{
-			_counter.CancelCount();			
-			PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.SPAWN_ID, spawnPoint);
-		}		
-	}
+	}	
 
 	[PunRPC]
 	void Update3DModel(int ID, string character)
@@ -159,6 +148,11 @@ public class CharacterSelectPage : MenuPage
 
 	public override void OnPageEnter()
 	{
+		// move all player UI boxes to the prefered positions of this page
+		// unselect ready arrows from last screen
+		_playerInfo.SetPlayerUIByScreen(MenuScreen.CharacterSelect);
+		_playerInfo.photonView.RPC("SetReadyUI", PhotonTargets.All, PhotonNetwork.player.ID, false);
+
 		// get the view of first model in character database
 		_currentView = CharacterDatabase.instance.GetFirstView();
 		photonView.RPC("Update3DModel", PhotonTargets.All, PhotonNetwork.player.ID, _currentView.name);
@@ -194,27 +188,15 @@ public class CharacterSelectPage : MenuPage
 				_currentViewObject[i].transform.rotation = Quaternion.Euler(_rotation);
 		}				
 	}
-	
-	void CheckAllReady()
-	{
-		if (!PhotonNetwork.isMasterClient || PhotonNetwork.room.PlayerCount < 2)
-			return;
-		
-		int playersReady = 0;
-		foreach(PhotonPlayer p in PhotonNetwork.playerList)			
-			if (p.CustomProperties.ContainsKey(Constants.PLAYER_READY) && (bool)p.CustomProperties[Constants.PLAYER_READY])
-				playersReady++;			
-		
-		if (playersReady == PhotonNetwork.room.PlayerCount)
-		{
-			// loop over all players in room and give them a spawnpoint based on order in list			
-			for (int i =0; i < PhotonNetwork.room.PlayerCount; i++)			
-				PhotonHelpers.SetPlayerProperty(PhotonNetwork.playerList[i], Constants.SPAWN_ID, i);
 
-			CancelInvoke("CheckAllReady");
-			
-			PhotonNetwork.LoadLevel(PhotonNetwork.player.CustomProperties[Constants.LEVEL_NAME].ToString());
-		}
+	void ChangeAllButtonsState(bool enable)
+	{
+		for (int i = 0; i < _characterButtons.Length; i++)
+			_characterButtons[i].interactable = enable;
+
+		_readyButton.interactable = enable;
+		_leftarrow.interactable = enable;
+		_rightArrow.interactable = enable;
 	}
 
 	[PunRPC]
@@ -223,6 +205,7 @@ public class CharacterSelectPage : MenuPage
 		_counter.StartCount(delta, 100, () => OnReady());
 	}
 
+	// photon callback forwarded from "MainMenuSystem.cs"
 	public override void OnPlayerLeftRoom(PhotonPlayer player)
 	{
 		int index = _playerInfo.GetModelTransformIndexFromID(player.ID);
@@ -233,7 +216,7 @@ public class CharacterSelectPage : MenuPage
 		// remove 3d model of left player
 		if (_currentViewObject[index] != null)
 			Destroy(_currentViewObject[index]);
-		
+
 		// if we are last player left in room, show message and disconnect last player
 		if (PhotonNetwork.room.PlayerCount == 1)
 		{
@@ -241,10 +224,11 @@ public class CharacterSelectPage : MenuPage
 			_counter.CancelCount();
 
 			// show the promt and call leaveroom when ok is pressed
-			_promt.SetAndShow("All other players have left the room!!\n\n Returning to menu!!!", () => LeaveRoom());				
-		}		
+			_promt.SetAndShow("All other players have left the room!!\n\n Returning to menu!!!", () => LeaveRoom());
+		}
 	}
 
+	// called from UIbutton
 	public void LeaveRoom()
 	{
 		// destroy 3d model
@@ -269,13 +253,25 @@ public class CharacterSelectPage : MenuPage
 		MainMenuSystem.instance.SetToPage("StartScreen");
 	}
 
-	void ChangeAllButtonsState(bool enable)
+	void CheckAllReady()
 	{
-		for (int i = 0; i < _characterButtons.Length; i++)
-			_characterButtons[i].interactable = enable;
+		if (!PhotonNetwork.isMasterClient || PhotonNetwork.room.PlayerCount < 2)
+			return;
 
-		_readyButton.interactable = enable;
-		_leftarrow.interactable   = enable;
-		_rightArrow.interactable  = enable;
+		int playersReady = 0;
+		foreach (PhotonPlayer p in PhotonNetwork.playerList)
+			if (p.CustomProperties.ContainsKey(Constants.PLAYER_READY) && (bool)p.CustomProperties[Constants.PLAYER_READY])
+				playersReady++;
+
+		if (playersReady == PhotonNetwork.room.PlayerCount)
+		{
+			// loop over all players in room and give them a spawnpoint based on order in list			
+			for (int i = 0; i < PhotonNetwork.room.PlayerCount; i++)
+				PhotonHelpers.SetPlayerProperty(PhotonNetwork.playerList[i], Constants.SPAWN_ID, i);
+
+			CancelInvoke("CheckAllReady");
+
+			PhotonNetwork.LoadLevel(PhotonNetwork.player.CustomProperties[Constants.LEVEL_NAME].ToString());
+		}
 	}
 }
