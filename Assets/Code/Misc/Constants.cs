@@ -21,7 +21,7 @@ public static class Constants
 
 	// PhotonPlayer properties keys
 	public static string CHARACTER_NAME = "0";
-	public static string LEVEL_NAME = "1";
+	public static string LEVEL_SCENE_NAME = "1";
 	public static string SPAWN_ID = "2";
 	public static string SKIN_ID = "3";
 	public static string PLAYER_READY = "4";

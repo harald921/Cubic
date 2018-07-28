@@ -25,20 +25,30 @@ public class LevelSelectPage : MenuPage
 		public Text name;
 	}
 
-	[SerializeField] GameObject _selectScreen;
-	[SerializeField] GameObject _nominatedScreen;
-
+	[Header("REFERENCES")]
+	[SerializeField] GameObject       _selectScreen;
+	[SerializeField] GameObject       _nominatedScreen;
 	[SerializeField] MenuPlayerInfoUI _playerInfo;
-	[SerializeField] MessagePromt _promt;
-	[SerializeField] StartCounterUI _counter;
-	[SerializeField] LevelData[] _levels;
+	[SerializeField] MessagePromt     _promt;
+	[SerializeField] StartCounterUI   _counter;
+
+	[Header("DATA STRUCTURES FOR LEVELS")]
+	[SerializeField] LevelData[]     _levels;
 	[SerializeField] NominatedData[] _nominatedLevelUI;
 
+	[Header("WINNER LEVEL SCREEN SETTINGS")]
 	[SerializeField] GameObject _border;
-	[SerializeField] Text _levelWinnerNameText;
+	[SerializeField] Text       _levelWinnerNameText;
+	[SerializeField] float      _timePerStep = 0.04f;
+	[SerializeField] float      _timeIncresePerLoop = 0.05f;
+	[SerializeField] int        _numLoops = 0;
+	[SerializeField] int        _loopsWithoutTimeIncrease = 12;
+
+	CoroutineHandle _handle;
 
 	public void OnLevelSelected(int level)
 	{
+		// set level ID of nominated level and set that we are ready
 		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.PLAYER_READY, true);
 		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.NOMINATED_LEVEL, level);
 		ChangeAllButtonsState(false);
@@ -70,17 +80,18 @@ public class LevelSelectPage : MenuPage
 	{
 		_playerInfo.DisableUIOfPlayer(player.ID);
 		if (PhotonNetwork.room.PlayerCount == 1)
+		{
+			Timing.KillCoroutines(_handle);
+			_counter.CancelCount();
 			_promt.SetAndShow("All other players have left the room!!\n\n Returning to menu!!!",
 				() => {
-					PhotonNetwork.RemovePlayerCustomProperties(null);					
-					PhotonNetwork.LeaveRoom();
-					MainMenuSystem.instance.SetToPage("StartScreen");
+					LeaveRoom();
 				});
+		}		
 	}
 
 	public override void UpdatePage()
-	{
-		
+	{		
 	}
 
 	void AllNominatedLevel()
@@ -88,6 +99,7 @@ public class LevelSelectPage : MenuPage
 		if (!PhotonNetwork.isMasterClient || PhotonNetwork.room.PlayerCount < 2)
 			return;
 
+		// check if all players have nominated a level
 		int playersReady = 0;
 		foreach (PhotonPlayer p in PhotonNetwork.playerList)
 			if (p.CustomProperties.ContainsKey(Constants.PLAYER_READY) && (bool)p.CustomProperties[Constants.PLAYER_READY])
@@ -96,24 +108,28 @@ public class LevelSelectPage : MenuPage
 		int numPlayers = PhotonNetwork.room.PlayerCount;
 		if (playersReady == numPlayers)
 		{
+			// randomize a winning player (will play this players nominated level)
 			int winner = Random.Range(0, numPlayers);
+			
+			// store all nominated level ID's in array
+			int[] nL = { 0, 0, 0, 0 };
 			string winnerLevel = "";
 			string winnerLevelName = "";
 
-			Debug.Log(winner);
+			for (int i =0; i < numPlayers; i++)
+			{				
+				// store all nominated level ID's 
+				nL[i] = (int)PhotonNetwork.playerList[i].CustomProperties[Constants.NOMINATED_LEVEL];
 
-			int[] nL = { 0, 0, 0, 0 };
-			for(int i =0; i < numPlayers; i++)
-			{
+				// if this player is the one that got randomized as winner, get the scene and level name of his nomination
 				if (i == winner)
 				{
 					winnerLevel     = _levels[(int)PhotonNetwork.playerList[i].CustomProperties[Constants.NOMINATED_LEVEL]].sceneName;
 					winnerLevelName = _levels[(int)PhotonNetwork.playerList[i].CustomProperties[Constants.NOMINATED_LEVEL]].name;
 				}
-
-				nL[i] = (int)PhotonNetwork.playerList[i].CustomProperties[Constants.NOMINATED_LEVEL];
 			}
 
+			// tell everyone to play nomination animation and set witch level to load
 			photonView.RPC("LevelToPlay", PhotonTargets.All, winnerLevel, winnerLevelName, winner, nL[0], nL[1], nL[2], nL[3]);
 		}
 	}
@@ -121,12 +137,16 @@ public class LevelSelectPage : MenuPage
 	[PunRPC]
 	void LevelToPlay(string level, string levelName, int winnerIndex, int one, int two, int three, int four)
 	{
-		CancelInvoke("AllNominatedLevel");
+		// stop count and cancel to keep checking if all is selected
 		_counter.CancelCount();
-		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.LEVEL_NAME, level);
+		CancelInvoke("AllNominatedLevel");
+
+		// set witch level we will load later and reset ready for next screen
+		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.LEVEL_SCENE_NAME, level);
 		PhotonHelpers.SetPlayerProperty(PhotonNetwork.player, Constants.PLAYER_READY, false);
 
-		Timing.RunCoroutine(_PickRandomLevel(winnerIndex, levelName, new int[]{one, two, three, four}));
+		// starrt the animation
+		_handle = Timing.RunCoroutine(_PickRandomLevel(winnerIndex, levelName, new int[]{one, two, three, four}));
 	}
 
 	[PunRPC]
@@ -142,10 +162,15 @@ public class LevelSelectPage : MenuPage
 
 	public void LeaveRoom()
 	{
+		// remove all UI
 		_counter.CancelCount();
 		_playerInfo.DisableAllPlayerUI();
+
+		// clear and leave photon room
 		PhotonNetwork.RemovePlayerCustomProperties(null);
 		PhotonNetwork.LeaveRoom();
+
+		// go back to main menu
 		MainMenuSystem.instance.SetToPage("StartScreen");
 	}
 
@@ -157,53 +182,70 @@ public class LevelSelectPage : MenuPage
 
 	IEnumerator<float> _PickRandomLevel(int winnerIndex, string levelName, int[] nominatedLevels)
 	{
+		// set select screen inactive and activate nomination screen
 		_nominatedScreen.SetActive(true);
 		_selectScreen.SetActive(false);
+
+		// activate border and set twxt of level to empty
 		_border.SetActive(true);
 		_levelWinnerNameText.text = "";
 
+		// set all 4 levels to inactive (dont know how many we will have)
 		for (int i = 0; i < 4; i++)
 			_nominatedLevelUI[i].content.SetActive(false);
 
-
+		// set levels active depending of num nominations
 		int numLevels = PhotonNetwork.room.PlayerCount;
 		for(int i =0; i< numLevels; i++)
 		{
+			// set the correct sprite of all nominated levels
 			_nominatedLevelUI[i].content.SetActive(true);
 			_nominatedLevelUI[i].image.sprite = _levels[nominatedLevels[i]].sprite;
 		}
 
-		int steps = winnerIndex + 1 + (numLevels * 20);
-
-		float timePerStep = 0.04f;
-		int loopsWithoutIncrease = 12;
-		float timeIncresePerLoop = 0.05f;
+		// set count variables for randomize level animation
+		int steps = winnerIndex + 1 + (numLevels * _numLoops);		
 		int count = 0;
 		int loops = 0;
 
+		float timePerStep = _timePerStep;
+		
 		while (count < steps )
 		{			
 			for(int i =0; i < numLevels; i++)
-			{												
-				count++;
-
+			{					
+				// sert position of border
 				_border.transform.position = _nominatedLevelUI[i].content.transform.position;
 
+				// set scale on highlighted level
+				for(int y=0; y < numLevels; y++)
+				{
+					if (y == i)
+						_nominatedLevelUI[y].content.transform.localScale = new Vector3(1.05f, 1.05f, 1.05f);
+					else
+						_nominatedLevelUI[y].content.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+				}
+
+				// add to count and break out if we are done
+				count++;
 				if (count == steps)
 					break;
 
 				yield return Timing.WaitForSeconds(timePerStep);
 			}
-			loops++;
-			if(loops >= loopsWithoutIncrease)
-			  timePerStep += timeIncresePerLoop;
 
+			// increment loops and start slowing down animation if it is time
+			loops++;
+			if(loops >= _loopsWithoutTimeIncrease)
+			  timePerStep += _timeIncresePerLoop;
 		}
 
+		// show the name of selected level
 		_levelWinnerNameText.text = levelName;
 
 		yield return Timing.WaitForSeconds(3.0f);
 
+		// go to character screen
 		GoToCharacter();
 	}
 

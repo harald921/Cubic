@@ -5,12 +5,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-
 public class CharacterSelectPage : MenuPage
 {
+	[Serializable]
+	public struct CharacterButton
+	{
+		public Button button;
+		public GameObject border;
+	}
+
 	[Header("UI REFERENCES"), Space(2)]
 	[SerializeField] MenuPlayerInfoUI _playerInfo;
-	[SerializeField] Button[] _characterButtons;
+	[SerializeField] CharacterButton[] _characterButtons;
 	[SerializeField] Button _readyButton;
 	[SerializeField] RectTransform _dotsParent;
 	[SerializeField] Image _dotPrefab;
@@ -30,6 +36,20 @@ public class CharacterSelectPage : MenuPage
 	int _numSkins;
 	int _currentSkin;
 	bool _imReady;
+	int _currentPressedIndex = -1;
+
+	public void OnCharacterSelcted(int buttonIndex)
+	{
+		// unselect last selected character
+		if(_currentPressedIndex >= 0)
+		{
+			UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+			_characterButtons[_currentPressedIndex].border.gameObject.SetActive(false);
+		}		
+
+		_currentPressedIndex = buttonIndex;
+		_characterButtons[_currentPressedIndex].border.gameObject.SetActive(true);
+	}
 
 	public void OnCharacterSelected(string name)
 	{
@@ -186,17 +206,20 @@ public class CharacterSelectPage : MenuPage
 		{
 			if (_currentViewObject[i] != null)
 				_currentViewObject[i].transform.rotation = Quaternion.Euler(_rotation);
-		}				
+		}
+
+		if (_currentPressedIndex >= 0)		
+			_characterButtons[_currentPressedIndex].button.Select();			
 	}
 
 	void ChangeAllButtonsState(bool enable)
 	{
 		for (int i = 0; i < _characterButtons.Length; i++)
-			_characterButtons[i].interactable = enable;
+			_characterButtons[i].button.interactable = enable;
 
 		_readyButton.interactable = enable;
-		_leftarrow.interactable = enable;
-		_rightArrow.interactable = enable;
+		_leftarrow.interactable   = enable;
+		_rightArrow.interactable  = enable;
 	}
 
 	[PunRPC]
@@ -242,8 +265,16 @@ public class CharacterSelectPage : MenuPage
 		_counter.CancelCount();
 		_playerInfo.DisableAllPlayerUI();
 
+		// remove highlight of selected character
+		if(_currentPressedIndex >= 0)
+		{
+			UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+			_characterButtons[_currentPressedIndex].border.gameObject.SetActive(false);
+		}
+
 		// reset page properties		
 		_currentSkin = 0;
+		_currentPressedIndex = -1;
 
 		// reset custom properties and leave room
 		PhotonNetwork.RemovePlayerCustomProperties(null);
@@ -271,7 +302,7 @@ public class CharacterSelectPage : MenuPage
 
 			CancelInvoke("CheckAllReady");
 
-			PhotonNetwork.LoadLevel(PhotonNetwork.player.CustomProperties[Constants.LEVEL_NAME].ToString());
+			PhotonNetwork.LoadLevel(PhotonNetwork.player.CustomProperties[Constants.LEVEL_SCENE_NAME].ToString());
 		}
 	}
 }
