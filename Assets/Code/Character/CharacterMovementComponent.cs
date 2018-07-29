@@ -224,7 +224,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		currentTile.data.RemovePlayer();
 		_stateComponent.SetState(CharacterState.Dead);
 
+		// stop all possible feedback
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Death);
+		_character.soundComponent.StopSound(CharacterSoundComponent.CharacterSound.Charge);
+		_character.ParticleComponent.EmitCharge(false);
 		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 
 		transform.position = new Vector3(tileX, 1, tileY);

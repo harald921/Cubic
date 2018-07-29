@@ -11,7 +11,6 @@ public enum MenuScreen
 	CharacterSelect,
 }
 	
-
 public class MenuPlayerInfoUI : Photon.MonoBehaviour
 {
 	[Serializable]

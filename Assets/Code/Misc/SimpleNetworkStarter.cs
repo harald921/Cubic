@@ -20,8 +20,7 @@ public class SimpleNetworkStarter : Photon.MonoBehaviour
 
     void ConnectToServer() =>
         PhotonNetwork.ConnectUsingSettings(Constants.GAME_VERSION);
-
-    
+  
     void OnConnectedToMaster() =>
         JoinRoom();
 
@@ -32,7 +31,7 @@ public class SimpleNetworkStarter : Photon.MonoBehaviour
     {
 		PhotonNetwork.player.NickName = "DunderBög";
 
-		PhotonNetwork.SetPlayerCustomProperties(new Hashtable(2));
+		PhotonNetwork.SetPlayerCustomProperties(new Hashtable(3));
 		Hashtable playerProps = PhotonNetwork.player.CustomProperties;
 
 		playerProps.Add(Constants.CHARACTER_NAME, _character);
@@ -42,9 +41,6 @@ public class SimpleNetworkStarter : Photon.MonoBehaviour
 		PhotonNetwork.player.SetCustomProperties(playerProps);
 
 		Match.instance.SimpleStart();
-
-
-
 	}
 
 	void OnPhotonPlayerPropertiesChanged(object[] playerAndUpdatedProps)
