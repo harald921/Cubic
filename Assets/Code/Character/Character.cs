@@ -8,20 +8,22 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterStateComponent))]
 [RequireComponent(typeof(CharacterSoundComponent))]
 [RequireComponent(typeof(CharacterParticlesComponent))]
+[RequireComponent(typeof(CharacterDeathComponent))]
 public class Character : Photon.MonoBehaviour
 {		
-	public CharacterModel model                { get; private set; }
-	public GameObject view                     { get; private set; }
-	public bool isMasterClient                 { get; private set; }
-	public int playerID                        { get; private set; }
-	public string playerNickname               { get; private set; }
-	public CharacterDatabase.ViewData viewData { get; private set; }
+	public CharacterModel model                {get; private set;}
+	public GameObject view                     {get; private set;}
+	public bool isMasterClient                 {get; private set;}
+	public int playerID                        {get; private set;}
+	public string playerNickname               {get; private set;}
+	public CharacterDatabase.ViewData viewData {get; private set;}
 
     public CharacterMovementComponent  movementComponent {get; private set;}
     public CharacterFlagComponent      flagComponent     {get; private set;}
     public CharacterStateComponent     stateComponent    {get; private set;}
 	public CharacterSoundComponent     soundComponent    {get; private set;}
 	public CharacterParticlesComponent ParticleComponent {get; private set;}
+	public CharacterDeathComponent	   deathComponent    {get; private set;}
 
 	public event Action<Vector2DInt> OnCharacterSpawned;
 
@@ -56,6 +58,7 @@ public class Character : Photon.MonoBehaviour
 		stateComponent    = GetComponent<CharacterStateComponent>();
 		soundComponent    = GetComponent<CharacterSoundComponent>();
 		ParticleComponent = GetComponent<CharacterParticlesComponent>();
+		deathComponent	  = GetComponent<CharacterDeathComponent>();
 
 		// initialize components
 		movementComponent.ManualAwake();

@@ -17,6 +17,17 @@ public class CharacterModel : ScriptableObject
     public float dashChargeRate   = 2.0f;   // Dash tiles per second
 	public int   dashRotationSpeed = 1;      // How many 90 degree rotations per tile the character does during a dash
 
-	[Header("Death")]
+	[Header("sink")]
 	public float sinkSpeed = 5.0f;
+
+	[Header("quicksand")]
+	public Vector2        startEndMoveSpeedQvick;
+	public Vector2        startEndRotationspeedQvick;
+	public float          durationQvick;
+	public AnimationCurve moveCurveQvick;
+	public AnimationCurve rotationCurveQvick;
+
+	[Header("explode")]
+	public float speedExplode;
+
 }

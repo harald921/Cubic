@@ -11,15 +11,15 @@ public class TileModel
     [SerializeField] Data _data; public Data data => _data;
     [SerializeField] View _view; public View view => _view;
 
-
     [System.Serializable]
-    public struct Data           // Hmpf, cannot be readonly due to Unity's serialization system...
+    public struct Data           
     {
 		[Header("BASIC SETTINGS"),Space(3)]
         public bool walkable;    // Can a player ever enter this tile?
         public int  health;      // How many times can a player step on this tile?
         public bool deadly;      // Will a player die if it steps on this tile?
         public bool unbreakable; // tile cant break 
+		public DeathType deathType;
 
 		[Header("SOUNDS"), Space(3)]
 		public AudioClip landSound;
@@ -28,6 +28,7 @@ public class TileModel
 		[Header("PARTICLES"), Space(3)]
 		public GameObject landParticle;
 		public GameObject breakParticle;
+		public GameObject killParticle;
     }
 
     [System.Serializable]
@@ -46,7 +47,7 @@ public class TileModel
 		_data.health = 0;
 		_data.deadly = true;
 		_data.unbreakable = true;
-
+		_data.deathType = DeathType.Sink;
 	}
 }
 
@@ -69,7 +70,6 @@ public class Tile
     TileDatabase _tileDB;
 
 	AudioSource[] _sounds;
-
 
     public Tile(Vector2DInt position, string tileName, float yRotation, float tintStrength, Transform tilesFolder)
     {

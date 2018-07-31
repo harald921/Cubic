@@ -227,13 +227,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// stop all possible feedback
 		_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Death);
 		_character.soundComponent.StopSound(CharacterSoundComponent.CharacterSound.Charge);
-		_character.ParticleComponent.EmitCharge(false);
-		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
+		_character.ParticleComponent.StopAll();
 
 		transform.position = new Vector3(tileX, 1, tileY);
 
-		// sink to bottom
-		Timing.RunCoroutineSingleton(_sink(), gameObject.GetInstanceID(), SingletonBehavior.Overwrite);
+		_character.deathComponent.KillPlayer(currentTile.data.position, currentTile.model.data.deathType);
 
 		if (PhotonNetwork.isMasterClient)
 			Match.instance.OnPlayerDie(_character.playerID, photonView.viewID);
@@ -486,16 +484,6 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// add cooldowns and stop feedback
 		_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 		StopMovementAndAddCooldowns();
-	}
-
-	// temp storage here, will add a deathcomponent later to handle different types of deaths
-	public IEnumerator<float> _sink()
-	{
-		while(_stateComponent.currentState == CharacterState.Dead)
-		{
-			transform.position += Vector3.down * _model.sinkSpeed * Time.deltaTime;
-			yield return Timing.WaitForOneFrame;
-		}
 	}
 	
 	public IEnumerator<float> _Correct(Vector3 from, Vector3 to, Quaternion fromRot, Quaternion toRot, float time)
