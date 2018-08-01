@@ -27,49 +27,43 @@ public class TileEditor : MonoBehaviour
 		PLACE_SINGLE,
 		PAINT,
 		DELETE,
-
 		NUM_MODES
 	}
 
-	EDIT_MODE _currentEditMode;
-	Camera _camera;
+	//UI
+	[Header("UI")]
+	[SerializeField] InputField _inputLoad;
+	[SerializeField] InputField _inputSave;
+	[SerializeField] Dropdown _dropDownTiles;
+	[SerializeField] Text _gridSizeText;
+	[SerializeField] Slider _sliderSizeX;
+	[SerializeField] Slider _sliderSizeY;
+	[SerializeField] Text _editModeText;
+	[SerializeField] MessagePromt _promt;
+	[SerializeField] Slider _tintMin;
+	[SerializeField] Slider _tintMax;
+	[SerializeField] Text _currentTint;
+	[SerializeField] Text _currentMinTintText;
+	[SerializeField] Text _currentMaxTintText;
 
 	// grid
 	[Header("Grid")]
 	[SerializeField] Material _gridmaterial;
 	[SerializeField] Transform _tileFolder;
-	Vector2DInt _gridDefaultSize = new Vector2DInt(10, 10);
-	Vector2DInt _gridSize;
-	GameObject _grid;
 
-	float _rotationY = 0.0f;
-	float _colorStrength = 1.0f;
-
-	// tileinfo
-	TileInfo[,] _tileProperties;
-
-	// current
-	GameObject _selectedTile;
-	string _selectedTileType;
-
+	// privates
+	EDIT_MODE    _currentEditMode;
+	Camera       _camera;
+	Vector2DInt  _gridDefaultSize = new Vector2DInt(10, 10);
+	Vector2DInt  _gridSize;
+	GameObject   _grid;
+	GameObject   _selectedTile;
+	string       _selectedTileType;
+	float        _rotationY = 0.0f;
+	float        _colorStrength = 1.0f;
 	TileDatabase _tileDB;
-
-	//UI
-	[Header("UI")]
-	[SerializeField] InputField   _inputLoad;
-	[SerializeField] InputField   _inputSave;
-	[SerializeField] Dropdown     _dropDownTiles;
-	[SerializeField] Text		  _gridSizeText;
-	[SerializeField] Slider		  _sliderSizeX;
-	[SerializeField] Slider		  _sliderSizeY;
-	[SerializeField] Text         _editModeText;
-	[SerializeField] MessagePromt _promt;	
-	[SerializeField] Slider       _tintMin;
-	[SerializeField] Slider       _tintMax;
-	[SerializeField] Text         _currentTint;
-	[SerializeField] Text         _currentMinTintText;
-	[SerializeField] Text         _currentMaxTintText;
-
+	TileInfo[,]  _tileProperties;
+			
 	void Start()
 	{
 		// get references
@@ -88,9 +82,9 @@ public class TileEditor : MonoBehaviour
 			_dropDownTiles.options.Add(new Dropdown.OptionData(_tileDB.GetTile(i).typeName));
 														
 		// create tile of first type in typearray
-		_selectedTile = Instantiate(_tileDB.GetTile(0).view.mainGO, _tileFolder);
+		_selectedTile     = Instantiate(_tileDB.GetTile(0).data.prefab, _tileFolder);
 		_selectedTileType = _tileDB.GetTile(0).typeName.ToLower();
-		_currentEditMode = EDIT_MODE.PLACE_SINGLE;
+		_currentEditMode  = EDIT_MODE.PLACE_SINGLE;
 
 		// add collider and set layer of tile (need this to be able to select alredy placed tiles)
 		AddcolliderToSelectedTile();
@@ -147,7 +141,7 @@ public class TileEditor : MonoBehaviour
 
 				if (!_selectedTile)
 				{
-					_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, Vector3.zero, _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
+					_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).data.prefab, Vector3.zero, _tileDB.GetTile(_selectedTileType).data.prefab.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
 					AddcolliderToSelectedTile();
 				}
 
@@ -180,7 +174,7 @@ public class TileEditor : MonoBehaviour
 				}
 			}
 		}
-		else // in select placed tile mode
+		else // in delete mode
 		{
 			if (Input.GetMouseButtonDown(0))
 			{
@@ -198,7 +192,6 @@ public class TileEditor : MonoBehaviour
 					}
 			}
 		}
-
 	}
 
 	void TintCurrentTile()
@@ -209,7 +202,6 @@ public class TileEditor : MonoBehaviour
 		_currentTint.text = _colorStrength.ToString("0.00");
 
 		TintTile(_selectedTile, _colorStrength);
-
 	}
 
 	void TintTile(GameObject tile, float strength)
@@ -232,10 +224,10 @@ public class TileEditor : MonoBehaviour
 			for (int x = 0; x < _gridSize.x; x++)
 			{
 				float strength = Random.Range(_tintMin.value, _tintMax.value);
-				if(_tileProperties[x, y].modelReference != null)
+				if(_tileProperties[y, x].modelReference != null)
 				{
-					_tileProperties[x, y].tintStrength = strength;
-					TintTile(_tileProperties[x, y].modelReference, strength);
+					_tileProperties[y, x].tintStrength = strength;
+					TintTile(_tileProperties[y, x].modelReference, strength);
 				}
 			}
 	}
@@ -246,10 +238,10 @@ public class TileEditor : MonoBehaviour
 			for (int x = 0; x < _gridSize.x; x++)
 			{
 				int rotation = Random.Range(0, 4);
-				if (_tileProperties[x, y].modelReference != null)
+				if (_tileProperties[y, x].modelReference != null)
 				{
-					_tileProperties[x, y].yRotation = (rotation * 90);
-					_tileProperties[x, y].modelReference.transform.rotation = Quaternion.Euler(Vector3.up * (rotation * 90));
+					_tileProperties[y, x].yRotation = (rotation * 90);
+					_tileProperties[y, x].modelReference.transform.rotation = Quaternion.Euler(Vector3.up * (rotation * 90));
 				}
 			}
 	}
@@ -269,7 +261,7 @@ public class TileEditor : MonoBehaviour
 			return;
 
 		// spawn new tile
-		_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, Vector3.zero, _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
+		_selectedTile = Instantiate(_tileDB.GetTile(_selectedTileType).data.prefab, Vector3.zero, _tileDB.GetTile(_selectedTileType).data.prefab.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
 		AddcolliderToSelectedTile();
 	}
 
@@ -285,7 +277,7 @@ public class TileEditor : MonoBehaviour
 		// instantiate tile and add collider
 		if(_currentEditMode != EDIT_MODE.DELETE)
 		{
-			_selectedTile = Instantiate(_tileDB.GetTile(index).view.mainGO, Vector3.zero, _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
+			_selectedTile = Instantiate(_tileDB.GetTile(index).data.prefab, Vector3.zero, _tileDB.GetTile(_selectedTileType).data.prefab.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
 			AddcolliderToSelectedTile();
 		}
 
@@ -305,7 +297,7 @@ public class TileEditor : MonoBehaviour
 			Destroy(_grid);
 
 		// create gameobject and mesh
-		_grid = new GameObject("grid");
+		_grid     = new GameObject("grid");
 		Mesh mesh = new Mesh();
 
 		float half = 0.5f;
@@ -316,10 +308,10 @@ public class TileEditor : MonoBehaviour
 
 		// create vertex and index array
 		Vector3[] vertices = new Vector3[(sizeX * sizeY) * 4];
-		int[] indices = new int[(sizeX * sizeY) * 6];
+		int[]     indices  = new int    [(sizeX * sizeY) * 6];
 
-		int column = 0;
-		int tileCount = 0;
+		int column      = 0;
+		int tileCount   = 0;
 		int indexVertex = 0;
 		int indexIndice = 0;
 
@@ -386,7 +378,6 @@ public class TileEditor : MonoBehaviour
 			BinarySave(_inputSave.text);
 		else
 			BinaryLoad(_inputLoad.text);
-
 	}
 
 	public void ClearAllTiles()
@@ -412,7 +403,7 @@ public class TileEditor : MonoBehaviour
 			for (int x = 0; x < _gridSize.x; x++)
 			{
 				_tileProperties[y, x] = new TileInfo(new Vector2DInt(x, y), _selectedTileType, 0.0f);
-				GameObject tile = Instantiate(_tileDB.GetTile(_selectedTileType).view.mainGO, new Vector3(x, 0, y), _tileDB.GetTile(_selectedTileType).view.mainGO.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
+				GameObject tile = Instantiate(_tileDB.GetTile(_selectedTileType).data.prefab, new Vector3(x, 0, y), _tileDB.GetTile(_selectedTileType).data.prefab.transform.rotation * Quaternion.Euler(0, _rotationY, 0), _tileFolder);
 				_tileProperties[y, x].tintStrength = _colorStrength;
 				_tileProperties[y, x].modelReference = tile;
 				tile.AddComponent<BoxCollider>();
@@ -454,8 +445,8 @@ public class TileEditor : MonoBehaviour
 			using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, levelName), FileMode.Open, FileAccess.Read))
 			using (BinaryReader reader = new BinaryReader(stream))
 			{				
-				int Y = reader.ReadInt32();        // Read: gridsize y
-				int X = reader.ReadInt32();        // Read: gridsize x
+				int Y = reader.ReadInt32();       
+				int X = reader.ReadInt32();       	
 
 				ClearAllTiles();
 				GenerateGrid(X, Y);
@@ -464,9 +455,9 @@ public class TileEditor : MonoBehaviour
 					for (int x = 0; x < X; x++)
 					{
 						Vector2DInt tilePosition = Vector2DInt.Zero;
-						tilePosition.BinaryLoad(reader);       // Read: Position
-						string typeName = reader.ReadString(); // Read: Tile type name  
-						float yRot = reader.ReadSingle();
+						tilePosition.BinaryLoad(reader);          
+						string typeName    = reader.ReadString();  
+						float yRot         = reader.ReadSingle();
 						float tintStrength = reader.ReadSingle();
 
 						_tileProperties[y, x].name = typeName;
@@ -474,16 +465,15 @@ public class TileEditor : MonoBehaviour
 						_tileProperties[y, x].yRotation = yRot;
 						_tileProperties[y, x].tintStrength = tintStrength;
 
-
 						// dont spawn any tile if it is empty
 						if (typeName == "empty")
 							continue;
 
 						Quaternion r = new Quaternion();
-						r = _tileDB.GetTile(typeName).view.mainGO.transform.rotation;
+						r = _tileDB.GetTile(typeName).data.prefab.transform.rotation;
 
 						// spawn new tile
-						GameObject tile = Instantiate(_tileDB.GetTile(typeName).view.mainGO, new Vector3(x, 0, y), r * Quaternion.Euler(0, yRot, 0), _tileFolder);
+						GameObject tile = Instantiate(_tileDB.GetTile(typeName).data.prefab, new Vector3(x, 0, y), r * Quaternion.Euler(0, yRot, 0), _tileFolder);
 						tile.AddComponent<BoxCollider>();
 						tile.layer = 9;
 

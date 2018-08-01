@@ -19,7 +19,6 @@ public class TileMap
         BinaryLoad();
     }
 
-
     public Tile GetTile(Vector2DInt position) => _tiles[position];
     public void SetTile(Vector2DInt position, Tile tile)
     {
@@ -29,24 +28,7 @@ public class TileMap
 
 	public Vector2DInt GetRandomTileCoords() =>	
 		new Vector2DInt(Random.Range(0, _gridSize.x), Random.Range(0, _gridSize.y));
-	
-    #region Serialization
-    public void BinarySave()
-    {
-        Directory.CreateDirectory(Constants.TILEMAP_SAVE_FOLDER); 
-
-        using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.OpenOrCreate, FileAccess.Write))
-        using (BinaryWriter writer = new BinaryWriter(stream))
-        {
-            writer.Write(_tiles.Count);                            // Write: Num tiles
-            foreach (var tilesKVP in _tiles)
-            {
-                tilesKVP.Key.BinarySave(writer);                  // Write: Position
-                writer.Write(tilesKVP.Value.model.typeName);  // Write: Tile type name
-            }
-        }
-    }
-
+	  
     public void BinaryLoad()
     {
         using (FileStream stream = new FileStream(Path.Combine(Constants.TILEMAP_SAVE_FOLDER, name), FileMode.Open, FileAccess.Read))
@@ -76,7 +58,6 @@ public class TileMap
 			AddEdgeTiles(gridSizeX, gridSizeY);
         }
     }
-    #endregion
 
 	public void AddEdgeTiles(int sizeX, int sizeY)
 	{

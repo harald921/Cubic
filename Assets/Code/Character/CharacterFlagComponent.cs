@@ -5,15 +5,12 @@ using MEC;
 
 public class CharacterFlagComponent : MonoBehaviour
 {
-    Character _character;
-
+  
     Dictionary<CharacterFlag, bool> _flags = new Dictionary<CharacterFlag, bool>(); // Can be replaced with bit enum when I am not lazy
     Dictionary<CharacterFlag, CoroutineHandle> _durationHandles = new Dictionary<CharacterFlag, CoroutineHandle>();
 
     public void ManualAwake()
-    {
-        _character = GetComponent<Character>();
-
+    {      
         foreach (CharacterFlag stateValue in System.Enum.GetValues(typeof(CharacterFlag)))
         {
             _flags.Add(stateValue, false);

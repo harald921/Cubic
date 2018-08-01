@@ -42,7 +42,6 @@ public struct Vector2DInt
         return true;
     }
 
-
     public void BinarySave(BinaryWriter inWriter)
     {
         inWriter.Write(x);
@@ -54,7 +53,6 @@ public struct Vector2DInt
         x = inReader.ReadInt32();
         y = inReader.ReadInt32();
     }
-
 
     public override string ToString() =>
         "(" + x + ", " + y + ")";
@@ -72,8 +70,13 @@ public struct Vector2DInt
         return false;
     }
 
-    #region Operator_Overloads
-    public static Vector2DInt operator +(Vector2DInt inVector1, Vector2DInt inVector2) =>
+	public override int GetHashCode()
+	{
+		return base.GetHashCode();
+	}
+
+	#region Operator_Overloads
+	public static Vector2DInt operator +(Vector2DInt inVector1, Vector2DInt inVector2) =>
         new Vector2DInt()
         {
             x = inVector1.x + inVector2.x,

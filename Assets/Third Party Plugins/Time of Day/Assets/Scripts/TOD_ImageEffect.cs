@@ -49,7 +49,7 @@ public abstract class TOD_ImageEffect : MonoBehaviour
 
 		if (!sky || !sky.Initialized) return false;
 
-		if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)
+		if (!SystemInfo.supportsImageEffects)
 		{
 			Debug.LogWarning("The image effect " + this.ToString() + " has been disabled as it's not supported on the current platform.");
 			enabled = false;

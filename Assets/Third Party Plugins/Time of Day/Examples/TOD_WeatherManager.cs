@@ -46,6 +46,8 @@ public class TOD_WeatherManager : MonoBehaviour
 	private float atmosphereBrightness;
 	private float rainEmission;
 
+	ParticleSystem.EmissionModule eModule;
+
 	protected void Start()
 	{
 		var sky = TOD_Sky.Instance;
@@ -56,13 +58,15 @@ public class TOD_WeatherManager : MonoBehaviour
 		cloudBrightness      = sky.Clouds.Brightness;
 		atmosphereFog        = sky.Atmosphere.Fogginess;
 		atmosphereBrightness = sky.Atmosphere.Brightness;
-		rainEmission         = RainParticleSystem ? RainParticleSystem.emissionRate : 0;
+		rainEmission         = RainParticleSystem ? eModule.rateOverTimeMultiplier : 0;
 
 		// Get maximum values
 		cloudOpacityMax         = cloudOpacity;
 		cloudBrightnessMax      = cloudBrightness;
 		atmosphereBrightnessMax = atmosphereBrightness;
 		rainEmissionMax         = rainEmission;
+
+		eModule = RainParticleSystem.emission;
 	}
 
 	protected void Update()
@@ -154,7 +158,7 @@ public class TOD_WeatherManager : MonoBehaviour
 
 		if (RainParticleSystem)
 		{
-			RainParticleSystem.emissionRate = Mathf.Lerp(RainParticleSystem.emissionRate, rainEmission, t);
+			eModule.rateOverTimeMultiplier = Mathf.Lerp(eModule.rateOverTimeMultiplier, rainEmission, t);
 		}
 	}
 }

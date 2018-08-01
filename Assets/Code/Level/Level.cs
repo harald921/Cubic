@@ -52,6 +52,6 @@ public class Level : Photon.MonoBehaviour
 	[PunRPC]
 	void NetworkBreakTile(int x, int y)
 	{
-		tileMap.GetTile(new Vector2DInt(x, y)).data.DamageTile();
+		tileMap.GetTile(new Vector2DInt(x, y)).DamageTile();
 	}
 }

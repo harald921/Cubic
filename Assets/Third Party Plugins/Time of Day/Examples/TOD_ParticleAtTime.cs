@@ -8,14 +8,16 @@ public class TOD_ParticleAtTime : MonoBehaviour
 	};
 
 	private ParticleSystem particleComponent;
+	ParticleSystem.EmissionModule eModule;
 
 	protected void Start()
 	{
 		particleComponent = GetComponent<ParticleSystem>();
+		eModule = particleComponent.emission;
 	}
 
 	protected void Update()
 	{
-		particleComponent.emissionRate = Emission.Evaluate(TOD_Sky.Instance.Cycle.Hour);
+		eModule.rateOverTimeMultiplier = Emission.Evaluate(TOD_Sky.Instance.Cycle.Hour);
 	}
 }

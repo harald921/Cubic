@@ -39,8 +39,8 @@ public class TileDatabase : MonoBehaviour
     public TileModel GetTile(string tileName) =>
         _tiles[tileName.ToLower()];
 
-    public TileModel GetTile(int ID) =>
-        _tiles[_tileTypes[ID]];
+    public TileModel GetTile(int index) =>
+        _tiles[_tileTypes[index]];
 
     public int GetTileTypeIndex(string name) =>
         _tileTypes.IndexOf(name);

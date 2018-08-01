@@ -37,7 +37,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_character.OnCharacterSpawned += (Vector2DInt inSpawnTile) =>
 		{
 			currentTile = Match.instance.level.tileMap.GetTile(inSpawnTile);
-			currentTile.data.SetCharacter(_character);
+			currentTile.SetCharacter(_character);
 		};
 	}
 
@@ -53,11 +53,11 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			return;
 
 		// cant walk to tile if occupied by other player or if not walkable tile
-		Tile targetTile = currentTile.data.GetRelativeTile(direction);
-		if (targetTile.data.IsOccupied() || !targetTile.model.data.walkable)
+		Tile targetTile = currentTile.GetRelativeTile(direction);
+		if (targetTile.IsOccupied() || !targetTile.model.data.walkable)
 			return;
 
-		photonView.RPC("NetworkWalk", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y, targetTile.data.position.x, targetTile.data.position.y);
+		photonView.RPC("NetworkWalk", PhotonTargets.All, currentTile.position.x, currentTile.position.y, targetTile.position.x, targetTile.position.y);
 	}
 
 	public void TryCharge()
@@ -100,15 +100,15 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	void SetNewTileReferences(Vector2DInt tile)
 	{
 		// remove old reference and set to new
-		currentTile.data.RemovePlayer();
+		currentTile.RemovePlayer();
 		currentTile = Match.instance.level.tileMap.GetTile(tile);
-		currentTile.data.SetCharacter(_character);
+		currentTile.SetCharacter(_character);
 	}
 
 	bool DeadlyTile()
 	{
 		if (currentTile.model.data.deadly)
-			photonView.RPC("Die", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y);
+			photonView.RPC("Die", PhotonTargets.All, currentTile.position.x, currentTile.position.y);
 
 		return currentTile.model.data.deadly;
 	}
@@ -221,7 +221,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 	void Die(int tileX, int tileY)
 	{
 		// remove reference and set state
-		currentTile.data.RemovePlayer();
+		currentTile.RemovePlayer();
 		_stateComponent.SetState(CharacterState.Dead);
 
 		// stop all possible feedback
@@ -231,7 +231,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		transform.position = new Vector3(tileX, 1, tileY);
 
-		_character.deathComponent.KillPlayer(currentTile.data.position, currentTile.model.data.deathType);
+		_character.deathComponent.KillPlayer(currentTile.position, currentTile.model.data.deathType);
 
 		if (PhotonNetwork.isMasterClient)
 			Match.instance.OnPlayerDie(_character.playerID, photonView.viewID);
@@ -254,7 +254,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 		// only handle tilebreaks on server
 		if (PhotonNetwork.isMasterClient && !currentTile.model.data.unbreakable)
-			Match.instance.level.BreakTile(currentTile.data.position.x, currentTile.data.position.y);
+			Match.instance.level.BreakTile(currentTile.position.x, currentTile.position.y);
 
 		TileMap tileMap = Match.instance.level.tileMap;
 
@@ -265,12 +265,12 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// Calculate lerp positions
 		// lerp from current position (will catch up if laging)
 		Vector3 fromPosition   = new Vector3(transform.position.x, 1, transform.position.z);
-		Vector3 targetPosition = new Vector3(targetTile.data.position.x, 1, targetTile.data.position.y);
+		Vector3 targetPosition = new Vector3(targetTile.position.x, 1, targetTile.position.y);
 
 		// Calculate lerp rotations
 		// get the movement direction based on vector between starttile and endtile
 		// flip x and z to get the correct rotation in worldspace
-		Vector3 movementDirection = (targetPosition - new Vector3(fromTile.data.position.x, 1, fromTile.data.position.y)).normalized;
+		Vector3 movementDirection = (targetPosition - new Vector3(fromTile.position.x, 1, fromTile.position.y)).normalized;
 		Vector3 movementDirectionRight = new Vector3(movementDirection.z, movementDirection.y, -movementDirection.x);
 
 		// do lerp from current rotation if desynced(will catch up)
@@ -286,7 +286,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		_lastMoveDirection = new Vector2DInt((int)movementDirection.x, (int)movementDirection.z);
 
 		// Update tile player references NOTE: this is done right when a player starts moving to avoid players being able to move to the same tile (lerping is used when getting hit when not physiclly att target tile)
-		SetNewTileReferences(targetTile.data.position);
+		SetNewTileReferences(targetTile.position);
 
 		// do the movement itself
 		float movementProgress = 0;
@@ -344,7 +344,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			yield return Timing.WaitForOneFrame;
 		}
 
-		Vector2DInt currentPos = currentTile.data.position;
+		Vector2DInt currentPos = currentTile.position;
 
 		photonView.RPC("NetworkDash", PhotonTargets.All, currentPos.x, currentPos.y, _lastMoveDirection.x, _lastMoveDirection.y, currentDashCharges);
 	}
@@ -356,8 +356,8 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		// only play dash sound if this was a volentary dash
 		if (!fromCollision)
 		{
-			Vector2DInt currentPos = currentTile.data.position;
-			Vector2DInt targetPos  = currentTile.data.GetRelativeTile(direction).data.position;
+			Vector2DInt currentPos = currentTile.position;
+			Vector2DInt targetPos  = currentTile.GetRelativeTile(direction).position;
 
 			_character.soundComponent.PlaySound(CharacterSoundComponent.CharacterSound.Dash);
 			_character.ParticleComponent.EmitTrail(true, (new Vector3(targetPos.x, 1, targetPos.y) - new Vector3(currentPos.x, 1, currentPos.y)).normalized);
@@ -372,7 +372,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		{
 			// get next tile in dash path			
 			// current tile is corrected before coroutine if lagging so this is safe
-			Tile targetTile = currentTile.data.GetRelativeTile(direction);			
+			Tile targetTile = currentTile.GetRelativeTile(direction);			
 
 			// abort dash if running into non walkable tile
 			if (!targetTile.model.data.walkable)
@@ -380,10 +380,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 			// Calculate lerp positions
 			Vector3 fromPosition   = transform.position; // interpolate from current position to avoid teleporting if lagging
-			Vector3 targetPosition = new Vector3(targetTile.data.position.x, 1, targetTile.data.position.y);
+			Vector3 targetPosition = new Vector3(targetTile.position.x, 1, targetTile.position.y);
 
 			// use the position of current tile instead of position of player to calculate rotation, otherwise we can get crooked rotation if laging
-			Vector3 currentTilePos = new Vector3(currentTile.data.position.x, 1, currentTile.data.position.y);
+			Vector3 currentTilePos = new Vector3(currentTile.position.x, 1, currentTile.position.y);
 
 			// Calculate lerp rotations
 			// note: use last target rotation as base if we was in middle of movement when this dash started from getting hit from other player
@@ -400,26 +400,26 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 			if (PhotonNetwork.isMasterClient) // do collision on master client
 			{
-				if (targetTile.data.IsOccupied())
+				if (targetTile.IsOccupied())
 				{
 					// get occupying player and tell it to send an rpc that it got dashed
-					Character playerToDash = targetTile.data.GetOccupyingPlayer();
+					Character playerToDash = targetTile.GetOccupyingPlayer();
 
 					// save the collision on server so the clients can check that they did not stop their dash locally incorrectly 
-					_collisionTracker.AddCollision(playerToDash.photonView.viewID, targetTile.data.position.x, targetTile.data.position.y);
+					_collisionTracker.AddCollision(playerToDash.photonView.viewID, targetTile.position.x, targetTile.position.y);
 
 					// tell all clients who got hit
-					playerToDash.movementComponent.OnGettingDashed(targetTile.data.position, direction, dashStrength - i);
+					playerToDash.movementComponent.OnGettingDashed(targetTile.position, direction, dashStrength - i);
 
 					// send rpc that we hit other player and cancel all our current movement
-					OnDashingOther(currentTile.data.position, previousLastTargetRotation, targetTile.data.position);
+					OnDashingOther(currentTile.position, previousLastTargetRotation, targetTile.position);
 
 					yield break;
 				}
 			}
 
 			// stop locally aswell and dubblecheck so we had collision on server, if not the server will restart our dashroutine with the charges that was left
-			if (targetTile.data.IsOccupied())
+			if (targetTile.IsOccupied())
 			{
 				// add cooldowns and reset last target rotation becuase we never started interpolation
 				StopMovementAndAddCooldowns();
@@ -429,9 +429,9 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 				_character.ParticleComponent.EmitTrail(false, Vector3.zero);
 
 				_collisionTracker.photonView.RPC("CheckServerCollision", PhotonTargets.MasterClient,
-												targetTile.data.GetOccupyingPlayer().photonView.viewID,
-												photonView.viewID, currentTile.data.position.x, currentTile.data.position.y,
-												targetTile.data.position.x, targetTile.data.position.y,
+												targetTile.GetOccupyingPlayer().photonView.viewID,
+												photonView.viewID, currentTile.position.x, currentTile.position.y,
+												targetTile.position.x, targetTile.position.y,
 												direction.x, direction.y, dashStrength - i);
 
 				// stop and frezze character while waiting for server to register collision
@@ -444,10 +444,10 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 
 			// hurt tile if it is destructible(only do break detection on server)
 			if (PhotonNetwork.isMasterClient && !currentTile.model.data.unbreakable)
-				Match.instance.level.BreakTile(currentTile.data.position.x, currentTile.data.position.y);
+				Match.instance.level.BreakTile(currentTile.position.x, currentTile.position.y);
 
 			// Update tile player references 
-			SetNewTileReferences(targetTile.data.position);
+			SetNewTileReferences(targetTile.position);
 
 			// do the movement itself
 			float movementProgress = 0;
@@ -468,7 +468,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 			if (DeadlyEdge())
 			{
 				if (PhotonNetwork.isMasterClient)
-					photonView.RPC("Die", PhotonTargets.All, currentTile.data.position.x, currentTile.data.position.y);
+					photonView.RPC("Die", PhotonTargets.All, currentTile.position.x, currentTile.position.y);
 				else
 					_stateComponent.SetState(CharacterState.Frozen);
 
@@ -510,7 +510,7 @@ public class CharacterMovementComponent : Photon.MonoBehaviour
 		foreach(Character p in c)
 		{
 			CharacterMovementComponent m = p.GetComponent<CharacterMovementComponent>();
-			p.GetComponent<PhotonView>().RPC("NetworkDash", PhotonTargets.All, m.currentTile.data.position.x, m.currentTile.data.position.y, m._lastMoveDirection.x, m._lastMoveDirection.y, 100);
+			p.GetComponent<PhotonView>().RPC("NetworkDash", PhotonTargets.All, m.currentTile.position.x, m.currentTile.position.y, m._lastMoveDirection.x, m._lastMoveDirection.y, 100);
 		}		
 	}
 #endif

@@ -9,12 +9,16 @@ public class TOD_ParticleAtDay : MonoBehaviour
 	private ParticleSystem particleComponent;
 	private float particleEmission;
 
+	ParticleSystem.EmissionModule eModule;
+
 	protected void Start()
 	{
 		particleComponent = GetComponent<ParticleSystem>();
-		particleEmission  = particleComponent.emissionRate;
+		particleEmission  = particleComponent.emission.rateOverTimeMultiplier;
 
-		particleComponent.emissionRate = TOD_Sky.Instance.IsDay ? particleEmission : 0;
+		eModule = particleComponent.emission;
+
+		eModule.rateOverTimeMultiplier = TOD_Sky.Instance.IsDay ? particleEmission : 0;
 	}
 
 	protected void Update()
@@ -22,6 +26,6 @@ public class TOD_ParticleAtDay : MonoBehaviour
 		int sign = (TOD_Sky.Instance.IsDay) ? +1 : -1;
 		lerpTime = Mathf.Clamp01(lerpTime + sign * Time.deltaTime / fadeTime);
 
-		particleComponent.emissionRate = Mathf.Lerp(0, particleEmission, lerpTime);
+		eModule.rateOverTimeMultiplier = Mathf.Lerp(0, particleEmission, lerpTime);
 	}
 }

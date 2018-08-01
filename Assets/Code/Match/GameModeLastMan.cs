@@ -74,9 +74,9 @@ public class GameModeLastMan : Photon.MonoBehaviour, IGameMode
 
 		//check if the match is over or if we should start next round		
 		if (_players[winnerId].score == _numRoundsToWin)
-			GetComponent<Match>().photonView.RPC("NetworkMatchOver", PhotonTargets.All, winnerId);
+			_match.photonView.RPC("NetworkMatchOver", PhotonTargets.All, winnerId);
 		else
-			GetComponent<Match>().SetCoundownToRoundRestart(2.0f);
+			_match.SetCoundownToRoundRestart(2.0f);
 	}
 
 	public void OnRoundRestarted()
@@ -95,7 +95,7 @@ public class GameModeLastMan : Photon.MonoBehaviour, IGameMode
 		_players[winnerID].score++;
 
 		// increment score and tell match to update UI
-		GetComponent<Match>().OnRoundOver(winnerID, _players[winnerID].score);
+		_match.OnRoundOver(winnerID, _players[winnerID].score);
 	}
 
 }

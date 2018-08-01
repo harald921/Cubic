@@ -37,7 +37,7 @@ public class PlayerPage : MonoBehaviour
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("CURRENT POSITION : X{0} Y{1}", currentTile.data.position.x, currentTile.data.position.y));
+		GUILayout.Label(string.Format("CURRENT POSITION : X{0} Y{1}", currentTile.position.x, currentTile.position.y));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
@@ -45,7 +45,7 @@ public class PlayerPage : MonoBehaviour
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Format("TILE HEALTH : {0}", currentTile.data.currentHealth));
+		GUILayout.Label(string.Format("TILE HEALTH : {0}", currentTile.currentHealth));
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
